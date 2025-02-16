@@ -21,7 +21,7 @@ const LandingPage = () => {
     fetchUserData();
 
     if(isLogin){
-      navigate(`/user/:${user.role}`);
+      navigate(`/user/Admin}`);
     }
   }, []);
 
