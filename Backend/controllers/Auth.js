@@ -15,18 +15,40 @@ const otpVerificationTemplate = require('../helper/OTPVerification');
 
 const sendOTPUsingEmail = async(req, res)=>{
 
-    const errors = validationResult(req);
-    if (!errors.isEmpty()){
-      return res.status(400).json({ errors: errors.array()});
+  // console.log("Request is Coming");
+
+  const { name, email, password, confirmPassword, role, registrationNumber } = req.body;
+
+    if (!name || !email || !password || !confirmPassword || !role){
+      return res.status(400).json({
+        success:false,
+        message:"All fields are Manadetory",
+      });
     }
 
-    const { name, email, password, role, location, phone, registrationNumber } = req.body;
+    if(password !== confirmPassword){
+      return res.status(400).json({
+        success:false,
+        message:"Password and Confirm password not Matching",
+      });
+    }
+
+    if(role==="NGO" && !registrationNumber){
+      return res.status(400).json({
+        success:false,
+        message:"Registration Number is Required",
+      });
+    }
 
     try {
+
       // Check if user already exists
       let user = await User.findOne({ email });
       if (user) {
-        return res.status(400).json({ msg: 'User already exists' });
+        return res.status(400).json({
+          success:false,
+          message:"User aleready exist",
+        });
       }
 
       // Generate OTP
@@ -36,9 +58,9 @@ const sendOTPUsingEmail = async(req, res)=>{
       await OTP.create({ email, otp });
 
       // Send OTP via email
-      const subject = 'Email Verification OTP';
+      const subject = 'Shareplat - Verify your Eamail';
       const text = `Your OTP for email verification is: ${otp}. It is valid for 5 minutes.`;
-      const htmlBody = otpVerificationTemplate(name, otp);
+      const htmlBody = otpVerificationTemplate(name, otp, "verification");
       await sendEmail(email, subject, text, htmlBody);
 
       return res.status(200).json({ 
@@ -60,13 +82,20 @@ const sendOTPUsingEmail = async(req, res)=>{
 // ----------------------------------------  Verify email using OTP  ---------------------------------------- 
 
 const OTPVerification = async(req, res)=>{
-  const { email, otp, name, password, role, location, phone, registrationNumber } = req.body;
-
+  const { email, name, password, role, registrationNumber } = req.body.userData;
+  const {otp} = req.body;
   try {
+
     // Find OTP in database
-    const storedOTP = await OTP.findOne({ email, otp: otp.toLowerCase() });
-    if (!storedOTP) {
-      return res.status(400).json({ msg: 'Invalid OTP' });
+    const storedOTP = await OTP.findOne({ email })
+        .sort({ createdAt: -1 })
+        .limit(1);
+
+    if (!storedOTP && otp !== storedOTP) {
+      return res.status(400).json({
+        success:false,
+        message: 'Invalid OTP' 
+      });
     }
 
     // Create new user
@@ -75,10 +104,8 @@ const OTPVerification = async(req, res)=>{
       email,
       password,
       role,
-      location,
-      phone,
       registrationNumber,
-      isVerified: false, // Default to false for NGOs
+      isVerified: role=="NGO"?false:true, // Default to false for NGOs
     });
 
     // Hash password
@@ -88,25 +115,32 @@ const OTPVerification = async(req, res)=>{
     // Save user to database
     await user.save();
 
-    // Delete OTP from database
-    await OTP.deleteOne({ email, otp });
-
     // Generate JWT token
     const payload = {
       user: {
         id: user.id,
+        email:email,
         role: user.role,
       },
     };
 
-    jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
-      if (err) throw err;
-      res.json({ token });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    res.status(200)
+      .header('Authorization', `Bearer ${token}`) // Attach token to the response header
+      .json({
+        success: true,
+        message: "User registered successfully!",
+        token // Also send the token in the response body (optional)
     });
+
   } 
   catch (err) {
     console.error(err.message);
-    res.status(500).send('Server error');
+    res.status(500).json({
+      success:false,
+      message:err.message,
+     })
   }
 }
 
