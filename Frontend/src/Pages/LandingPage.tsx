@@ -1,4 +1,5 @@
-import React from 'react'
+import * as React from 'react';
+
 
 // Import Pages
 import Navbar from '../components/common/Navbar'
