@@ -1,24 +1,40 @@
 const express = require('express');
-const connectDB = require('./config/db');
+const connectDB = require('./config/Database');
+
+// -------------------------Routes---------------------------------
 const authRoutes = require('./routes/auth');
+const userRoutes = require('./routes/user');
+
 require('dotenv').config();
+
 
 // Initialize Express app
 const app = express();
 
+
+// Allow Cross origin access
+const cors = require("cors");
+
+app.use(
+  cors({
+    origin: "http://localhost:5173", 
+    credentials: true,
+  })
+);
+
+
 // Middleware to parse JSON
 app.use(express.json());
+
 
 // Connect to MongoDB
 connectDB();
 
+
 // Define routes
 app.use('/api/auth', authRoutes);
+app.use('/api', userRoutes);
 
-// Define a simple route
-app.get('/', (req, res) => {
-  res.send('Food Redistribution Platform API is running!');
-});
 
 // Start the server
 const PORT = process.env.PORT || 5000;

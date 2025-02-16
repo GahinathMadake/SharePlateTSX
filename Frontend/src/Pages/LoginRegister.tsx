@@ -24,19 +24,19 @@ export default function LoginRegister() {
                 </div>
                 
                 <ScrollArea className="w-full h-screen">
-                <div className="flex flex-col gap-4 p-6 md:p-10">
-                    <div className="flex justify-center gap-2 md:justify-start">
-                        <a href="#" className="flex items-center gap-2 font-medium">
-                            <img src={logo} className="w-[200px]" />
-                        </a>
-                    </div>
-                    
-                    <div className="flex flex-1 items-center justify-center">
-                        <div className="w-[400px] border rounded-sm shadow-md px-6 py-4">
-                            <Outlet />
+                    <div className="flex flex-col gap-4 p-4 md:p-10">
+                        <div className="flex justify-center gap-2 md:justify-start">
+                            <a href="#" className="flex items-center gap-2 font-medium">
+                                <img src={logo} className="w-[200px]" />
+                            </a>
+                        </div>
+                        
+                        <div className="flex flex-1 items-center justify-center">
+                            <div className="w-[400px] border rounded-sm shadow-md px-6 py-4">
+                                <Outlet />
+                            </div>
                         </div>
                     </div>
-                </div>
                 </ ScrollArea>
             </div>
     )
