@@ -1,4 +1,3 @@
-
 const jwt = require('jsonwebtoken');
 
 const authMiddleware = async (req, res, next) => {
@@ -20,7 +19,6 @@ const authMiddleware = async (req, res, next) => {
     res.status(401).json({ message: "Invalid Token" });
   }
 };
-
 
 // Middleware to check if the user is an admin
 const isAdmin = (req, res, next) => {

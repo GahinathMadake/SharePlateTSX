@@ -8,6 +8,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import AnimatedInput from "@/Animations/FormDiv";
 
+
 // Auth context
 import { useAuth } from "@/context/AuthContext";
 
@@ -93,6 +94,7 @@ export default function SignUpForm({
         `${import.meta.env.VITE_Backend_URL}/api/auth/verify-otp`,
         { userData, otp }
       );
+      
       console.log(response);
       console.log("Response Headers:", response.headers);
       const token = response.headers["authorization"].split(" ")[1];

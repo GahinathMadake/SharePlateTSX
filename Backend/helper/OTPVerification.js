@@ -1,4 +1,4 @@
-// Inline HTML for email body
+
 function otpVerificationTemplate(name, otp, type){
       const titleText = (type === 'verification' ? 'Email Verification' : 'Password Reset');
       const messageText = type === 'verification' 

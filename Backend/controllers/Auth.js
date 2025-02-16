@@ -14,7 +14,6 @@ const otpVerificationTemplate = require('../helper/OTPVerification');
 // ----------------------------------------   Send Email while Registration ---------------------------------------
 
 const sendOTPUsingEmail = async(req, res)=>{
-
    console.log("Request is Coming");
 
   const { name, email, password, confirmPassword, role, registrationNumber } = req.body;
@@ -61,6 +60,7 @@ const sendOTPUsingEmail = async(req, res)=>{
       const subject = 'Shareplat - Verify your Eamail';
       const text = `Your OTP for email verification is: ${otp}. It is valid for 5 minutes.`;
       const htmlBody = otpVerificationTemplate(name, otp, "verification");
+
       await sendEmail(email, subject, text, htmlBody);
 
       return res.status(200).json({ 
@@ -82,6 +82,7 @@ const sendOTPUsingEmail = async(req, res)=>{
 // ----------------------------------------  Verify email using OTP  ---------------------------------------- 
 
 const OTPVerification = async(req, res)=>{
+
   const { email, name, password, role, registrationNumber } = req.body.userData;
   const {otp} = req.body;
   try {
@@ -237,6 +238,8 @@ const ForgotPasswordOTP = async (req, res) => {
   }
 };
 
+
+
 // ----------------------------------------   Verify OTP and allow password reset   ---------------------------------------- 
 
 const ForgotPassword = async (req, res) => {
@@ -274,7 +277,7 @@ const resetPassword = async (req, res) => {
     if (!storedOTP) {
       return res.status(400).json({ msg: 'Invalid OTP' });
     }
-
+    
     // Log the OTP for debugging
     console.log(`Retrieved OTP for ${email}: ${storedOTP.otp}`);
 
