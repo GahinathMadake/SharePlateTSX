@@ -15,7 +15,7 @@ const otpVerificationTemplate = require('../helper/OTPVerification');
 
 const sendOTPUsingEmail = async(req, res)=>{
 
-  // console.log("Request is Coming");
+   console.log("Request is Coming");
 
   const { name, email, password, confirmPassword, role, registrationNumber } = req.body;
 
