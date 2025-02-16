@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import ImageURL from '../../assets/Gahinath.jpg';
+import { useAuth } from '@/context/AuthContext';
 
 // Define props type
 interface NavbarProps {
@@ -9,18 +10,13 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ className }) => {
-  const [isLoggedIN, setIsLoggedIn] = useState<boolean>(true);
+  const {user, isLogin} = useAuth();
 
   // Define user object type
   interface User {
     name: string;
     imageUrl: string;
   }
-
-  const user: User = {
-    name: 'Gahinath Madake',
-    imageUrl: ImageURL,
-  };
 
   return (
     <header className={`sticky top-0 left-0 shadow-sm bg-white ${className}`}>
@@ -37,7 +33,7 @@ const Navbar: React.FC<NavbarProps> = ({ className }) => {
             <Link to='/faq'><li>FAQ</li></Link>
           </ul>
 
-          {!isLoggedIN && (
+          {!isLogin && (
             <Link to='/user/login'>
               <Button >
                 Get Started
@@ -45,7 +41,7 @@ const Navbar: React.FC<NavbarProps> = ({ className }) => {
             </Link>
           )}
 
-          {isLoggedIN && (
+          {isLogin && (
             <Link to='/user/NGO'>
               <div className='flex items-center justify-center gap-1'>
                 <img src={user.imageUrl} alt='user' className='w-[35px] h-[35px] rounded-full' />
