@@ -11,7 +11,6 @@ import UserDashboard from "./Pages/UserDashBoard";
 import Profile from './components/Dashboard/Profile';
 import Dashboard from "./Admin/Analytics";
 import NgoRegistration from "./Admin/NgoManagementDashboard";
-import VerifyNgo from "./Admin/VerifyNgo";
 import ActiveUser from "./Admin/UserList";
 import DonationManagement from "./Admin/DonationManagement";
 import ContentManagement  from "./Admin/ContentManagement";
@@ -33,6 +32,8 @@ function App() {
         <Route path="/user/:userType" element={<UserDashboard />}>
            <Route index element={<Profile />} />
         </Route>
+
+        <Route path="/admin/ngo" element={<NgoRegistration />} />
 
 
       </Routes>
