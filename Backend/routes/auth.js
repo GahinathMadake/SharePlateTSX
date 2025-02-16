@@ -6,8 +6,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const OTP = require('../models/OTP');
 const { check } = require('express-validator');
-const sendEmail = require('../utils/sendEmail');
-const otpVerificationTemplate = require('../utils/OTPVerification');
+
 
 const {sendOTPUsingEmail, OTPVerification, AuthenticateUser, ForgotPasswordOTP, ForgotPassword, resetPassword} = require('../controllers/Auth');
 

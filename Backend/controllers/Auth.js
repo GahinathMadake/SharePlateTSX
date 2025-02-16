@@ -30,7 +30,7 @@ const sendOTPUsingEmail = async(req, res)=>{
       }
 
       // Generate OTP
-      const otp = crypto.randomBytes(3).toString('hex'); // Generates a 6-character OTP
+      const otp = crypto.randomBytes(3).toString('hex').toLowerCase(); // Generates a 6-character OTP
 
       // Save OTP to database
       await OTP.create({ email, otp });
@@ -64,7 +64,7 @@ const OTPVerification = async(req, res)=>{
 
   try {
     // Find OTP in database
-    const storedOTP = await OTP.findOne({ email, otp });
+    const storedOTP = await OTP.findOne({ email, otp: otp.toLowerCase() });
     if (!storedOTP) {
       return res.status(400).json({ msg: 'Invalid OTP' });
     }
@@ -170,26 +170,37 @@ const ForgotPasswordOTP = async (req, res) => {
     }
 
     // Generate OTP
-    const otp = crypto.randomBytes(3).toString('hex'); // Generates a 6-character OTP
+    const otp = crypto.randomBytes(3).toString('hex').toLowerCase();
+    console.log(`Generated OTP for ${email}: ${otp}`);
 
     // Save OTP to database
-    await OTP.create({ email, otp });
+    const otpEntry = new OTP({ email, otp });
+    await otpEntry.save();
 
     // Send OTP via email
     const subject = 'Password Reset OTP';
-    const text = `Your OTP for password reset is: ${otp}. It is valid for 5 minutes.`;
-    await sendEmail(email, subject, text);
-
-    res.json({ msg: 'OTP sent to your email' });
+    const htmlBody = otpVerificationTemplate(user.name, otp, 'reset');
+    
+    try {
+      await sendEmail(email, subject, '', htmlBody);
+      res.json({ msg: 'OTP sent to your email' });
+    } catch (emailError) {
+      console.error('Email sending failed:', emailError);
+      // Clean up OTP if email fails
+      await OTP.deleteOne({ email, otp });
+      return res.status(500).json({ 
+        msg: 'Failed to send OTP email',
+        error: emailError.message 
+      });
+    }
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
+    console.error('Error in ForgotPasswordOTP:', err);
+    res.status(500).json({ 
+      msg: 'Server error',
+      error: err.message 
+    });
   }
 };
-
-
-
-
 
 // ----------------------------------------   Verify OTP and allow password reset   ---------------------------------------- 
 
@@ -214,15 +225,23 @@ const ForgotPassword = async (req, res) => {
 
 // -----------------------------------------  Reset user's password after OTP verification     -----------------------------------------
 
-const resetPassword =  async (req, res) => {
+const resetPassword = async (req, res) => {
   const { email, otp, newPassword } = req.body;
 
   try {
+    // Validate input
+    if (!email || !otp || !newPassword) {
+      return res.status(400).json({ msg: 'Please provide all required fields' });
+    }
+
     // Find OTP in database
-    const storedOTP = await OTP.findOne({ email, otp });
+    const storedOTP = await OTP.findOne({ email, otp: otp.toLowerCase() });
     if (!storedOTP) {
       return res.status(400).json({ msg: 'Invalid OTP' });
     }
+
+    // Log the OTP for debugging
+    console.log(`Retrieved OTP for ${email}: ${storedOTP.otp}`);
 
     // Hash new password
     const salt = await bcrypt.genSalt(10);
@@ -232,13 +251,13 @@ const resetPassword =  async (req, res) => {
     await User.findOneAndUpdate({ email }, { password: hashedPassword });
 
     // Delete OTP from database
-    await OTP.deleteOne({ email, otp });
+    await OTP.deleteOne({ email, otp: otp.toLowerCase() });
 
-    res.json({ msg: 'Password reset successfully' });
+    res.json({ success: true, msg: 'Password reset successfully' });
   } catch (err) {
-    console.error(err.message);
+    console.error('Error in resetPassword:', err.message);
     res.status(500).send('Server error');
   }
-}
+};
 
 module.exports = {sendOTPUsingEmail, OTPVerification, AuthenticateUser, ForgotPasswordOTP, ForgotPassword, resetPassword}
