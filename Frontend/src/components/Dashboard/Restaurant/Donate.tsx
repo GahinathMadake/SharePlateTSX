@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Link } from "react-router-dom";
 
 const Donate: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -79,10 +80,10 @@ const Donate: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r  py-8 flex items-center justify-center">
-      <Card className="w-full max-w-2xl shadow-lg">
+    <div className="min-h-screen bg-gradient-to-r   py-8 flex items-center justify-center">
+      <Card className="w-full max-w-2xl mx-4 md:mx-0 shadow-lg">
         <CardHeader>
-          <CardTitle className="text-4xl font-bold text-center text-black-600">
+          <CardTitle className="text-2xl md:text-3xl font-bold text-center text-gray-800">
             Donation Form
           </CardTitle>
         </CardHeader>
@@ -90,7 +91,7 @@ const Donate: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Full Name */}
             <div>
-              <Label htmlFor="fullName" className="text-lg font-medium text-gray-700">
+              <Label htmlFor="fullName" className="text-sm md:text-base font-medium text-gray-700">
                 Full Name
               </Label>
               <Input
@@ -99,7 +100,7 @@ const Donate: React.FC = () => {
                 type="text"
                 value={formData.fullName}
                 onChange={handleChange}
-                className="mt-1"
+                className="mt-1 w-full"
               />
               {errors.fullName && (
                 <p className="text-sm text-red-500 mt-1">{errors.fullName}</p>
@@ -108,7 +109,7 @@ const Donate: React.FC = () => {
 
             {/* Phone Number */}
             <div>
-              <Label htmlFor="phoneNumber" className="text-lg font-medium text-gray-700">
+              <Label htmlFor="phoneNumber" className="text-sm md:text-base font-medium text-gray-700">
                 Phone Number
               </Label>
               <Input
@@ -117,7 +118,7 @@ const Donate: React.FC = () => {
                 type="tel"
                 value={formData.phoneNumber}
                 onChange={handleChange}
-                className="mt-1"
+                className="mt-1 w-full"
               />
               {errors.phoneNumber && (
                 <p className="text-sm text-red-500 mt-1">{errors.phoneNumber}</p>
@@ -126,8 +127,8 @@ const Donate: React.FC = () => {
 
             {/* Location/City */}
             <div>
-              <Label htmlFor="location" className="text-lg font-medium text-gray-700">
-                Pickup-location
+              <Label htmlFor="location" className="text-sm md:text-base font-medium text-gray-700">
+                Pickup Location
               </Label>
               <Input
                 id="location"
@@ -135,7 +136,7 @@ const Donate: React.FC = () => {
                 type="text"
                 value={formData.location}
                 onChange={handleChange}
-                className="mt-1"
+                className="mt-1 w-full"
               />
               {errors.location && (
                 <p className="text-sm text-red-500 mt-1">{errors.location}</p>
@@ -144,7 +145,7 @@ const Donate: React.FC = () => {
 
             {/* Address */}
             <div>
-              <Label htmlFor="address" className="text-lg font-medium text-gray-700">
+              <Label htmlFor="address" className="text-sm md:text-base font-medium text-gray-700">
                 Address
               </Label>
               <Input
@@ -153,7 +154,7 @@ const Donate: React.FC = () => {
                 type="text"
                 value={formData.address}
                 onChange={handleChange}
-                className="mt-1"
+                className="mt-1 w-full"
               />
               {errors.address && (
                 <p className="text-sm text-red-500 mt-1">{errors.address}</p>
@@ -162,8 +163,8 @@ const Donate: React.FC = () => {
 
             {/* Donation Item Quantity */}
             <div>
-              <Label htmlFor="donationQuantity" className="text-lg font-medium text-gray-700">
-                Food Donate Quantity (Person Count)
+              <Label htmlFor="donationQuantity" className="text-sm md:text-base font-medium text-gray-700">
+                Food Donation Quantity (Person Count)
               </Label>
               <Input
                 id="donationQuantity"
@@ -171,7 +172,7 @@ const Donate: React.FC = () => {
                 type="number"
                 value={formData.donationQuantity}
                 onChange={handleChange}
-                className="mt-1"
+                className="mt-1 w-full"
               />
               {errors.donationQuantity && (
                 <p className="text-sm text-red-500 mt-1">{errors.donationQuantity}</p>
@@ -180,7 +181,7 @@ const Donate: React.FC = () => {
 
             {/* Upload Donation Item Image */}
             <div>
-              <Label htmlFor="donationImage" className="text-lg font-medium text-gray-700">
+              <Label htmlFor="donationImage" className="text-sm md:text-base font-medium text-gray-700">
                 Upload Donation Item Image
               </Label>
               <Input
@@ -188,7 +189,7 @@ const Donate: React.FC = () => {
                 name="donationImage"
                 type="file"
                 onChange={handleChange}
-                className="mt-1"
+                className="mt-1 w-full"
               />
               {errors.donationImage && (
                 <p className="text-sm text-red-500 mt-1">{errors.donationImage}</p>
@@ -197,9 +198,11 @@ const Donate: React.FC = () => {
 
             {/* Submit Button */}
             <div className="flex justify-center items-center">
-              <Button className="bg-pink-600 hover:bg-pink-500 text-white text-2xl py-6 px-12 rounded-lg transition duration-300 ease-in-out transform hover:scale-105">
-                Confirm Donate
-              </Button>
+              <Link to="/restaurant/thanks">
+                <Button className="bg-red-600 hover:bg-red-500 text-white text-base md:text-lg py-4 px-8 rounded-lg">
+                  Confirm Donate
+                </Button>
+              </Link>
             </div>
           </form>
         </CardContent>

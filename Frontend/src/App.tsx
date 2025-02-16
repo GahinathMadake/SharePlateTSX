@@ -1,14 +1,14 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-// Import Various Pages
-import LandingPage from './Pages/LandingPage';
-import LoginRegister from "./Pages/LoginRegister";
-import Login from "./components/common/LoginForm";
-import Register from "./components/common/SignUpForm";
 
-// Import Dashboard Components
-import UserDashboard from "./Pages/UserDashBoard";
-import Profile from './components/Dashboard/Profile';
+// // Import Various Pages
+// import LandingPage from './Pages/LandingPage';
+// import LoginRegister from "./Pages/LoginRegister";
+// import Login from "./components/common/LoginForm";
+// import Register from "./components/common/SignUpForm";
+
+// // Import Dashboard Components
+// import UserDashboard from "./Pages/UserDashBoard";
+// import Profile from './components/Dashboard/Profile';
 import RestaurantDashBoard from "./Pages/RestaurantDashBoard";
 
 
@@ -18,7 +18,7 @@ function App() {
 
     <div>
 
-   
+{/*    
   <Router>
       <Routes>
         <Route index element={<LandingPage />} />
@@ -36,7 +36,8 @@ function App() {
 
       </Routes>
     </Router>
-    <RestaurantDashBoard />
+*/}
+    <RestaurantDashBoard /> 
     </div>
   )
 }

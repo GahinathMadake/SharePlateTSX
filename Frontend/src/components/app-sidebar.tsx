@@ -43,7 +43,7 @@ interface Data {
   };
   Platform: {
     name: string;
-    logo: LucideIcon;
+    logo: String;
     plan: string;
   };
   navMenu: MenuItem[];

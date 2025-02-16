@@ -1,14 +1,58 @@
 import React, { useState } from "react";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, PieChart, Pie, Cell, LineChart, Line } from "recharts";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+  ResponsiveContainer,
+} from "recharts";
 
 const Pastdonation: React.FC = () => {
   // Sample data for past donations
   const pastDonations = [
-    { id: 1, date: "2024-01-15", ngo: "NGO A", persons: 50, status: "Completed" },
-    { id: 2, date: "2024-02-20", ngo: "NGO B", persons: 75, status: "Completed" },
-    { id: 3, date: "2024-03-10", ngo: "NGO C", persons: 60, status: "Completed" },
-    { id: 4, date: "2024-04-05", ngo: "NGO D", persons: 90, status: "Completed" },
+    {
+      id: 1,
+      date: "2024-01-15",
+      ngo: "NGO A",
+      persons: 50,
+      status: "Completed",
+    },
+    {
+      id: 2,
+      date: "2024-02-20",
+      ngo: "NGO B",
+      persons: 75,
+      status: "Completed",
+    },
+    {
+      id: 3,
+      date: "2024-03-10",
+      ngo: "NGO C",
+      persons: 60,
+      status: "Completed",
+    },
+    {
+      id: 4,
+      date: "2024-04-05",
+      ngo: "NGO D",
+      persons: 90,
+      status: "Completed",
+    },
   ];
 
   // Data for the bar chart (persons fed per NGO per month)
@@ -97,7 +141,10 @@ const Pastdonation: React.FC = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {pastDonations.map((donation) => (
-                    <tr key={donation.id} className="hover:bg-gray-50 transition-colors">
+                    <tr
+                      key={donation.id}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {donation.date}
                       </td>
@@ -119,7 +166,9 @@ const Pastdonation: React.FC = () => {
             </div>
           </CardContent>
           <CardFooter>
-            <p className="text-sm text-gray-500">Showing all past donations.</p>
+            <p className="text-sm text-gray-500 text-center">
+              Showing all past donations.
+            </p>
           </CardFooter>
         </Card>
       ) : (
@@ -130,20 +179,44 @@ const Pastdonation: React.FC = () => {
               <CardTitle>Persons Fed per NGO (Monthly)</CardTitle>
             </CardHeader>
             <CardContent className="flex justify-center items-center mt-5">
-              <BarChart width={650} height={450} data={barChartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="ngoA" fill={colors.ngoA} name="NGO A" barSize={50} />
-                <Bar dataKey="ngoB" fill={colors.ngoB} name="NGO B" barSize={50} />
-                <Bar dataKey="ngoC" fill={colors.ngoC} name="NGO C" barSize={50} />
-                <Bar dataKey="ngoD" fill={colors.ngoD} name="NGO D" barSize={50} />
-              </BarChart>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={barChartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar
+                    dataKey="ngoA"
+                    fill={colors.ngoA}
+                    name="NGO A"
+                    barSize={50}
+                  />
+                  <Bar
+                    dataKey="ngoB"
+                    fill={colors.ngoB}
+                    name="NGO B"
+                    barSize={50}
+                  />
+                  <Bar
+                    dataKey="ngoC"
+                    fill={colors.ngoC}
+                    name="NGO C"
+                    barSize={50}
+                  />
+                  <Bar
+                    dataKey="ngoD"
+                    fill={colors.ngoD}
+                    name="NGO D"
+                    barSize={50}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
             </CardContent>
             <CardFooter>
-              <p className="text-sm text-gray-500">Total persons fed per NGO per month.</p>
+              <p className="text-sm text-gray-500 text-center">
+                Total persons fed per NGO per month.
+              </p>
             </CardFooter>
           </Card>
 
@@ -153,27 +226,31 @@ const Pastdonation: React.FC = () => {
               <CardTitle>Total Persons Fed per NGO</CardTitle>
             </CardHeader>
             <CardContent className="flex justify-center items-center">
-              <PieChart width={500} height={500}>
-                <Pie
-                  data={pieChartData}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={170}
-                  innerRadius={90}
-                  label
-                >
-                  {pieChartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.fill} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={pieChartData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={130}
+                    innerRadius={70}
+                    label
+                  >
+                    {pieChartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
             </CardContent>
             <CardFooter>
-              <p className="text-sm text-gray-500">Distribution of persons fed across NGOs.</p>
+              <p className="text-sm text-gray-500 text-center">
+                Distribution of persons fed across NGOs.
+              </p>
             </CardFooter>
           </Card>
 
@@ -183,20 +260,44 @@ const Pastdonation: React.FC = () => {
               <CardTitle>Persons Fed Over Time</CardTitle>
             </CardHeader>
             <CardContent className="flex justify-center items-center">
-              <LineChart width={650} height={450} data={lineChartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="ngoA" stroke={colors.ngoA} name="NGO A" />
-                <Line type="monotone" dataKey="ngoB" stroke={colors.ngoB} name="NGO B" />
-                <Line type="monotone" dataKey="ngoC" stroke={colors.ngoC} name="NGO C" />
-                <Line type="monotone" dataKey="ngoD" stroke={colors.ngoD} name="NGO D" />
-              </LineChart>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={lineChartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="ngoA"
+                    stroke={colors.ngoA}
+                    name="NGO A"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="ngoB"
+                    stroke={colors.ngoB}
+                    name="NGO B"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="ngoC"
+                    stroke={colors.ngoC}
+                    name="NGO C"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="ngoD"
+                    stroke={colors.ngoD}
+                    name="NGO D"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
             </CardContent>
             <CardFooter>
-              <p className="text-sm text-gray-500">Trend of persons fed over time.</p>
+              <p className="text-sm text-gray-500 text-center">
+                Trend of persons fed over time.
+              </p>
             </CardFooter>
           </Card>
 
@@ -206,20 +307,44 @@ const Pastdonation: React.FC = () => {
               <CardTitle>Persons Fed per NGO (Stacked)</CardTitle>
             </CardHeader>
             <CardContent className="flex justify-center items-center">
-              <BarChart width={650} height={450} data={stackedBarChartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="ngoA" stackId="a" fill={colors.ngoA} name="NGO A" />
-                <Bar dataKey="ngoB" stackId="a" fill={colors.ngoB} name="NGO B" />
-                <Bar dataKey="ngoC" stackId="a" fill={colors.ngoC} name="NGO C" />
-                <Bar dataKey="ngoD" stackId="a" fill={colors.ngoD} name="NGO D" />
-              </BarChart>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={stackedBarChartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar
+                    dataKey="ngoA"
+                    stackId="a"
+                    fill={colors.ngoA}
+                    name="NGO A"
+                  />
+                  <Bar
+                    dataKey="ngoB"
+                    stackId="a"
+                    fill={colors.ngoB}
+                    name="NGO B"
+                  />
+                  <Bar
+                    dataKey="ngoC"
+                    stackId="a"
+                    fill={colors.ngoC}
+                    name="NGO C"
+                  />
+                  <Bar
+                    dataKey="ngoD"
+                    stackId="a"
+                    fill={colors.ngoD}
+                    name="NGO D"
+                  />
+                </BarChart>
+              </ResponsiveContainer>
             </CardContent>
             <CardFooter>
-              <p className="text-sm text-gray-500">Stacked distribution of persons fed per NGO.</p>
+              <p className="text-sm text-gray-500 text-center">
+                Stacked distribution of persons fed per NGO.
+              </p>
             </CardFooter>
           </Card>
         </div>

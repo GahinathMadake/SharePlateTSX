@@ -1,30 +1,38 @@
 import React from "react";
 import { ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
 
 const ThanksPage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-      <Card className="w-full max-w-md bg-white shadow-lg rounded-lg">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 sm:p-6">
+      {/* Card with responsive max-width and padding */}
+      <Card className="w-full max-w-sm sm:max-w-md bg-white shadow-lg rounded-lg">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold text-gray-900">
-            {/* Increased title size */}
+          {/* Responsive title size */}
+          <CardTitle className="text-2xl sm:text-3xl font-bold text-gray-900">
             Thank You!
           </CardTitle>
         </CardHeader>
         <CardContent className="text-center">
-          <p className="text-xl text-gray-700">
-            {/* Increased text size */}
+          {/* Responsive text size */}
+          <p className="text-base sm:text-lg text-gray-700">
             Your donation has been received. We appreciate your support!
           </p>
-          <div className="mt-6 flex justify-center">
-            <ChevronUp className="h-10 w-10 text-blue-600" /> {/* Increased icon size */}
+          {/* Responsive icon size */}
+          <div className="mt-4 flex justify-center">
+            <ChevronUp className="h-8 w-8 sm:h-10 sm:w-10 text-blue-600" />
           </div>
         </CardContent>
         <CardFooter className="flex justify-center">
-          <Button className="bg-pink-600 hover:bg-pink-500 text-white text-2xl py-7 px-12 rounded-lg">
-            {/* Increased button size */}
+          {/* Responsive button size */}
+          <Button className="bg-blue-600 hover:bg-blue-500 text-white text-base sm:text-lg py-4 sm:py-6 px-8 sm:px-10 rounded-lg">
             Donate Again
           </Button>
         </CardFooter>
