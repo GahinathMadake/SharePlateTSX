@@ -175,6 +175,7 @@ const AuthenticateUser = async (req, res) => {
       const payload = {
         user: {
           id: user.id,
+          email: user.email,
           role: user.role,
         },
       };
