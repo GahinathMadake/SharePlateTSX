@@ -1,12 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
-const OTP = require('../models/OTP');
-const { check } = require('express-validator');
-const sendEmail = require('../utils/sendEmail');
 
 const {sendOTPUsingEmail, OTPVerification, AuthenticateUser, ForgotPasswordOTP, ForgotPassword, resetPassword} = require('../controllers/Auth');
 
@@ -17,13 +10,6 @@ const {sendOTPUsingEmail, OTPVerification, AuthenticateUser, ForgotPasswordOTP, 
 // @access  Public
 router.post(
   '/send-otp',
-  [
-    check('name', 'Name is required').not().isEmpty(),
-    check('email', 'Please include a valid email').isEmail(),
-    check('password', 'Please enter a password with 6 or more characters').isLength({ min: 6 }),
-    check('role', 'Role is required').not().isEmpty(),
-    check('location', 'Location is required').not().isEmpty(),
-  ],
   sendOTPUsingEmail
 );
 
@@ -33,7 +19,7 @@ router.post(
 // @route   POST /api/auth/verify-email
 // @desc    Verify email using OTP
 // @access  Public
-router.post('/verify-email', OTPVerification);
+router.post('/verify-otp', OTPVerification);
 
 
 
@@ -42,10 +28,6 @@ router.post('/verify-email', OTPVerification);
 // @access  Public
 router.post(
   '/login',
-  [
-    check('email', 'Please include a valid email').isEmail(),
-    check('password', 'Password is required').exists(),
-  ],
   AuthenticateUser
 );
 
