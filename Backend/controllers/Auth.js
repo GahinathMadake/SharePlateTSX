@@ -14,31 +14,53 @@ const otpVerificationTemplate = require('../helper/OTPVerification');
 // ----------------------------------------   Send Email while Registration ---------------------------------------
 
 const sendOTPUsingEmail = async(req, res)=>{
+   console.log("Request is Coming");
 
-    const errors = validationResult(req);
-    if (!errors.isEmpty()){
-      return res.status(400).json({ errors: errors.array()});
+  const { name, email, password, confirmPassword, role, registrationNumber } = req.body;
+
+    if (!name || !email || !password || !confirmPassword || !role){
+      return res.status(400).json({
+        success:false,
+        message:"All fields are Manadetory",
+      });
     }
 
-    const { name, email, password, role, location, phone, registrationNumber } = req.body;
+    if(password !== confirmPassword){
+      return res.status(400).json({
+        success:false,
+        message:"Password and Confirm password not Matching",
+      });
+    }
+
+    if(role==="NGO" && !registrationNumber){
+      return res.status(400).json({
+        success:false,
+        message:"Registration Number is Required",
+      });
+    }
 
     try {
+
       // Check if user already exists
       let user = await User.findOne({ email });
       if (user) {
-        return res.status(400).json({ msg: 'User already exists' });
+        return res.status(400).json({
+          success:false,
+          message:"User aleready exist",
+        });
       }
 
       // Generate OTP
-      const otp = crypto.randomBytes(3).toString('hex'); // Generates a 6-character OTP
+      const otp = crypto.randomBytes(3).toString('hex').toLowerCase(); // Generates a 6-character OTP
 
       // Save OTP to database
       await OTP.create({ email, otp });
 
       // Send OTP via email
-      const subject = 'Email Verification OTP';
+      const subject = 'Shareplat - Verify your Eamail';
       const text = `Your OTP for email verification is: ${otp}. It is valid for 5 minutes.`;
-      const htmlBody = otpVerificationTemplate(name, otp);
+      const htmlBody = otpVerificationTemplate(name, otp, "verification");
+
       await sendEmail(email, subject, text, htmlBody);
 
       return res.status(200).json({ 
@@ -60,13 +82,21 @@ const sendOTPUsingEmail = async(req, res)=>{
 // ----------------------------------------  Verify email using OTP  ---------------------------------------- 
 
 const OTPVerification = async(req, res)=>{
-  const { email, otp, name, password, role, location, phone, registrationNumber } = req.body;
 
+  const { email, name, password, role, registrationNumber } = req.body.userData;
+  const {otp} = req.body;
   try {
+
     // Find OTP in database
-    const storedOTP = await OTP.findOne({ email, otp });
-    if (!storedOTP) {
-      return res.status(400).json({ msg: 'Invalid OTP' });
+    const storedOTP = await OTP.findOne({ email })
+        .sort({ createdAt: -1 })
+        .limit(1);
+
+    if (!storedOTP && otp !== storedOTP) {
+      return res.status(400).json({
+        success:false,
+        message: 'Invalid OTP' 
+      });
     }
 
     // Create new user
@@ -75,10 +105,8 @@ const OTPVerification = async(req, res)=>{
       email,
       password,
       role,
-      location,
-      phone,
       registrationNumber,
-      isVerified: false, // Default to false for NGOs
+      isVerified: role=="NGO"?false:true, // Default to false for NGOs
     });
 
     // Hash password
@@ -88,25 +116,32 @@ const OTPVerification = async(req, res)=>{
     // Save user to database
     await user.save();
 
-    // Delete OTP from database
-    await OTP.deleteOne({ email, otp });
-
     // Generate JWT token
     const payload = {
       user: {
         id: user.id,
+        email:email,
         role: user.role,
       },
     };
 
-    jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
-      if (err) throw err;
-      res.json({ token });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    res.status(200)
+      .header('Authorization', `Bearer ${token}`) // Attach token to the response header
+      .json({
+        success: true,
+        message: "User registered successfully!",
+        token // Also send the token in the response body (optional)
     });
+
   } 
   catch (err) {
     console.error(err.message);
-    res.status(500).send('Server error');
+    res.status(500).json({
+      success:false,
+      message:err.message,
+     })
   }
 }
 
@@ -141,6 +176,7 @@ const AuthenticateUser = async (req, res) => {
       const payload = {
         user: {
           id: user.id,
+          email: user.email,
           role: user.role,
         },
       };
@@ -170,24 +206,37 @@ const ForgotPasswordOTP = async (req, res) => {
     }
 
     // Generate OTP
-    const otp = crypto.randomBytes(3).toString('hex'); // Generates a 6-character OTP
+    const otp = crypto.randomBytes(3).toString('hex').toLowerCase();
+    console.log(`Generated OTP for ${email}: ${otp}`);
 
     // Save OTP to database
-    await OTP.create({ email, otp });
+    const otpEntry = new OTP({ email, otp });
+    await otpEntry.save();
 
     // Send OTP via email
     const subject = 'Password Reset OTP';
-    const text = `Your OTP for password reset is: ${otp}. It is valid for 5 minutes.`;
-    await sendEmail(email, subject, text);
-
-    res.json({ msg: 'OTP sent to your email' });
+    const htmlBody = otpVerificationTemplate(user.name, otp, 'reset');
+    
+    try {
+      await sendEmail(email, subject, '', htmlBody);
+      res.json({ msg: 'OTP sent to your email' });
+    } catch (emailError) {
+      console.error('Email sending failed:', emailError);
+      // Clean up OTP if email fails
+      await OTP.deleteOne({ email, otp });
+      return res.status(500).json({ 
+        msg: 'Failed to send OTP email',
+        error: emailError.message 
+      });
+    }
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
+    console.error('Error in ForgotPasswordOTP:', err);
+    res.status(500).json({ 
+      msg: 'Server error',
+      error: err.message 
+    });
   }
 };
-
-
 
 
 
@@ -214,15 +263,23 @@ const ForgotPassword = async (req, res) => {
 
 // -----------------------------------------  Reset user's password after OTP verification     -----------------------------------------
 
-const resetPassword =  async (req, res) => {
+const resetPassword = async (req, res) => {
   const { email, otp, newPassword } = req.body;
 
   try {
+    // Validate input
+    if (!email || !otp || !newPassword) {
+      return res.status(400).json({ msg: 'Please provide all required fields' });
+    }
+
     // Find OTP in database
-    const storedOTP = await OTP.findOne({ email, otp });
+    const storedOTP = await OTP.findOne({ email, otp: otp.toLowerCase() });
     if (!storedOTP) {
       return res.status(400).json({ msg: 'Invalid OTP' });
     }
+    
+    // Log the OTP for debugging
+    console.log(`Retrieved OTP for ${email}: ${storedOTP.otp}`);
 
     // Hash new password
     const salt = await bcrypt.genSalt(10);
@@ -232,13 +289,13 @@ const resetPassword =  async (req, res) => {
     await User.findOneAndUpdate({ email }, { password: hashedPassword });
 
     // Delete OTP from database
-    await OTP.deleteOne({ email, otp });
+    await OTP.deleteOne({ email, otp: otp.toLowerCase() });
 
-    res.json({ msg: 'Password reset successfully' });
+    res.json({ success: true, msg: 'Password reset successfully' });
   } catch (err) {
-    console.error(err.message);
+    console.error('Error in resetPassword:', err.message);
     res.status(500).send('Server error');
   }
-}
+};
 
 module.exports = {sendOTPUsingEmail, OTPVerification, AuthenticateUser, ForgotPasswordOTP, ForgotPassword, resetPassword}

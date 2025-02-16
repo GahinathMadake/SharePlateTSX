@@ -6,7 +6,6 @@ const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
 
 const ngoRoutes = require("./routes/Ngo");
-
 require('dotenv').config();
 
 
@@ -17,12 +16,12 @@ const app = express();
 // Allow Cross origin access
 const cors = require("cors");
 
-app.use(
-  cors({
-    origin: "http://localhost:5173", 
-    credentials: true,
-  })
-);
+
+app.use(cors({
+  origin: "http://localhost:5173",  // ✅ Replace with your frontend URL
+  credentials: true,
+  exposedHeaders: ["Authorization"] // ✅ Allow frontend to access this header
+}));
 
 
 // Middleware to parse JSON
@@ -35,8 +34,11 @@ connectDB();
 
 // Define routes
 app.use('/api/auth', authRoutes);
-app.use('/api', userRoutes);
 app.use("/api/ngos", ngoRoutes);
+
+// app.use('/api', userRoutes);
+app.use('/api/faq', require('./routes/faq'));
+app.use('/user', userRoutes);
 
 
 // Start the server
