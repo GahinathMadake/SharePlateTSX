@@ -7,6 +7,7 @@ const crypto = require('crypto');
 const OTP = require('../models/OTP');
 const { check, validationResult } = require('express-validator');
 const sendEmail = require('../utils/sendEmail');
+const otpVerificationTemplate = require('../utils/OTPVerification');
 
 // @route   POST /api/auth/register
 // @desc    Register a new user with email verification
@@ -29,22 +30,22 @@ router.post(
     const { name, email, password, role, location, phone, registrationNumber } = req.body;
 
     try {
-      // Check if user already exists
       let user = await User.findOne({ email });
       if (user) {
         return res.status(400).json({ msg: 'User already exists' });
       }
 
-      // Generate OTP
-      const otp = crypto.randomBytes(3).toString('hex'); // Generates a 6-character OTP
-
-      // Save OTP to database
+      const otp = crypto.randomBytes(3).toString('hex');
       await OTP.create({ email, otp });
 
-      // Send OTP via email
-      const subject = 'Email Verification OTP';
-      const text = `Your OTP for email verification is: ${otp}. It is valid for 5 minutes.`;
-      await sendEmail(email, subject, text);
+      // Split name into first and last name
+      const [firstName, ...lastNameParts] = name.split(' ');
+      const lastName = lastNameParts.join(' ') || '';
+
+      // Send OTP via email using the template
+      const subject = 'Email Verification - SharePlate';
+      const htmlContent = otpVerificationTemplate(firstName, lastName, otp, 'verification');
+      await sendEmail(email, subject, null, htmlContent);
 
       res.json({ msg: 'OTP sent to your email for verification' });
     } catch (err) {
@@ -53,6 +54,37 @@ router.post(
     }
   }
 );
+
+// @route   POST /api/auth/forgot-password
+// @desc    Send OTP to user's email for password reset
+// @access  Public
+router.post('/forgot-password', async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ msg: 'User not found' });
+    }
+
+    const otp = crypto.randomBytes(3).toString('hex');
+    await OTP.create({ email, otp });
+
+    // Split name into first and last name
+    const [firstName, ...lastNameParts] = user.name.split(' ');
+    const lastName = lastNameParts.join(' ') || '';
+
+    // Send OTP via email using the template
+    const subject = 'Password Reset - SharePlate';
+    const htmlContent = otpVerificationTemplate(firstName, lastName, otp, 'reset');
+    await sendEmail(email, subject, null, htmlContent);
+
+    res.json({ msg: 'OTP sent to your email' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
 
 // @route   POST /api/auth/verify-email
 // @desc    Verify email using OTP
@@ -155,37 +187,6 @@ router.post(
     }
   }
 );
-
-// @route   POST /api/auth/forgot-password
-// @desc    Send OTP to user's email for password reset
-// @access  Public
-router.post('/forgot-password', async (req, res) => {
-  const { email } = req.body;
-
-  try {
-    // Check if user exists
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ msg: 'User not found' });
-    }
-
-    // Generate OTP
-    const otp = crypto.randomBytes(3).toString('hex'); // Generates a 6-character OTP
-
-    // Save OTP to database
-    await OTP.create({ email, otp });
-
-    // Send OTP via email
-    const subject = 'Password Reset OTP';
-    const text = `Your OTP for password reset is: ${otp}. It is valid for 5 minutes.`;
-    await sendEmail(email, subject, text);
-
-    res.json({ msg: 'OTP sent to your email' });
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
-  }
-});
 
 // @route   POST /api/auth/verify-otp
 // @desc    Verify OTP and allow password reset

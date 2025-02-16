@@ -9,12 +9,16 @@ import Register from "./components/common/SignUpForm";
 // Import Dashboard Components
 import UserDashboard from "./Pages/UserDashBoard";
 import Profile from './components/Dashboard/Profile';
+import RestaurantDashBoard from "./Pages/RestaurantDashBoard";
 
 
 function App() {
   
   return (
 
+    <div>
+
+   
   <Router>
       <Routes>
         <Route index element={<LandingPage />} />
@@ -28,9 +32,12 @@ function App() {
            <Route index element={<Profile />} />
         </Route>
 
+        
 
       </Routes>
     </Router>
+    <RestaurantDashBoard />
+    </div>
   )
 }
 
