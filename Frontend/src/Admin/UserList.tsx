@@ -32,9 +32,10 @@ const ActiveUser = () => {
   );
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
-      <div className="w-full max-w-4xl bg-white shadow-md rounded-lg p-6">
-        
+    // <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
+    //   <div className="w-full max-w-4xl bg-white shadow-md rounded-lg p-6">
+    <div className="flex min-h-screen w-full bg-gray-50 justify-center">
+    <div className="p-4 sm:p-6 lg:p-8 w-full max-w-7xl">
         {/* Search Bar */}
         <div className="flex items-center gap-2 mb-4">
           <Search className="w-5 h-5 text-gray-500" />

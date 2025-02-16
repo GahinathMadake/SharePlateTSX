@@ -1,4 +1,6 @@
-import * as React from 'react';
+import { useEffect} from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 
 
 // Import Pages
@@ -11,6 +13,18 @@ import Footer from '../components/common/Footer';
 
 
 const LandingPage = () => {
+  const {user, fetchUserData, isLogin} = useAuth();
+  const navigate = useNavigate();
+  
+
+  useEffect(() => {
+    fetchUserData();
+
+    if(isLogin){
+      navigate(`/user/:${user.role}`);
+    }
+  }, []);
+
   return (
     <div className="relative z-0">
       <Navbar className="relative z-[1000]" />

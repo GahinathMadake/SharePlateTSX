@@ -59,8 +59,10 @@ const ContentManagement = () => {
   };
 
   return (
-    <div className="flex min-h-screen w-full bg-gray-50 justify-center items-center">
-      <div className="w-full max-w-7xl p-4 sm:p-6 lg:p-8 bg-white rounded-lg shadow-md">
+    // <div className="flex min-h-screen w-full bg-gray-50 justify-center items-center">
+    //   <div className="w-full max-w-7xl p-4 sm:p-6 lg:p-8 bg-white rounded-lg shadow-md">
+    <div className="flex min-h-screen w-full bg-gray-50 justify-center">
+      <div className="p-4 sm:p-6 lg:p-8 w-full max-w-7xl">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">Content Management</h1>
 
         <Tabs defaultValue="faqs">

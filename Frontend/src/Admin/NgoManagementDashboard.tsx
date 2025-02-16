@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState , useEffect} from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle, FileText } from 'lucide-react';
@@ -6,55 +6,79 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Textarea } from "@/components/ui/textarea";
 
 const NgoManagementDashboard = () => {
-  const [requests, setRequests] = useState([
-    {
-      id: 1,
-      name: "Helping Hands",
-      email: "helpinghands@example.com",
-      registrationDate: "2024-09-01",
-      status: "Pending",
-      registrationNumber: "123456789",
-      phone: "+1234567890",
-      address: "123 Main St, New York, NY",
-      documents: [
-        { name: "Registration Certificate", url: "https://example.com/doc1.pdf" },
-        { name: "Tax ID", url: "https://example.com/doc2.pdf" },
-      ],
-    },
-    {
-      id: 2,
-      name: "Food for All",
-      email: "foodforall@example.com",
-      registrationDate: "2024-09-05",
-      status: "Pending",
-      registrationNumber: "987654321",
-      phone: "+9876543210",
-      address: "456 Elm St, London, UK",
-      documents: [
-        { name: "Registration Certificate", url: "https://example.com/doc3.pdf" },
-        { name: "Tax ID", url: "https://example.com/doc4.pdf" },
-      ],
-    },
-  ]);
-
-  const [selectedRequest, setSelectedRequest] = useState(null);
+  interface Request {
+    _id: number;
+    name: string;
+    email: string;
+    createdAt: string;
+    isVerified: string;
+    registrationNumber: string;
+    phone: string;
+  }
+  
+  const [requests, setRequests] = useState<Request[]>([]);
+  const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [viewMode, setViewMode] = useState("table"); // 'table' or 'details'
 
-  const handleApprove = (id) => {
-    setRequests(requests.map(req => req.id === id ? { ...req, status: "Approved" } : req));
-    setSelectedRequest(null);
-    setViewMode("table");
+
+
+
+  
+
+
+  /*
+   */
+  useEffect(() => {
+    fetch("http://localhost:5000/api/ngos/pending")
+      .then((res) => res.json())
+      .then((data) => setRequests(data))
+      .catch((err) => console.error(err));
+      console.log("reuests",requests);
+      // console.log("requests",res.json());
+  }, []);
+  
+
+  
+  const handleApprove = async (id: number) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/ngos/approve/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // Include auth token
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to approve NGO");
+      }
+  
+      const updatedNgo = await response.json();
+
+      // Update state with the new status
+      setRequests(requests.map(req => req._id === id ? { ...req, isVerified: updatedNgo.ngo.isVerified} : req));
+      setSelectedRequest(null);
+      setViewMode("table");
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("Error approving NGO:", error.message);
+      } else {
+        console.error("Error approving NGO:", error);
+      }
+    }   
   };
 
-  const handleReject = (id) => {
-    setRequests(requests.map(req => req.id === id ? { ...req, status: "Rejected", rejectionReason } : req));
+
+
+  const handleReject = (id: number) => {
+    setRequests(requests.map(req => req._id === id ? { ...req, status: "Rejected", rejectionReason } : req));
     setSelectedRequest(null);
     setRejectionReason("");
     setViewMode("table");
   };
 
-  const handleViewDetails = (request) => {
+  const handleViewDetails = (request: Request) => {
     setSelectedRequest(request);
     setViewMode("details");
   };
@@ -78,23 +102,25 @@ const NgoManagementDashboard = () => {
               </TableHeader>
               <TableBody>
                 {requests.map((request) => (
-                  <TableRow key={request.id} className="hover:bg-gray-50 transition-colors">
+                  console.log("request",request),
+
+                  <TableRow key={request._id} className="hover:bg-gray-50 transition-colors">
                     <TableCell className="font-medium">{request.name}</TableCell>
                     <TableCell>{request.email}</TableCell>
-                    <TableCell>{request.registrationDate}</TableCell>
-                    <TableCell>
-                      <span
-                        className={`px-2 py-1 rounded-full text-sm ${
-                          request.status === "Pending"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : request.status === "Approved"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        {request.status}
-                      </span>
-                    </TableCell>
+                    <TableCell>{request.createdAt.split("T")[0]}</TableCell>
+              <TableCell>
+                  <span
+                   className={`px-2 py-1 rounded-full text-sm ${
+                    request.isVerified
+                    ? "bg-green-100 text-green-800"  // When true (Approved)
+                    : "bg-yellow-100 text-yellow-800" // When false (Pending)
+                   }`}
+                  >
+                   {request.isVerified ? "Approved" : "Pending"}
+                  </span>
+              </TableCell>
+
+
                     <TableCell className="text-right">
                       <Button variant="outline" size="sm" onClick={() => handleViewDetails(request)}>
                         <FileText className="mr-2" size={16} /> View Details
@@ -112,8 +138,8 @@ const NgoManagementDashboard = () => {
               <p><strong>Registration Number:</strong> {selectedRequest?.registrationNumber}</p>
               <p><strong>Email:</strong> {selectedRequest?.email}</p>
               <p><strong>Phone:</strong> {selectedRequest?.phone}</p>
-              <p><strong>Address:</strong> {selectedRequest?.address}</p>
-              <div>
+              {/* <p><strong>Address:</strong> {selectedRequest?.address}</p> */}
+              {/* <div>
                 <h3 className="font-bold mb-2">Documents</h3>
                 <ul className="space-y-2">
                   {selectedRequest?.documents.map((doc, index) => (
@@ -124,9 +150,9 @@ const NgoManagementDashboard = () => {
                     </li>
                   ))}
                 </ul>
-              </div>
+              </div> */}
               <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-                <Button variant="success" onClick={() => handleApprove(selectedRequest?.id)}>
+                <Button variant="default" onClick={() => selectedRequest && handleApprove(selectedRequest._id)}>
                   <CheckCircle className="mr-2" size={16} /> Approve
                 </Button>
                 <Button variant="destructive" onClick={() => setViewMode("reject")}>
@@ -156,7 +182,7 @@ const NgoManagementDashboard = () => {
               />
             </div>
             <DialogFooter>
-              <Button variant="destructive" onClick={() => handleReject(selectedRequest?.id)}>
+              <Button variant="destructive" onClick={() => selectedRequest && handleReject(selectedRequest._id)}>
                 Confirm Reject
               </Button>
               <Button variant="outline" onClick={() => setViewMode("details")}>
