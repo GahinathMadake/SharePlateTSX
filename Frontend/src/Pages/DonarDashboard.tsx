@@ -3,7 +3,6 @@ import UserDashboard from './UserDashBoard';
 
 import { 
     LayoutDashboard,
-    Captions,
     Bell,
     CircleUserRound,
     ChefHat,
