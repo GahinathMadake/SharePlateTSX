@@ -1,7 +1,6 @@
 import { useLocation } from "react-router-dom";
 import { Outlet } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area"
-import LoginForm from "../components/common/LoginForm"
 import loginImage from '../assets/form/login.jpg';
 import signupImage from '../assets/form/signup.jpg';
 import logo from '../assets/logo.png';
@@ -10,13 +9,13 @@ import logo from '../assets/logo.png';
 
 export default function LoginRegister() {
     const location = useLocation();
-    console.log(location);
+    const isSignUp = location.pathname === "/user/login";
 
     return (
             <div className="grid min-h-svh lg:grid-cols-2">
                 <div className="relative hidden bg-muted lg:block">
                 <img
-                        src={loginImage}
+                        src={isSignUp?signupImage:loginImage}
                         alt="SharePlate Image"
                         className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.9] dark:grayscale"
                     />
