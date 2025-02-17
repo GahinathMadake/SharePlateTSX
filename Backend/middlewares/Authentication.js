@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 
 const authMiddleware = async (req, res, next) => {
+  console.log("Accessed AuthMidleware")
 
   try {
     const token = req.header("Authorization")?.split(" ")[1]; // Extract token

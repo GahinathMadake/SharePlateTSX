@@ -20,10 +20,10 @@ const AuthContextProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   async function fetchUserData() {
     try {
-      console.log("trying");
       const token = localStorage.getItem("token");
-      // if (!token) return;
+      if (!token) return;
 
+      console.log("Fetching User Data = ", token);
       const response = await axios.get(`${import.meta.env.VITE_Backend_URL}/user/getUser`,{
         headers: {
           Authorization: `Bearer ${token}`,
