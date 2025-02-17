@@ -3,10 +3,10 @@ import UserDashboard from './UserDashBoard';
 
 import { 
     LayoutDashboard,
-    House,
     Captions,
-    CircleUserRound,
     Bell,
+    CircleUserRound,
+    ChefHat,
 } from "lucide-react";
 
 // Importing Common
@@ -15,62 +15,59 @@ import logo from '../assets/logobg.png';
 const DonarDashboard: React.FC = () => {
     const Donar = {
         user: {
-          name: "Rohan Wagh",
-          email: "rohanWagh@gmail.com",
+          name: "Shreyash Padase",
+          email: "shreyash@gmail.com",
           avatar: "/avatars/shadcn.jpg",
         },
         Platform: {
           name: "SharePlate",
           logo: logo,
-          plan: "Admin",
+          plan: "Donar",
         },
         navMenu: [
             {
                 name: "Dashboard",
-                url: "/user/Admin",
+                url: "/user/Donar",
                 icon: LayoutDashboard, 
             },
-            { 
-                name: "NGO Management", 
-                url: "/user/Admin/ngomanagement", 
-                icon: House,
-            },
             {
-                title: "Courses",
+                title: "Donation",
                 url: "#",
-                icon: Captions,
+                icon:  ChefHat,
                 isActive: false,
+                
                 items:[
                     {
-                        title:"Ongoing",
-                        url:'/student/courses/ongoing'
+                        title:"New Donation",
+                        url:'/user/Donar/newdonation',
+                  
                     },
                     {
-                        title:"Completed",
-                        url:'/student/courses/completed'
-                    },
+                        title:"My Donations",
+                        url:'/user/Donar/mydonations'
+                    }, 
                     {
-                        title:"All",
-                        url:'/student/courses/All'
-                    },
+                        title:"Track Location",
+                        url:'/user/Donar/trackloaction'
+                    }, 
                 ],
                 
             },
+           
             {
-                name: "Donation Management",
-                url: "/user/Admin/donationmanagement",
-                icon: Bell, 
-            },
-            {
-                name: "UserLists",
-                url: "/user/admin/userList",
-                icon: CircleUserRound, 
-            },
-            {
-              name: "Content Management",
-              url: "/user/admin/contentManagement",
-              icon: CircleUserRound, 
-          },
+                name: "Notifications",
+                url: "/user/Donar/notification",
+                icon: Bell,
+              },
+              {
+                name: "Profile",
+                url: "/user/Donar/donarprofile",
+                icon: CircleUserRound,
+              },
+           
+           
+            
+            
         ],
       };
   return (
