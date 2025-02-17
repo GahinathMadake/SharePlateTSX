@@ -2,12 +2,11 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Eye, EyeOff, Clock } from "lucide-react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import AnimatedInput from "@/Animations/FormDiv";
-
 
 // Auth context
 import { useAuth } from "@/context/AuthContext";
@@ -25,8 +24,7 @@ export default function SignUpForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"form">) {
-
-  const {user, fetchUserData} = useAuth();
+  const { user, fetchUserData } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -34,6 +32,10 @@ export default function SignUpForm({
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState<string[]>(new Array(6).fill(""));
   const navigate = useNavigate();
+
+  // Timer state
+  const [timeLeft, setTimeLeft] = useState<number>(600); // 600 seconds = 10 minutes
+  const [timerActive, setTimerActive] = useState<boolean>(false);
 
   const [userData, setUserData] = useState<UserData>({
     name: "",
@@ -43,11 +45,37 @@ export default function SignUpForm({
     role: "Donar",
   });
 
+  // Timer effect
+  useEffect(() => {
+    let interval: number | undefined;
+    
+    if (timerActive && timeLeft > 0) {
+      interval = window.setInterval(() => {
+        setTimeLeft((prevTime) => prevTime - 1);
+      }, 1000);
+    } else if (timeLeft === 0) {
+      // Redirect to login page when timer expires
+      alert("OTP has expired. Please try again.");
+      navigate("/user/login");
+    }
+    
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [timerActive, timeLeft, navigate]);
+
+  // Format time to MM:SS
+  const formatTime = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
 
   const handleChange = (index: number, value: string) => {
-    // if (isNaN(Number(value))) return; 
     const newOtp = [...otp];
-    newOtp[index] = value.slice(-1); 
+    newOtp[index] = value.slice(-1);
     setOtp(newOtp);
 
     // Move to next input
@@ -61,7 +89,6 @@ export default function SignUpForm({
       document.getElementById(`otp-${index - 1}`)?.focus();
     }
   };
-
 
   const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -78,12 +105,11 @@ export default function SignUpForm({
 
       console.log(res.data);
       setOtpSent(true); // Hide form and show OTP input
-    }
-    catch (error) {
+      setTimerActive(true); // Start the timer
+    } catch (error) {
       console.error("OTP send error:", (error as Error).message);
     }
   };
-
 
   const verifyOtpHandler = async () => {
     const enteredOtp = otp.join("");
@@ -94,7 +120,7 @@ export default function SignUpForm({
         `${import.meta.env.VITE_Backend_URL}/api/auth/verify-otp`,
         { userData, otp }
       );
-      
+
       console.log(response);
       console.log("Response Headers:", response.headers);
       const token = response.headers["authorization"].split(" ")[1];
@@ -117,34 +143,40 @@ export default function SignUpForm({
       </div>
 
       {/* Show OTP Input if OTP is Sent */}
-      {
-      otpSent ? 
-      (
+      {otpSent ? (
         <div className="grid gap-4 py-2">
-      <div className="py-4 grid gap-5">
-        <Label>Enter OTP<sup className="text-[red]">*</sup></Label>
-        <div className="flex justify-center gap-2">
-          {otp.map((digit, index) => (
-            <Input
-              key={index}
-              id={`otp-${index}`}
-              type="text"
-              value={digit}
-              onChange={(e) => handleChange(index, e.target.value)}
-              onKeyDown={(e) => handleKeyDown(index, e)}
-              maxLength={1}
-              className="w-12 h-12 text-center text-lg"
-            />
-          ))}
+          {/* Timer Display */}
+          <div className="flex items-center justify-center gap-2 py-2">
+            <Clock className="text-muted-foreground" size={18} />
+            <div className={`text-center font-mono text-lg ${timeLeft < 60 ? 'text-red-500' : 'text-muted-foreground'}`}>
+              {formatTime(timeLeft)}
+            </div>
+          </div>
+
+          <div className="py-2 grid gap-5">
+            <Label>
+              Enter OTP<sup className="text-[red]">*</sup>
+            </Label>
+            <div className="flex justify-center gap-2">
+              {otp.map((digit, index) => (
+                <Input
+                  key={index}
+                  id={`otp-${index}`}
+                  type="text"
+                  value={digit}
+                  onChange={(e) => handleChange(index, e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(index, e)}
+                  maxLength={1}
+                  className="w-12 h-12 text-center text-lg"
+                />
+              ))}
+            </div>
+          </div>
+          <Button type="button" className="w-full" onClick={verifyOtpHandler}>
+            Verify OTP & Register
+          </Button>
         </div>
-      </div>
-      <Button type="button" className="w-full" onClick={verifyOtpHandler}>
-        Verify OTP & Register
-      </Button>
-    </div>
-      ) 
-      : 
-      (
+      ) : (
         <div className="grid gap-6">
           {/* Role Selector */}
           <div className="mx-auto flex gap-2 p-1 bg-[#111111] rounded-full max-w-max">
@@ -182,7 +214,9 @@ export default function SignUpForm({
 
           {/* Name */}
           <div className="grid gap-2">
-            <Label>Name<sup className="text-[red]">*</sup></Label>
+            <Label>
+              Name<sup className="text-[red]">*</sup>
+            </Label>
             <Input
               type="text"
               name="name"
@@ -195,7 +229,9 @@ export default function SignUpForm({
 
           {/* Email */}
           <div className="grid gap-2">
-            <Label>Email<sup className="text-[red]">*</sup></Label>
+            <Label>
+              Email<sup className="text-[red]">*</sup>
+            </Label>
             <Input
               type="email"
               name="email"
@@ -208,7 +244,9 @@ export default function SignUpForm({
 
           {/* Password */}
           <div className="grid gap-2">
-            <Label>Password<sup className="text-red-500">*</sup></Label>
+            <Label>
+              Password<sup className="text-red-500">*</sup>
+            </Label>
             <div className="relative">
               <Input
                 type={showPassword ? "text" : "password"}
@@ -230,7 +268,9 @@ export default function SignUpForm({
 
           {/* Confirm Password */}
           <div className="grid gap-2">
-            <Label>Confirm Password<sup className="text-red-500">*</sup></Label>
+            <Label>
+              Confirm Password<sup className="text-red-500">*</sup>
+            </Label>
             <div className="relative">
               <Input
                 type={showConfirmPassword ? "text" : "password"}
@@ -252,7 +292,9 @@ export default function SignUpForm({
 
           {/* Registration Number (Only for NGO) */}
           <AnimatedInput isVisible={userData.role === "NGO"}>
-            <Label>Registration Number<sup className="text-[red]">*</sup></Label>
+            <Label>
+              Registration Number<sup className="text-[red]">*</sup>
+            </Label>
             <Input
               type="text"
               name="registrationNumber"
