@@ -7,6 +7,7 @@ import { Eye, EyeOff, Clock } from "lucide-react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import AnimatedInput from "@/Animations/FormDiv";
+import { useSnackbar } from 'notistack';
 
 // Auth context
 import { useAuth } from "@/context/AuthContext";
@@ -25,6 +26,7 @@ export default function SignUpForm({
   ...props
 }: React.ComponentPropsWithoutRef<"form">) {
   const { user, fetchUserData } = useAuth();
+  const { enqueueSnackbar } = useSnackbar();
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -55,7 +57,9 @@ export default function SignUpForm({
       }, 1000);
     } else if (timeLeft === 0) {
       // Redirect to login page when timer expires
-      alert("OTP has expired. Please try again.");
+      enqueueSnackbar("OTP has expired. Please try again.", { 
+        variant: 'error',
+      });
       navigate("/user/login");
     }
     
@@ -64,7 +68,7 @@ export default function SignUpForm({
         clearInterval(interval);
       }
     };
-  }, [timerActive, timeLeft, navigate]);
+  }, [timerActive, timeLeft, navigate, enqueueSnackbar]);
 
   // Format time to MM:SS
   const formatTime = (seconds: number): string => {
@@ -100,41 +104,84 @@ export default function SignUpForm({
 
   const sendOtpHandler = async (event: React.FormEvent) => {
     event.preventDefault();
+    
+    // Basic validation
+    if (userData.password !== userData.confirmPassword) {
+      enqueueSnackbar("Passwords do not match", { 
+        variant: 'error',
+      });
+      return;
+    }
+    
+    if (userData.role === "NGO" && !userData.registrationNumber) {
+      enqueueSnackbar("Registration number is required for NGO accounts", { 
+        variant: 'warning',
+      });
+      return;
+    }
+    
     try {
       const res = await axios.post(`${import.meta.env.VITE_Backend_URL}/api/auth/send-otp`, userData);
 
       console.log(res.data);
       setOtpSent(true); // Hide form and show OTP input
       setTimerActive(true); // Start the timer
+      
+      enqueueSnackbar("OTP sent to your email! Please check your inbox.", { 
+        variant: 'success',
+      });
     } catch (error) {
       console.error("OTP send error:", (error as Error).message);
+      enqueueSnackbar("Failed to send OTP. Please check your details and try again.", { 
+        variant: 'error',
+      });
     }
   };
 
   const verifyOtpHandler = async () => {
     const enteredOtp = otp.join("");
     console.log("Entered OTP:", enteredOtp);
+    
+    if (enteredOtp.length !== 6) {
+      enqueueSnackbar("Please enter a valid 6-digit OTP", { 
+        variant: 'warning',
+      });
+      return;
+    }
 
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_Backend_URL}/api/auth/verify-otp`,
-        { userData, otp }
+        { userData, otp: enteredOtp }
       );
 
       console.log(response);
       console.log("Response Headers:", response.headers);
-      const token = response.headers["authorization"].split(" ")[1];
-      localStorage.setItem("token", token);
-
-      fetchUserData();
-      navigate("/user/admin");
+      
+      const authHeader = response.headers["authorization"];
+      if (authHeader) {
+        const token = authHeader.split(" ")[1];
+        localStorage.setItem("token", token);
+        fetchUserData();
+        
+        enqueueSnackbar("Sign up successful! Welcome to our platform.", { 
+          variant: 'success',
+        });
+        navigate("/user/admin");
+      } else {
+        throw new Error("No authorization token received");
+      }
     } catch (error) {
       console.error("OTP verification error:", (error as Error).message);
+      enqueueSnackbar("Failed to verify OTP. Please try again or request a new OTP.", { 
+        variant: 'error',
+      });
     }
   };
 
   return (
     <form className={cn("flex flex-col gap-6", className)} {...props} onSubmit={sendOtpHandler}>
+      {/* Form content remains the same */}
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">Sign Up to your account</h1>
         <p className="text-sm text-muted-foreground">

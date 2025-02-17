@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { Clock } from "lucide-react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useSnackbar } from 'notistack';
 
 export default function ForgotPassword({
   className,
@@ -17,6 +18,7 @@ export default function ForgotPassword({
   const [newPassword, setNewPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
 
   // Timer state
   const [timeLeft, setTimeLeft] = useState<number>(600); // 600 seconds = 10 minutes
@@ -50,7 +52,9 @@ export default function ForgotPassword({
       }, 1000);
     } else if (timeLeft === 0) {
       // Redirect to login page when timer expires
-      alert("OTP has expired. Please try again.");
+      enqueueSnackbar("OTP has expired. Please try again.", { 
+        variant: 'error',
+      });
       navigate("/user/login");
     }
     
@@ -59,7 +63,7 @@ export default function ForgotPassword({
         clearInterval(interval);
       }
     };
-  }, [timerActive, timeLeft, navigate]);
+  }, [timerActive, timeLeft, navigate, enqueueSnackbar]);
 
   // Format time to MM:SS
   const formatTime = (seconds: number): string => {
@@ -77,14 +81,36 @@ export default function ForgotPassword({
       });
       setOtpSent(true); // Show OTP input fields
       setTimerActive(true); // Start the timer
+      
+      enqueueSnackbar("OTP sent to your email!", { 
+        variant: 'success',
+      });
     } catch (error) {
       console.error("OTP send error:", (error as Error).message);
+      enqueueSnackbar("Failed to send OTP. Please check your email address.", { 
+        variant: 'error',
+      });
     }
   };
 
   // Verify OTP and reset password
   const verifyOtpHandler = async () => {
     const enteredOtp = otp.join("");
+    
+    if (!newPassword) {
+      enqueueSnackbar("Please enter a new password", { 
+        variant: 'warning',
+      });
+      return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+      enqueueSnackbar("Passwords do not match", { 
+        variant: 'error',
+      });
+      return;
+    }
+    
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_Backend_URL}/api/auth/reset-password`,
@@ -95,17 +121,25 @@ export default function ForgotPassword({
         }
       );
       if (response.data.success) {
-        alert("Password reset successfully!");
+        enqueueSnackbar("Password reset successfully!", { 
+          variant: 'success',
+        });
         navigate("/user/login"); // Redirect to login page
       } else {
         console.error("Invalid OTP");
         console.error(response.data.msg);
+        enqueueSnackbar(response.data.msg || "Invalid OTP. Please try again.", { 
+          variant: 'error',
+        });
       }
     } catch (error) {
       console.error("OTP verification error:", (error as Error).message);
       if ((error as any).response) {
         console.error("Response data:", (error as any).response.data);
       }
+      enqueueSnackbar("Failed to verify OTP. Please try again.", { 
+        variant: 'error',
+      });
     }
   };
 
@@ -115,6 +149,7 @@ export default function ForgotPassword({
       {...props}
       onSubmit={sendOtpHandler}
     >
+      {/* Form content remains the same */}
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">Forgot Password</h1>
         <p className="text-sm text-muted-foreground">

@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { SnackbarProvider } from 'notistack';
 
 // Import Various Pages
 import LandingPage from './Pages/LandingPage';
@@ -22,6 +23,14 @@ function App() {
  
 
   return (
+
+    <SnackbarProvider
+    maxSnack={3}
+    anchorOrigin={{
+      vertical: 'top',
+      horizontal: 'right',
+    }}
+  >
 
   <Router>
       <Routes>
@@ -51,6 +60,7 @@ function App() {
 
       </Routes>
     </Router>
+  </SnackbarProvider>
 
     // <div>
         
