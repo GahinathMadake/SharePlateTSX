@@ -1,9 +1,9 @@
-
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Clock } from "lucide-react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -17,6 +17,10 @@ export default function ForgotPassword({
   const [newPassword, setNewPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const navigate = useNavigate();
+
+  // Timer state
+  const [timeLeft, setTimeLeft] = useState<number>(600); // 600 seconds = 10 minutes
+  const [timerActive, setTimerActive] = useState<boolean>(false);
 
   // Handle OTP input changes
   const handleChange = (index: number, value: string) => {
@@ -36,6 +40,34 @@ export default function ForgotPassword({
     }
   };
 
+  // Timer effect
+  useEffect(() => {
+    let interval: number | undefined;
+    
+    if (timerActive && timeLeft > 0) {
+      interval = window.setInterval(() => {
+        setTimeLeft((prevTime) => prevTime - 1);
+      }, 1000);
+    } else if (timeLeft === 0) {
+      // Redirect to login page when timer expires
+      alert("OTP has expired. Please try again.");
+      navigate("/user/login");
+    }
+    
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [timerActive, timeLeft, navigate]);
+
+  // Format time to MM:SS
+  const formatTime = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
   // Send OTP to the user's email
   const sendOtpHandler = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -44,6 +76,7 @@ export default function ForgotPassword({
         email,
       });
       setOtpSent(true); // Show OTP input fields
+      setTimerActive(true); // Start the timer
     } catch (error) {
       console.error("OTP send error:", (error as Error).message);
     }
@@ -109,6 +142,14 @@ export default function ForgotPassword({
       ) : (
         // Step 2: Enter OTP and Reset Password
         <div className="grid gap-6">
+          {/* Timer Display */}
+          <div className="flex items-center justify-center gap-2 py-2">
+            <Clock className="text-muted-foreground" size={18} />
+            <div className={`text-center font-mono text-lg ${timeLeft < 60 ? 'text-red-500' : 'text-muted-foreground'}`}>
+              {formatTime(timeLeft)}
+            </div>
+          </div>
+
           {/* OTP Input */}
           <div className="grid gap-4 py-2">
             <Label>Enter OTP<sup className="text-[red]">*</sup></Label>
