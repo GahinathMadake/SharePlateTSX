@@ -22,20 +22,29 @@ export default function LoginForm({
 
   const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // Prevent form refresh
-
+  
     // Basic Validation
     if (!email || !password) {
       alert("Please enter both email and password.");
       return;
     }
-
+  
     try {
-      const res = await axios.post(import.meta.env.VITE_Backend_URL+"/api/auth/login");
-
-      if(res.data.success){
+      const res = await axios.post(import.meta.env.VITE_Backend_URL + "/api/auth/login", {
+        email,
+        password,
+      });
+  
+      console.log("Response from server:", res.data);
+  
+      if (res.data.token) {
+        console.log("Login Successful:", res.data);
         alert("Login Successful!");
-        navigate("/");
-      };
+        navigate("/user/Admin");
+      } else {
+        console.error("Login failed:", res.data);
+        alert("Login failed. Please try again.");
+      }
     } catch (error) {
       console.error("Login Error:", error);
       alert("Login failed. Please try again.");
