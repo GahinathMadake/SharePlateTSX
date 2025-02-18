@@ -13,13 +13,26 @@ import AdminDashboard from "./Pages/AdminDashboard";
 import NGODashboard from "./Pages/NGODashboard";
 import DonarDashboard from "./Pages/DonarDashboard";
 
+
+
+// Admin Dashboard Components
 import Dashboard from "./Dashboard/Admin/Analytics";
 import NgoRegistration from "./Dashboard/Admin/NgoManagementDashboard";
 import ActiveUser from "./Dashboard/Admin/UserList";
 import DonationManagement from "./Dashboard/Admin/DonationManagement";
 import ContentManagement  from "./Dashboard/Admin/ContentManagement";
 
-function App() {
+// Donar Dashboard Components
+import DonarDash from "./Dashboard/Donar/Dashboard";
+import NewDonations from "./Dashboard/Donar/Donations/NewDonations";
+import MyDonations from "./Dashboard/Donar/Donations/MyDonations";
+import DonationForm from "./Dashboard/Donar/Donations/DonationForm";
+import ConfirmDonation  from "./Dashboard/Donar/Donations/ConfirmDonation";
+import TrackLocation from "./Dashboard/Donar/Donations/TrackLocation";
+import Notification from "./Dashboard/Donar/Notification";
+import Donarprofile from "./Dashboard/Donar/Donarprofile";
+
+function App(){
  
 
   return (
@@ -55,23 +68,21 @@ function App() {
         </Route>
 
         <Route path="/user/Donar" element={<DonarDashboard />}>
-           <Route index element={<Dashboard />} />
+           <Route index element={<DonarDash />} />
+           <Route path='newdonation' element={<NewDonations />} />
+           <Route path='mydonations' element={<MyDonations />} />
+           <Route path='donationForm' element={<DonationForm/>}/>
+           <Route path='confirmdonation' element={<ConfirmDonation/>}/>
+           <Route path='trackloaction' element={<TrackLocation/>}/>
+           <Route path='notification' element={<Notification/>}/>
+           <Route path='donarprofile' element={<Donarprofile/>}/>
         </Route>
 
       </Routes>
     </Router>
   </SnackbarProvider>
 
-    // <div>
-        
-    //     <Dashboard></Dashboard>
-    //     <NgoRegistration></NgoRegistration>
-    //     <DonationManagement></DonationManagement>
-    //     <ActiveUser></ActiveUser>
-    //     <ContentManagement></ContentManagement>
-        
-        
-    // </div>
+    
   )
 }
 
