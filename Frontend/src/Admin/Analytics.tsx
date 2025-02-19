@@ -5,6 +5,8 @@ import { Avatar } from "@/components/ui/avatar";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { ArrowUpRight, Users, Package, Clock, AlertCircle, CheckCircle, MapPin, Calendar, Target } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState, useEffect } from "react";
+import axios from 'axios';
 
 // TypeScript interfaces for our data
 interface MetricCard {
@@ -65,30 +67,85 @@ const yearlyChartData: { [key: string]: ChartData[] } = {
 };
 
 const Dashboard = () => {
-  const [selectedYear, setSelectedYear] = React.useState("2024");
+  const [selectedYear, setSelectedYear] = useState("2024");
+  const [totalDonations, setTotalDonations] =useState("");
+  const [totalNgos, setTotalNgos] =useState("");  
+  const [pendingNgosCount, setPendingNgosCount] =useState("");
+  const [totalDeliveredFood, setTotalDeliveredFood] =useState("");
+
+
+  useEffect(() => {
+    fetchTotalDonations();
+    fetchTotalNgos();
+    fetchPendingNgos();
+    fetchTotalDeliveredFood();
+  },[])
+
+
+  const fetchTotalDonations = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/api/donations/totaldonations");
+      setTotalDonations(response.data.totalDonations);
+    } catch (error) {
+      console.error("Error fetching total donations:", error);
+    }
+  };
+
+  
+  const fetchTotalNgos = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/api/ngos/totalngos");
+      setTotalNgos(response.data.totalNgos);
+    } catch (error) {
+      console.error("Error fetching total ngos:", error);
+    }
+  };
+
+  const fetchPendingNgos = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/api/ngos/pending");
+      console.log("ngos data",response.data);
+      setPendingNgosCount(response.data.PendingNgosCount);
+    } catch (error) {
+      console.error("Error fetching pending ngos:", error);
+    }
+  };
+
+
+  const fetchTotalDeliveredFood = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/api/donations/totaldeliveredfood");
+      setTotalDeliveredFood(response.data.totalDeliveredFood);
+    } catch (error) {
+      console.error("Error fetching total delivered food:", error);
+    }
+
+  };
+
+
 
   const metrics: MetricCard[] = [
     {
       title: "Total Donations",
-      value: "$9,568",
+      value: totalDonations,
       change: "+12.5%",
       icon: <ArrowUpRight className="text-green-500" size={24} />
     },
     {
       title: "Active NGOs",
-      value: "42.5K",
+      value: totalNgos,
       change: "+4.3%",
       icon: <Users className="text-blue-500" size={24} />
     },
     {
       title: "Pending Requests",
-      value: "246",
+      value: pendingNgosCount || "0",
       change: "-2.1%",
       icon: <Clock className="text-yellow-500" size={24} />
     },
     {
       title: "Food Redistributed",
-      value: "96,147 kg",
+      value: totalDeliveredFood,
       change: "+18.7%",
       icon: <Package className="text-purple-500" size={24} />
     }

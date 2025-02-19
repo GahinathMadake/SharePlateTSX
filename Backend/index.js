@@ -6,6 +6,7 @@ const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
 
 const ngoRoutes = require("./routes/Ngo");
+const donationRoutes = require("./routes/donation");
 
 require('dotenv').config();
 
@@ -37,6 +38,7 @@ connectDB();
 app.use('/api/auth', authRoutes);
 app.use('/api', userRoutes);
 app.use("/api/ngos", ngoRoutes);
+app.use("/api/donations",donationRoutes);
 
 
 // Start the server

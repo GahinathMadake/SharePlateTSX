@@ -14,4 +14,21 @@ const  getUser = async (req, res) => {
     }  
 }
 
-module.exports = {getUser};
+
+const FetchRoleBasedData = async (req, res) => {
+
+  try {
+    const { role } = req.query;
+    let query = {};
+    if (role && role !== "all") {
+      query.role = role.toUpperCase(); // Convert role to uppercase before querying
+    }
+    const users = await User.find(query);
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error });
+  }
+
+}
+
+module.exports = {getUser, FetchRoleBasedData};
