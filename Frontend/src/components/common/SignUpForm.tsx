@@ -8,6 +8,10 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import AnimatedInput from "@/Animations/FormDiv";
 
+
+// Auth context
+import { useAuth } from "@/context/AuthContext";
+
 interface UserData {
   name: string;
   email: string;
@@ -21,6 +25,8 @@ export default function SignUpForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"form">) {
+
+  const {user, fetchUserData} = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -39,7 +45,7 @@ export default function SignUpForm({
 
 
   const handleChange = (index: number, value: string) => {
-    if (isNaN(Number(value))) return; 
+    // if (isNaN(Number(value))) return; 
     const newOtp = [...otp];
     newOtp[index] = value.slice(-1); 
     setOtp(newOtp);
@@ -68,14 +74,16 @@ export default function SignUpForm({
   const sendOtpHandler = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
-      // await axios.post(`${import.meta.env.VITE_Backend_URL}/api/auth/send-otp`, {
-      //   email: userData.email,
-      // });
+      const res = await axios.post(`${import.meta.env.VITE_Backend_URL}/api/auth/send-otp`, userData);
+
+      console.log(res.data);
       setOtpSent(true); // Hide form and show OTP input
-    } catch (error) {
+    }
+    catch (error) {
       console.error("OTP send error:", (error as Error).message);
     }
   };
+
 
   const verifyOtpHandler = async () => {
     const enteredOtp = otp.join("");
@@ -86,11 +94,14 @@ export default function SignUpForm({
         `${import.meta.env.VITE_Backend_URL}/api/auth/verify-otp`,
         { userData, otp }
       );
-      if (response.data.success) {
-        navigate("/dashboard");
-      } else {
-        console.error("Invalid OTP");
-      }
+      
+      console.log(response);
+      console.log("Response Headers:", response.headers);
+      const token = response.headers["authorization"].split(" ")[1];
+      localStorage.setItem("token", token);
+
+      fetchUserData();
+      navigate("/user/admin");
     } catch (error) {
       console.error("OTP verification error:", (error as Error).message);
     }

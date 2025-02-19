@@ -16,14 +16,21 @@ const LandingPage = () => {
   const {user, fetchUserData, isLogin} = useAuth();
   const navigate = useNavigate();
   
-
   useEffect(() => {
-    fetchUserData();
+    const fetchAndNavigate = async () => {
+      await fetchUserData();  // Fetch user data first
+    };
 
-    if(isLogin){
-      navigate(`/user/:${user.role}`);
+    fetchAndNavigate();
+  }, []); // Run once on mount
+
+  
+  useEffect(() => {
+    console.log("Updated User:", user);
+    if (isLogin && user) {
+      navigate("/user/Admin");
     }
-  }, []);
+  }, [user, isLogin]);
 
   return (
     <div className="relative z-0">
