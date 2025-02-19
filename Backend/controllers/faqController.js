@@ -1,4 +1,5 @@
 const FAQ = require('../models/FAQ');
+const { authMiddleware, isAdmin } = require('../middlewares/Authentication');
 
 // @desc    Get all FAQs
 // @route   GET /api/faq

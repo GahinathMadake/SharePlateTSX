@@ -11,6 +11,6 @@ router.get('/', getAllFAQs);
 // @route   POST /api/faq
 // @desc    Add a new FAQ
 // @access  Admin only
-router.post('/', addNewFAQ);
+router.post('/', authMiddleware, isAdmin, addNewFAQ);
 
 module.exports = router;

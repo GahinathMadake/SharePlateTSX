@@ -97,7 +97,7 @@ function otpVerificationTemplate(name, otp, type){
                   <div class="main-content">
                       <h1>${titleText}</h1>
                       <p>
-                          Hello <b>${name}b>, <br />
+                          Hello <b>${name}<br/>
                           ${messageText}
                       </p>
   
