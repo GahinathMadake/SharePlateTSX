@@ -7,6 +7,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import { useSnackbar } from 'notistack';
 
 export default function LoginForm({
   className,
@@ -17,28 +18,44 @@ export default function LoginForm({
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const navigate = useNavigate();
-
-
+  const { enqueueSnackbar } = useSnackbar();
 
   const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // Prevent form refresh
-
+  
     // Basic Validation
     if (!email || !password) {
-      alert("Please enter both email and password.");
+      enqueueSnackbar("Please enter both email and password.", { 
+        variant: 'warning',
+      });
       return;
     }
-
+  
     try {
-      const res = await axios.post(import.meta.env.VITE_Backend_URL+"/api/auth/login");
-
-      if(res.data.success){
-        alert("Login Successful!");
-        navigate("/");
-      };
+      const res = await axios.post(import.meta.env.VITE_Backend_URL + "/api/auth/login", {
+        email,
+        password,
+      });
+  
+      console.log("Response from server:", res.data);
+  
+      if (res.data.token) {
+        console.log("Login Successful:", res.data);
+        enqueueSnackbar("Login Successful!", { 
+          variant: 'success',
+        });
+        navigate("/user/Admin");
+      } else {
+        console.error("Login failed:", res.data);
+        enqueueSnackbar("Login failed. Please try again.", { 
+          variant: 'error',
+        });
+      }
     } catch (error) {
       console.error("Login Error:", error);
-      alert("Login failed. Please try again.");
+      enqueueSnackbar("Login failed. Please check your credentials.", { 
+        variant: 'error',
+      });
     }
   };
 
@@ -46,6 +63,7 @@ export default function LoginForm({
   return (
     <form className={cn("flex flex-col gap-6", className)} {...props} onSubmit={submitHandler}>
       
+      {/* Form content remains the same */}
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">Login to your account</h1>
         <p className="text-balance text-sm text-muted-foreground">

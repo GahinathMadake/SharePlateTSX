@@ -12,8 +12,8 @@ const  getUser = async (req, res) => {
     }
     catch(error){
       console.error(error.message);
-      res.status(500).send("error while fetching user details"); 
-    }  
+      res.status(500).send("error while fetching user details");
+    } 
 }
 
 
