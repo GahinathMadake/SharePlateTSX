@@ -18,8 +18,18 @@ import ActiveUser from "./Dashboard/Admin/UserList";
 import DonationManagement from "./Dashboard/Admin/DonationManagement";
 import ContentManagement  from "./Dashboard/Admin/ContentManagement";
 
-function App() {
- 
+// Import NGO Components
+import NGODash from './Dashboard/ngo/Dashboard';
+import AvailableDonations from "./Dashboard/ngo/AvailableDonations";
+import MyDonations from "./Dashboard/ngo/Donations/MyDonations";
+import TrackDonations from "./Dashboard/ngo/Donations/TrackDonations";
+
+import Profile from './Dashboard/common/Profile';
+import Review from "./Dashboard/ngo/Review";
+import Contact from "./Dashboard/common/Contact";
+
+
+function App(){
 
   return (
 
@@ -42,26 +52,24 @@ function App() {
         </Route>
 
         <Route path="/user/NGO" element={<NGODashboard />}>
-           <Route index element={<Dashboard />} />
+           <Route index element={<NGODash />} />
+           <Route path="listings" element={<AvailableDonations />} />
+           <Route path="trackdonations" element={<TrackDonations />} />
+           <Route path="donationhistory" element={<MyDonations />} />
+
+           {/* User Profiles */}
+           <Route path="id/:userId" element={<Profile />} />
+           <Route path="reviews" element={<Review />} />
+           <Route path="contact" element={<Contact />} />
         </Route>
 
         <Route path="/user/Donar" element={<DonarDashboard />}>
-           <Route index element={<Dashboard />} />
+           <Route index element={<NGODash />} />
         </Route>
 
       </Routes>
     </Router>
-
-    // <div>
         
-    //     <Dashboard></Dashboard>
-    //     <NgoRegistration></NgoRegistration>
-    //     <DonationManagement></DonationManagement>
-    //     <ActiveUser></ActiveUser>
-    //     <ContentManagement></ContentManagement>
-        
-        
-    // </div>
   )
 }
 

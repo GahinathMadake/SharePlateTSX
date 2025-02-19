@@ -4,10 +4,9 @@ import UserDashboard from './UserDashBoard';
 
 import { 
     LayoutDashboard,
-    House,
-    Captions,
-    CircleUserRound,
-    Bell,
+    ListChecks,
+    HandPlatter,
+    Star,
 } from "lucide-react";
 
 // Importing Common
@@ -16,64 +15,52 @@ import logo from '../assets/logobg.png';
 const NGODashboard: React.FC = () => {
     const NGO = {
         user: {
-          name: "Rohan Wagh",
-          email: "rohanWagh@gmail.com",
+          name: "Gahinath Madake",
+          role: "NGO",
+          email: "gahinathmadake@gmail.com",
           avatar: "/avatars/shadcn.jpg",
         },
         Platform: {
           name: "SharePlate",
           logo: logo,
-          plan: "Admin",
+          plan: "NGO",
         },
         navMenu: [
             {
                 name: "Dashboard",
-                url: "/user/Admin",
+                url: "/user/NGO",
                 icon: LayoutDashboard, 
             },
             { 
-                name: "NGO Management", 
-                url: "/user/Admin/ngomanagement", 
-                icon: House,
+                name: "Listings", 
+                url: "/user/NGO/listings", 
+                icon: ListChecks,
             },
             {
-                title: "Courses",
+                title: "Donations",
                 url: "#",
-                icon: Captions,
+                icon: HandPlatter,
                 isActive: false,
                 items:[
                     {
-                        title:"Ongoing",
-                        url:'/student/courses/ongoing'
+                        title:"Track Donations",
+                        url:'/user/NGO/trackdonations'
                     },
                     {
-                        title:"Completed",
-                        url:'/student/courses/completed'
-                    },
-                    {
-                        title:"All",
-                        url:'/student/courses/All'
+                        title:"Donation History",
+                        url:'/user/NGO/donationHistory'
                     },
                 ],
                 
             },
             {
-                name: "Donation Management",
-                url: "/user/Admin/donationmanagement",
-                icon: Bell, 
+                name: "Donar",
+                url: "/user/ngo/review",
+                icon: Star,
             },
-            {
-                name: "UserLists",
-                url: "/user/admin/userList",
-                icon: CircleUserRound, 
-            },
-            {
-              name: "Content Management",
-              url: "/user/admin/contentManagement",
-              icon: CircleUserRound, 
-          },
         ],
       };
+
   return (
     <>
       <UserDashboard data={NGO}/>

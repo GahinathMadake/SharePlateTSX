@@ -16,13 +16,14 @@ const DonarDashboard: React.FC = () => {
     const Donar = {
         user: {
           name: "Rohan Wagh",
+          role:"Donar",
           email: "rohanWagh@gmail.com",
           avatar: "/avatars/shadcn.jpg",
         },
         Platform: {
           name: "SharePlate",
           logo: logo,
-          plan: "Admin",
+          plan: "Donar",
         },
         navMenu: [
             {

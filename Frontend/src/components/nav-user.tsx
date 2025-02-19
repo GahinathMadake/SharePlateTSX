@@ -1,12 +1,12 @@
 "use client"
-
+import { Link } from "react-router-dom"
 import {
-  BadgeCheck,
-  Bell,
+  User,
+  UserPlus,
+  Star,
+  CircleHelp,
   ChevronsUpDown,
-  CreditCard,
   LogOut,
-  Sparkles,
 } from "lucide-react"
 
 import {
@@ -28,18 +28,25 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
+
+import { useAuth } from "@/context/AuthContext";
 
 export function NavUser({
   user,
 }: {
   user: {
     name: string
+    role: string,
     email: string
     avatar: string
   }
 }) {
   const { isMobile } = useSidebar()
+
+  const {logout} = useAuth();
+
+
 
   return (
     <SidebarMenu>
@@ -61,6 +68,8 @@ export function NavUser({
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
+
+
           <DropdownMenuContent
             className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
             side={isMobile ? "bottom" : "right"}
@@ -79,34 +88,48 @@ export function NavUser({
                 </div>
               </div>
             </DropdownMenuLabel>
+
             <DropdownMenuSeparator />
+
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
+              
+              <Link to={`id/${user.email}`}>
+                <DropdownMenuItem>
+                  <User />
+                  My Profile
+                </DropdownMenuItem>
+              </Link>
+
+              <Link to='connections'>
+                <DropdownMenuItem>
+                  <UserPlus  />
+                  Connections
+                </DropdownMenuItem>
+              </Link>
+
+              <Link to={`/user/${user.role}/reviews`}>
+                <DropdownMenuItem>
+                  <Star />
+                  Reviews
+                </DropdownMenuItem>
+              </Link>
+
+              <Link to={`/user/${user.role}/contact`}>
+                <DropdownMenuItem>
+                  <CircleHelp />
+                  Help
+                </DropdownMenuItem>
+              </Link>
             </DropdownMenuGroup>
+
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
+
+            <DropdownMenuItem onClick={logout}>
               <LogOut />
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>
+          
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>

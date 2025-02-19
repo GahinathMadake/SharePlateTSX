@@ -17,6 +17,7 @@ const AdminDashboard: React.FC = () => {
     const Admin = {
         user: {
           name: "Rohan Wagh",
+          role:"Admin",
           email: "rohanWagh@gmail.com",
           avatar: "/avatars/shadcn.jpg",
         },

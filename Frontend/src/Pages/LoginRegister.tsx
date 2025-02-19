@@ -14,7 +14,7 @@ export default function LoginRegister() {
     return (
             <div className="grid min-h-svh lg:grid-cols-2">
                 <div className="relative hidden bg-muted lg:block">
-                <img
+                    <img
                         src={isSignUp?signupImage:loginImage}
                         alt="SharePlate Image"
                         className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.9] dark:grayscale"

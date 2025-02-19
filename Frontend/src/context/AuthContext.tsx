@@ -40,6 +40,7 @@ const AuthContextProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }
 
   const logout = () => {
+    console.log("Logging Out!!");
     localStorage.removeItem("token");
     setUser(null);
     setIsLogin(false);
