@@ -22,7 +22,11 @@
     "express-validator": "^7.2.1",
     "install": "^0.13.0",
     "jsonwebtoken": "^9.0.2",
+    "jwt-decode": "^4.0.0",
     "mongoose": "^8.10.0",
     "nodemon": "^3.1.9"
+  },
+  "devDependencies": {
+    "@types/jwt-decode": "^2.2.1"
   }
 }

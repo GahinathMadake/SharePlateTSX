@@ -51,5 +51,38 @@ catch{
 
 }
 
+// ...existing code...
 
-module.exports = { getDonations,getTotalDonations,deliverdDonationsCount };
+const createDonation = async (req, res) => {
+  console.log("[createDonation] Received donation creation request");
+  try {
+    const { foodType, quantity, expirationDate, pickupLocation, imageUrl } = req.body;
+
+    // Validate required fields
+    if (!foodType || !quantity || !expirationDate || !pickupLocation) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    // Create donation object
+    const donationData = {
+      foodType,
+      quantity,
+      expirationDate,
+      pickupLocation,
+      imageUrl,
+      donor: req.user?._id, // Add donor ID if user is authenticated
+    };
+
+    const newDonation = new Donation(donationData);
+    const savedDonation = await newDonation.save();
+
+    res.status(201).json(savedDonation);
+  } catch (error) {
+    console.error('[createDonation] Error creating donation:', error);
+    res.status(500).json({ error: "Internal server error", details: error.message });
+  }
+};
+
+module.exports = { getDonations, getTotalDonations, deliverdDonationsCount, createDonation };
+
+
