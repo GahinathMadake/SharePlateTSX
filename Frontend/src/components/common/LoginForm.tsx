@@ -44,7 +44,7 @@ export default function LoginForm({
         enqueueSnackbar("Login Successful!", { 
           variant: 'success',
         });
-        navigate("/user/Admin");
+        navigate("/user/Donar");
       } else {
         console.error("Login failed:", res.data);
         enqueueSnackbar("Login failed. Please try again.", { 
