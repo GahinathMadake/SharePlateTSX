@@ -114,7 +114,7 @@ const MyDonations: React.FC = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle>Total Persons Fed per NGO</CardTitle>
+              <CardTitle>Total Persons Feed per NGO</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
