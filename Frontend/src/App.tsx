@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { SnackbarProvider } from 'notistack';
 
 // Import Various Pages
 import LandingPage from './Pages/LandingPage';
@@ -12,11 +13,24 @@ import AdminDashboard from "./Pages/AdminDashboard";
 import NGODashboard from "./Pages/NGODashboard";
 import DonarDashboard from "./Pages/DonarDashboard";
 
+
+
+// Admin Dashboard Components
 import Dashboard from "./Dashboard/Admin/Analytics";
 import NgoRegistration from "./Dashboard/Admin/NgoManagementDashboard";
 import ActiveUser from "./Dashboard/Admin/UserList";
 import DonationManagement from "./Dashboard/Admin/DonationManagement";
 import ContentManagement  from "./Dashboard/Admin/ContentManagement";
+
+// Donar Dashboard Components
+import DonarDash from "./Dashboard/Donar/Dashboard";
+import NewDonations from "./Dashboard/Donar/Donations/NewDonations";
+import MyDonations from "./Dashboard/Donar/Donations/MyDonations";
+import DonationForm from "./Dashboard/Donar/Donations/DonationForm";
+import ConfirmDonation  from "./Dashboard/Donar/Donations/ConfirmDonation";
+import TrackLocation from "./Dashboard/Donar/Donations/TrackLocation";
+import Notification from "./Dashboard/Donar/Notification";
+import Donarprofile from "./Dashboard/Donar/Donarprofile";
 
 // Import NGO Components
 import NGODash from './Dashboard/ngo/Dashboard';
@@ -28,10 +42,17 @@ import Profile from './Dashboard/common/Profile';
 import Review from "./Dashboard/ngo/Review";
 import Contact from "./Dashboard/common/Contact";
 
-
 function App(){
 
   return (
+
+    <SnackbarProvider
+    maxSnack={3}
+    anchorOrigin={{
+      vertical: 'top',
+      horizontal: 'right',
+    }}
+  >
 
   <Router>
       <Routes>
@@ -64,12 +85,22 @@ function App(){
         </Route>
 
         <Route path="/user/Donar" element={<DonarDashboard />}>
+           <Route index element={<DonarDash />} />
+           <Route path='newdonation' element={<NewDonations />} />
+           <Route path='mydonations' element={<MyDonations />} />
+           <Route path='donationForm' element={<DonationForm/>}/>
+           <Route path='confirmdonation' element={<ConfirmDonation/>}/>
+           <Route path='trackloaction' element={<TrackLocation/>}/>
+           <Route path='notification' element={<Notification/>}/>
+           <Route path='donarprofile' element={<Donarprofile/>}/>
            <Route index element={<NGODash />} />
         </Route>
 
       </Routes>
     </Router>
-        
+  </SnackbarProvider>
+
+    
   )
 }
 

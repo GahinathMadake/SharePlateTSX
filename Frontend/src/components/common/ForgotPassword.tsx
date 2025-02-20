@@ -1,11 +1,12 @@
-
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Clock } from "lucide-react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useSnackbar } from 'notistack';
 
 export default function ForgotPassword({
   className,
@@ -17,6 +18,11 @@ export default function ForgotPassword({
   const [newPassword, setNewPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
+
+  // Timer state
+  const [timeLeft, setTimeLeft] = useState<number>(600); // 600 seconds = 10 minutes
+  const [timerActive, setTimerActive] = useState<boolean>(false);
 
   // Handle OTP input changes
   const handleChange = (index: number, value: string) => {
@@ -36,6 +42,36 @@ export default function ForgotPassword({
     }
   };
 
+  // Timer effect
+  useEffect(() => {
+    let interval: number | undefined;
+    
+    if (timerActive && timeLeft > 0) {
+      interval = window.setInterval(() => {
+        setTimeLeft((prevTime) => prevTime - 1);
+      }, 1000);
+    } else if (timeLeft === 0) {
+      // Redirect to login page when timer expires
+      enqueueSnackbar("OTP has expired. Please try again.", { 
+        variant: 'error',
+      });
+      navigate("/user/login");
+    }
+    
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [timerActive, timeLeft, navigate, enqueueSnackbar]);
+
+  // Format time to MM:SS
+  const formatTime = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
   // Send OTP to the user's email
   const sendOtpHandler = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -44,14 +80,37 @@ export default function ForgotPassword({
         email,
       });
       setOtpSent(true); // Show OTP input fields
+      setTimerActive(true); // Start the timer
+      
+      enqueueSnackbar("OTP sent to your email!", { 
+        variant: 'success',
+      });
     } catch (error) {
       console.error("OTP send error:", (error as Error).message);
+      enqueueSnackbar("Failed to send OTP. Please check your email address.", { 
+        variant: 'error',
+      });
     }
   };
 
   // Verify OTP and reset password
   const verifyOtpHandler = async () => {
     const enteredOtp = otp.join("");
+    
+    if (!newPassword) {
+      enqueueSnackbar("Please enter a new password", { 
+        variant: 'warning',
+      });
+      return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+      enqueueSnackbar("Passwords do not match", { 
+        variant: 'error',
+      });
+      return;
+    }
+    
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_Backend_URL}/api/auth/reset-password`,
@@ -62,17 +121,25 @@ export default function ForgotPassword({
         }
       );
       if (response.data.success) {
-        alert("Password reset successfully!");
+        enqueueSnackbar("Password reset successfully!", { 
+          variant: 'success',
+        });
         navigate("/user/login"); // Redirect to login page
       } else {
         console.error("Invalid OTP");
         console.error(response.data.msg);
+        enqueueSnackbar(response.data.msg || "Invalid OTP. Please try again.", { 
+          variant: 'error',
+        });
       }
     } catch (error) {
       console.error("OTP verification error:", (error as Error).message);
       if ((error as any).response) {
         console.error("Response data:", (error as any).response.data);
       }
+      enqueueSnackbar("Failed to verify OTP. Please try again.", { 
+        variant: 'error',
+      });
     }
   };
 
@@ -82,6 +149,7 @@ export default function ForgotPassword({
       {...props}
       onSubmit={sendOtpHandler}
     >
+      {/* Form content remains the same */}
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">Forgot Password</h1>
         <p className="text-sm text-muted-foreground">
@@ -109,6 +177,14 @@ export default function ForgotPassword({
       ) : (
         // Step 2: Enter OTP and Reset Password
         <div className="grid gap-6">
+          {/* Timer Display */}
+          <div className="flex items-center justify-center gap-2 py-2">
+            <Clock className="text-muted-foreground" size={18} />
+            <div className={`text-center font-mono text-lg ${timeLeft < 60 ? 'text-red-500' : 'text-muted-foreground'}`}>
+              {formatTime(timeLeft)}
+            </div>
+          </div>
+
           {/* OTP Input */}
           <div className="grid gap-4 py-2">
             <Label>Enter OTP<sup className="text-[red]">*</sup></Label>
