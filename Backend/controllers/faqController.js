@@ -19,7 +19,8 @@ const getAllFAQs = async (req, res) => {
 // @access  Admin only
 const addNewFAQ = async (req, res) => {
   const { question, answer } = req.body;
-
+  console.log("Question:", question);
+  console.log("Answer:", answer);
   try {
     const newFAQ = new FAQ({
       question,

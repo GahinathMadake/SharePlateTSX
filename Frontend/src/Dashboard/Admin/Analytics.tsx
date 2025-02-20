@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Avatar } from "@/components/ui/avatar";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Bar, BarChart, Legend } from 'recharts';
 import { ArrowUpRight, Users, Package, Clock, AlertCircle, CheckCircle, MapPin, Calendar, Target } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState, useEffect } from "react";
@@ -72,6 +72,8 @@ const Dashboard = () => {
   const [totalNgos, setTotalNgos] =useState("");  
   const [pendingNgosCount, setPendingNgosCount] =useState("");
   const [totalDeliveredFood, setTotalDeliveredFood] =useState("");
+  const [yearlyChartData, setYearlyChartData] = useState({});
+
 
 
   useEffect(() => {
@@ -79,7 +81,27 @@ const Dashboard = () => {
     fetchTotalNgos();
     fetchPendingNgos();
     fetchTotalDeliveredFood();
+    fetchYearlyData();
   },[])
+
+const fetchYearlyData = async () => {
+
+   try {
+    
+    const response = await fetch("http://localhost:5000/user/yearly-chart-data");
+    const data = await response.json();
+    setYearlyChartData(data);
+
+   }
+   catch(error) {
+    console.error("Error fetching yearly data", error);
+  }
+
+
+
+}
+
+const chartData = yearlyChartData[selectedYear] || [];
 
 
   const fetchTotalDonations = async () => {
@@ -234,34 +256,36 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Food Redistribution Trends */}
         <Card className="hover:shadow-lg transition-shadow duration-300">
-          <CardHeader>
-            <div className="flex flex-col sm:flex-row justify-between items-center">
-              <CardTitle className="text-lg sm:text-xl mb-2 sm:mb-0">Food Redistribution Trends</CardTitle>
-              <Select value={selectedYear} onValueChange={(value) => setSelectedYear(value)}>
-                <SelectTrigger className="w-[120px]">
-                  <SelectValue placeholder="Select Year" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="2023">2023</SelectItem>
-                  <SelectItem value="2024">2024</SelectItem>
-                  <SelectItem value="2025">2025</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </CardHeader>
-          <CardContent className="h-60 sm:h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={yearlyChartData[selectedYear]}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Line type="monotone" dataKey="donations" stroke="#3B82F6" name="Donations" />
-                <Line type="monotone" dataKey="redistributed" stroke="#10B981" name="Redistributed" />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+      <CardHeader>
+        <div className="flex flex-col sm:flex-row justify-between items-center">
+          <CardTitle className="text-lg sm:text-xl mb-2 sm:mb-0">Food Redistribution Trends</CardTitle>
+          <Select value={selectedYear} onValueChange={(value) => setSelectedYear(value)}>
+            <SelectTrigger className="w-[120px]">
+              <SelectValue placeholder="Select Year" />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.keys(yearlyChartData).map((year) => (
+                <SelectItem key={year} value={year}>
+                  {year}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <ResponsiveContainer width="100%" height={400}>
+          <BarChart data={chartData}>
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="donations" fill="#8884d8" name="Donations" />
+            <Bar dataKey="redistributed" fill="#82ca9d" name="Redistributed" />
+          </BarChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
 
         {/* Active Campaigns */}
         <Card className="hover:shadow-lg transition-shadow duration-300">

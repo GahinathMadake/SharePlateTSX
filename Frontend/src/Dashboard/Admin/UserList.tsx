@@ -146,7 +146,7 @@ const ActiveUser = () => {
     email: string;
     role: string;
     createdAt: string;
-    
+    status: string; // Add this line
   }
   
   const [users, setUsers] = useState<User[]>([]);
@@ -160,7 +160,8 @@ const ActiveUser = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/role/?role=${roleFilter}`);
+      console.log(roleFilter);
+      const response = await axios.get(`http://localhost:5000/user/role/?role=${roleFilter}`);
       setUsers(response.data);
       console.log(response.data);
       
@@ -208,7 +209,7 @@ const ActiveUser = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Roles</SelectItem>
-                <SelectItem value="donor">Donor</SelectItem>
+                <SelectItem value="donar">Donar</SelectItem>
                 <SelectItem value="ngo">NGO</SelectItem>
               </SelectContent>
             </Select>
@@ -246,7 +247,7 @@ const ActiveUser = () => {
                     
                     {/* Role with Icon */}
                     <TableCell className="flex items-center gap-2">
-                      {user.role === "Donor" ? <User className="w-4 h-4 text-blue-500" /> : <Shield className="w-4 h-4 text-green-500" />}
+                      {user.role === "Donar" ? <User className="w-4 h-4 text-blue-500" /> : <Shield className="w-4 h-4 text-green-500" />}
                       {user.role}
                     </TableCell>
                     
@@ -255,22 +256,17 @@ const ActiveUser = () => {
                     
                     {/* Status Badge */}
                     <TableCell>
-                      <Badge variant={user.status === "Active" ? "success" : "destructive"}>
+                      <Badge variant={user.status === "Active" ? "default" : "destructive"}>
                         {user.status}
                       </Badge>
                     </TableCell>
                     
                     {/* Actions */}
                     <TableCell>
-                      {user.status === "Active" ? (
-                        <Button variant="destructive" size="sm" onClick={() => handleSuspend(user.id)}>
-                          <XCircle className="mr-2" size={16} /> Suspend
-                        </Button>
-                      ) : (
+                    
                         <Button variant="success" size="sm" onClick={() => handleActivate(user.id)}>
                           <CheckCircle className="mr-2" size={16} /> Activate
                         </Button>
-                      )}
                     </TableCell>
                   </TableRow>
                 ))
