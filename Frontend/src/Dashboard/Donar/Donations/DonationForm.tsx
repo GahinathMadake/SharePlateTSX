@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Link } from "react-router-dom";
+import { Textarea } from '@/components/ui/textarea';
+import { Upload, Phone, MapPin, User, ClipboardList } from 'lucide-react';
 
 const DonationForm: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -28,178 +30,72 @@ const DonationForm: React.FC = () => {
     const { name, value, type } = e.target;
 
     if (type === 'file') {
-      // Handle file input
       if (e.target.files) {
-        setFormData({
-          ...formData,
-          [name]: e.target.files[0],
-        });
-        setErrors({
-          ...errors,
-          [name]: '',
-        });
+        setFormData({ ...formData, [name]: e.target.files[0] });
+        setErrors({ ...errors, [name]: '' });
       }
     } else {
-      // Handle other inputs (text, number, etc.)
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
-      setErrors({
-        ...errors,
-        [name]: value ? '' : `This field is required`,
-      });
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors = {
-      fullName: formData.fullName ? '' : 'Full Name is required',
-      phoneNumber: formData.phoneNumber ? '' : 'Phone Number is required',
-      location: formData.location ? '' : 'Location/City is required',
-      address: formData.address ? '' : 'Address is required',
-      donationQuantity: formData.donationQuantity ? '' : 'Donation Quantity is required',
-      donationImage: formData.donationImage ? '' : 'Donation Image is required',
-    };
-
-    setErrors(newErrors);
-
-    // Check if all fields are filled
-    return Object.values(newErrors).every((error) => !error);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (validateForm()) {
-      // Handle form submission
-      console.log('Form submitted successfully:', formData);
-    } else {
-      console.log('Form has errors. Please fill out all fields.');
+      setFormData({ ...formData, [name]: value });
+      setErrors({ ...errors, [name]: value ? '' : `This field is required` });
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r   py-8 flex items-center justify-center">
-      <Card className="w-full max-w-2xl mx-4 md:mx-0 shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-2xl md:text-3xl font-bold text-center text-gray-800">
+    <div className="min-h-screen w-full flex items-center justify-center bg-gray-100 p-6">
+      <Card className="w-full max-w-2xl shadow-2xl border rounded-2xl bg-white p-8">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-3xl font-bold text-center text-gray-800">
             Donation Form
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Full Name */}
-            <div>
-              <Label htmlFor="fullName" className="text-sm md:text-base font-medium text-gray-700">
-                Full Name
-              </Label>
-              <Input
-                id="fullName"
-                name="fullName"
-                type="text"
-                value={formData.fullName}
-                onChange={handleChange}
-                className="mt-1 w-full"
-              />
-              {errors.fullName && (
-                <p className="text-sm text-red-500 mt-1">{errors.fullName}</p>
-              )}
-            </div>
+          <form className="space-y-5">
+            {[{
+              label: 'Full Name', name: 'fullName', icon: <User className="w-5 h-5" />
+            }, {
+              label: 'Phone Number', name: 'phoneNumber', icon: <Phone className="w-5 h-5" />, type: 'tel'
+            }, {
+              label: 'Pickup Location', name: 'location', icon: <MapPin className="w-5 h-5" />
+            }, {
+              label: 'Address', name: 'address', icon: <ClipboardList className="w-5 h-5" />, component: Textarea
+            }, {
+              label: 'Food Donation Quantity (Person Count)', name: 'donationQuantity', type: 'number', icon: <ClipboardList className="w-5 h-5" />
+            }].map(({ label, name, icon, type = 'text', component: Component = Input }) => (
+              <div key={name} className="space-y-1">
+                <Label htmlFor={name} className="text-lg font-medium flex items-center gap-2 text-gray-700">
+                  {icon} {label}
+                </Label>
+                <Component
+                  id={name}
+                  name={name}
+                  type={type}
+                  value={formData[name as keyof typeof formData] as string}
+                  onChange={handleChange}
+                  className="mt-1 w-full border rounded-lg p-3 focus:ring-2 focus:ring-red-400"
+                />
+                {errors[name as keyof typeof errors] && (
+                  <p className="text-sm text-red-500">{errors[name as keyof typeof errors]}</p>
+                )}
+              </div>
+            ))}
 
-            {/* Phone Number */}
-            <div>
-              <Label htmlFor="phoneNumber" className="text-sm md:text-base font-medium text-gray-700">
-                Phone Number
-              </Label>
-              <Input
-                id="phoneNumber"
-                name="phoneNumber"
-                type="tel"
-                value={formData.phoneNumber}
-                onChange={handleChange}
-                className="mt-1 w-full"
-              />
-              {errors.phoneNumber && (
-                <p className="text-sm text-red-500 mt-1">{errors.phoneNumber}</p>
-              )}
-            </div>
-
-            {/* Location/City */}
-            <div>
-              <Label htmlFor="location" className="text-sm md:text-base font-medium text-gray-700">
-                Pickup Location
-              </Label>
-              <Input
-                id="location"
-                name="location"
-                type="text"
-                value={formData.location}
-                onChange={handleChange}
-                className="mt-1 w-full"
-              />
-              {errors.location && (
-                <p className="text-sm text-red-500 mt-1">{errors.location}</p>
-              )}
-            </div>
-
-            {/* Address */}
-            <div>
-              <Label htmlFor="address" className="text-sm md:text-base font-medium text-gray-700">
-                Address
-              </Label>
-              <Input
-                id="address"
-                name="address"
-                type="text"
-                value={formData.address}
-                onChange={handleChange}
-                className="mt-1 w-full"
-              />
-              {errors.address && (
-                <p className="text-sm text-red-500 mt-1">{errors.address}</p>
-              )}
-            </div>
-
-            {/* Donation Item Quantity */}
-            <div>
-              <Label htmlFor="donationQuantity" className="text-sm md:text-base font-medium text-gray-700">
-                Food Donation Quantity (Person Count)
-              </Label>
-              <Input
-                id="donationQuantity"
-                name="donationQuantity"
-                type="number"
-                value={formData.donationQuantity}
-                onChange={handleChange}
-                className="mt-1 w-full"
-              />
-              {errors.donationQuantity && (
-                <p className="text-sm text-red-500 mt-1">{errors.donationQuantity}</p>
-              )}
-            </div>
-
-            {/* Upload Donation Item Image */}
-            <div>
-              <Label htmlFor="donationImage" className="text-sm md:text-base font-medium text-gray-700">
-                Upload Donation Item Image
+            <div className="space-y-1">
+              <Label htmlFor="donationImage" className="text-lg font-medium flex items-center gap-2 text-gray-700">
+                <Upload className="w-5 h-5" /> Upload Donation Item Image
               </Label>
               <Input
                 id="donationImage"
                 name="donationImage"
                 type="file"
                 onChange={handleChange}
-                className="mt-1 w-full"
+                className="mt-1 w-full border rounded-lg p-3 focus:ring-2 focus:ring-red-400"
               />
-              {errors.donationImage && (
-                <p className="text-sm text-red-500 mt-1">{errors.donationImage}</p>
-              )}
+              {errors.donationImage && <p className="text-sm text-red-500">{errors.donationImage}</p>}
             </div>
 
-            {/* Submit Button */}
-            <div className="flex justify-center items-center">
+            <div className="flex justify-center pt-4">
               <Link to="/user/Donar/confirmdonation">
-                <Button className="bg-red-600 hover:bg-red-500 text-white text-base md:text-lg py-4 px-8 rounded-lg">
+                <Button className="bg-red-600 hover:bg-red-500 text-white text-lg py-3 px-6 rounded-xl shadow-md">
                   Confirm Donate
                 </Button>
               </Link>
