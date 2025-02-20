@@ -34,7 +34,28 @@ const addNewFAQ = async (req, res) => {
   }
 };
 
+// @desc    Delete a FAQ
+// @route   DELETE /api/faq/:id
+// @access  Admin only
+const deleteFAQ = async (req, res) => {
+  try {
+    const faq = await FAQ.findById(req.params.id);
+
+    if (!faq) {
+      return res.status(404).json({ msg: 'FAQ not found' });
+    }
+
+    await FAQ.deleteOne({ _id: req.params.id });
+
+    res.json({ msg: 'FAQ removed' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+};
+
 module.exports = {
   getAllFAQs,
   addNewFAQ,
+  deleteFAQ,
 };
