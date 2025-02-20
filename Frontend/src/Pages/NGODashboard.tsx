@@ -1,6 +1,9 @@
 
 import React from 'react';
 import UserDashboard from './UserDashBoard';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/context/AuthContext';
+import { AlertCircle } from 'lucide-react'; 
 
 import { 
     LayoutDashboard,
@@ -9,22 +12,12 @@ import {
     Star,
 } from "lucide-react";
 
-// Importing Common
-import logo from '../assets/logobg.png';
 
 const NGODashboard: React.FC = () => {
+    const {user} = useAuth();
+    console.log(user);
+
     const NGO = {
-        user: {
-          name: "Gahinath Madake",
-          role: "NGO",
-          email: "gahinathmadake@gmail.com",
-          avatar: "/avatars/shadcn.jpg",
-        },
-        Platform: {
-          name: "SharePlate",
-          logo: logo,
-          plan: "NGO",
-        },
         navMenu: [
             {
                 name: "Dashboard",
@@ -63,7 +56,48 @@ const NGODashboard: React.FC = () => {
 
   return (
     <>
-      <UserDashboard data={NGO}/>
+      {
+        user.isVerified ?
+        <UserDashboard data={NGO}/>
+        :
+        <div className="flex flex-col items-center justify-center min-h-screen">
+            <div className=" border shadow-sm rounded-sm  p-4 text-center max-w-md">
+                {/* Warning Icon */}
+                <AlertCircle className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
+
+                {/* Title */}
+                <h1 className="text-2xl font-bold text-gray-800 mb-2">
+                    Account Not Verified
+                </h1>
+
+                {/* Description */}
+                <p className="text-gray-600 mb-6">
+                Your NGO account is currently not verified. Please contact support or request verification to access the dashboard.
+                </p>
+
+                {/* Action Buttons */}
+                {/* <div className="flex gap-4 justify-center">
+                <Button
+                    onClick={() => {
+                    // Add logic to request verification
+                    console.log("Request Verification");
+                    }}
+                >
+                    Request Verification
+                </Button>
+                <Button
+                    variant="outline" // Assuming you have an outline variant
+                    onClick={() => {
+                    // Add logic to contact support
+                    console.log("Contact Support");
+                    }}
+                >
+                    Contact Support
+                </Button>
+                </div> */}
+            </div>
+        </div>
+      }
     </>
   )
 }

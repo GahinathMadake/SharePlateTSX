@@ -102,6 +102,11 @@ export default function SignUpForm({
     }));
   };
 
+
+
+
+  // Login Functionality
+
   const sendOtpHandler = async (event: React.FormEvent) => {
     event.preventDefault();
     
@@ -138,6 +143,8 @@ export default function SignUpForm({
     }
   };
 
+
+
   const verifyOtpHandler = async () => {
     const enteredOtp = otp.join("");
     console.log("Entered OTP:", enteredOtp);
@@ -149,35 +156,43 @@ export default function SignUpForm({
       return;
     }
 
-    try {
+    try{
+      
       const response = await axios.post(
         `${import.meta.env.VITE_Backend_URL}/api/auth/verify-otp`,
-        { userData, otp: enteredOtp }
+        { userData, otp: enteredOtp },
+        { withCredentials: true }
       );
-
-      console.log(response);
-      console.log("Response Headers:", response.headers);
       
-      const authHeader = response.headers["authorization"];
-      if (authHeader) {
-        const token = authHeader.split(" ")[1];
-        localStorage.setItem("token", token);
+      console.log("OTP verified:", response.data);
+
+      if(response.data.success){
         fetchUserData();
-        
-        enqueueSnackbar("Sign up successful! Welcome to our platform.", { 
+        enqueueSnackbar("Registration Successful!", { 
           variant: 'success',
         });
-        navigate("/user/admin");
-      } else {
-        throw new Error("No authorization token received");
       }
-    } catch (error) {
+      else{
+        enqueueSnackbar(response.data.message, { 
+          variant: 'error',
+        });
+      }
+    }
+    catch (error) {
       console.error("OTP verification error:", (error as Error).message);
       enqueueSnackbar("Failed to verify OTP. Please try again or request a new OTP.", { 
         variant: 'error',
       });
     }
   };
+
+  useEffect(() => {
+    if (user?.role) {
+      navigate(`/user/${user.role}`);
+    }
+  }, [user]);
+
+  
 
   return (
     <form className={cn("flex flex-col gap-6", className)} {...props} onSubmit={sendOtpHandler}>

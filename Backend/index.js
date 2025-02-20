@@ -11,21 +11,21 @@ require('dotenv').config();
 
 // Initialize Express app
 const app = express();
+const cookieParser = require("cookie-parser");
 
 
 // Allow Cross origin access
 const cors = require("cors");
 
+// Middleware to parse JSON
+app.use(express.json());
+app.use(cookieParser())
+
 
 app.use(cors({
   origin: "http://localhost:5173",  // ✅ Replace with your frontend URL
   credentials: true,
-  exposedHeaders: ["Authorization"] // ✅ Allow frontend to access this header
 }));
-
-
-// Middleware to parse JSON
-app.use(express.json());
 
 
 // Connect to MongoDB

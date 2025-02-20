@@ -1,27 +1,32 @@
 const jwt = require('jsonwebtoken');
 
-const authMiddleware = async (req, res, next) => {
-  console.log("Accessed AuthMidleware")
+const authMiddleware = (req, res, next) => {
+  // console.log("Accessed AuthMiddleware");
 
   try {
-    const token = req.header("Authorization")?.split(" ")[1]; // Extract token
+    const token = req.cookies.token;
     if (!token) {
-      return res.status(401).json({ message: "No token, authorization denied" });
+      return res.status(401).json({ 
+        sucess:false,
+        message: "No token, authorization denied" 
+      });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET); // Verify token
-    req.user = decoded.user; // Attach user data to request
+    // Verify JWT token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded.user;
 
-    console.log("Decoded user:", decoded.user); // Log decoded user
+    // console.log("Decoded User:", decoded);
 
     next();
   } catch (error) {
-    console.error("Token verification error:", error); // Log error
-    res.status(401).json({ message: "Invalid Token" });
+    console.error("Token verification error:", error.message);
+    return res.status(401).json({
+      success: false,
+      message: "Invalid or expired token" });
   }
 };
 
-// Middleware to check if the user is an admin
 const isAdmin = (req, res, next) => {
   console.log("User role:", req.user.role); // Log user role
   if (req.user.role.toLowerCase() !== 'admin') {

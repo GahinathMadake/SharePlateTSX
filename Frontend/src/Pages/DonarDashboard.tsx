@@ -8,23 +8,10 @@ import {
     ChefHat,
 } from "lucide-react";
 
-// Importing Common
-import logo from '../assets/logobg.png';
 
 const DonarDashboard: React.FC = () => {
+
     const Donar = {
-        user: {
-          name: "Shreyash Padase",
-          email: "shreyash@gmail.com",
-          role:"Donar",
-          avatar: "/avatars/shadcn.jpg",
-        },
-        Platform: {
-          name: "SharePlate",
-          logo: logo,
-          plan: "Donar",
-          plan: "Donar",
-        },
         navMenu: [
             {
                 name: "Dashboard",

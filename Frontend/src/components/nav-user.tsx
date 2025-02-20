@@ -30,23 +30,12 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
+// Import My components
 import { useAuth } from "@/context/AuthContext";
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    name: string
-    role: string,
-    email: string
-    avatar: string
-  }
-}) {
+export function NavUser() {
   const { isMobile } = useSidebar()
-
-  const {logout} = useAuth();
-
-
+  const {user, logout} = useAuth();
 
   return (
     <SidebarMenu>
@@ -58,7 +47,7 @@ export function NavUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatar} alt={user.name} />
+                <AvatarImage src={user.profilePic} alt={user.name} />
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">

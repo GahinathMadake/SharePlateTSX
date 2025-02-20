@@ -34,22 +34,7 @@ interface SubMenuItem {
 
 type MenuItem = BaseMenuItem | SubMenuItem;
 
-interface Platform {
-    name: string;
-    logo: string;
-    plan: string;
-}
-
-interface User {
-    name: string;
-    role:string;
-    email: string;
-    avatar: string;
-}
-
 interface AdminData {
-    user: User;
-    Platform: Platform;
     navMenu: MenuItem[];
 }
 
@@ -57,7 +42,9 @@ interface UserDashboardProps {
     data: AdminData;
 }
 
+
 const UserDashboard: React.FC<UserDashboardProps> = ({ data }) => {
+
     return (
         <SidebarProvider>
             <AppSidebar data={data} />
