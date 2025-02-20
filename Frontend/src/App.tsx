@@ -31,6 +31,8 @@ import ConfirmDonation  from "./Dashboard/Donar/Donations/ConfirmDonation";
 import TrackLocation from "./Dashboard/Donar/Donations/TrackLocation";
 import Notification from "./Dashboard/Donar/Notification";
 import Donarprofile from "./Dashboard/Donar/Donarprofile";
+import Contactus from "./Dashboard/common/Contactus";
+import Review from "./Dashboard/Donar/Review";
 
 function App(){
  
@@ -76,6 +78,9 @@ function App(){
            <Route path='trackloaction' element={<TrackLocation/>}/>
            <Route path='notification' element={<Notification/>}/>
            <Route path='donarprofile' element={<Donarprofile/>}/>
+           <Route path='contactus' element={<Contactus/>}/>
+           <Route path='review' element={<Review/>}/>
+            
         </Route>
 
       </Routes>
