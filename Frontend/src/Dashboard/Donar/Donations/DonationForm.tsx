@@ -5,13 +5,17 @@ import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useNavigate } from "react-router-dom";
 import { Textarea } from '@/components/ui/textarea';
-import { Upload, Calendar, MapPin, Pizza, ClipboardList } from 'lucide-react';
+import { Upload, Calendar, MapPin, Pizza, ClipboardList, FileText } from 'lucide-react';
 import axios from 'axios';
-import api, { getUserFromToken } from '../../../services/apiService';
+import { useAuth } from '@/context/AuthContext';
 import imageCompression from 'browser-image-compression';
+import { useSnackbar } from 'notistack';
 
 const DonationForm: React.FC = () => {
   const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
+  
+  const {user} = useAuth();
   
   const [formData, setFormData] = useState({
     foodType: '',
@@ -19,6 +23,7 @@ const DonationForm: React.FC = () => {
     expirationDate: '',
     pickupLocation: '',
     address: '',
+    description: '',
     donationImage: null as File | null,
   });
 
@@ -28,18 +33,24 @@ const DonationForm: React.FC = () => {
     expirationDate: '',
     pickupLocation: '',
     address: '',
+    description: '',
     donationImage: '',
   });
 
   const compressImage = async (file: File): Promise<File> => {
+    console.log(`Original image size: ${(file.size / (1024 * 1024)).toFixed(2)}MB`);
+    
     const options = {
-      maxSizeMB: 1,
-      maxWidthOrHeight: 1920,
-      useWebWorker: true
+      maxSizeMB: 0.5,                  // Compress to max 500KB
+      maxWidthOrHeight: 1200,          // Reduce dimensions
+      useWebWorker: true,
+      initialQuality: 0.7              // Start with 70% quality
     };
     
     try {
-      return await imageCompression(file, options);
+      const compressedFile = await imageCompression(file, options);
+      console.log(`Compressed to: ${(compressedFile.size / (1024 * 1024)).toFixed(2)}MB`);
+      return compressedFile;
     } catch (error) {
       console.error('Error compressing image:', error);
       throw error;
@@ -62,6 +73,7 @@ const DonationForm: React.FC = () => {
             ...errors, 
             donationImage: 'Image size should be less than 5MB' 
           });
+          enqueueSnackbar('Image size should be less than 5MB', { variant: 'error' });
           return;
         }
   
@@ -74,6 +86,7 @@ const DonationForm: React.FC = () => {
             ...errors, 
             donationImage: 'Error processing image. Please try another image.' 
           });
+          enqueueSnackbar('Error processing image. Please try another image.', { variant: 'error' });
         }
       }
     } else {
@@ -99,19 +112,9 @@ const DonationForm: React.FC = () => {
     console.log("[DonationForm] Form submission started");
   
     try {
-      // Check if user is logged in and token is valid
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.error("[DonationForm] No token found, redirecting to login");
-        navigate('/user/login');
-        return;
-      }
-
-      console.log("[DonationForm] Token from local storage:", token);
-  
-      const user = getUserFromToken();
-      if (!user || !user.id) {
+      if (!user) {
         console.error("[DonationForm] No user information found, redirecting to login");
+        enqueueSnackbar('Please login to submit a donation', { variant: 'warning' });
         navigate('/user/login');
         return;
       }
@@ -119,42 +122,83 @@ const DonationForm: React.FC = () => {
       // Upload image if present
       let imageUrl = '';
       if (formData.donationImage) {
-        const base64Image = await convertImageToBase64(formData.donationImage);
-        const uploadResponse = await api.post('/api/upload', {
-          base64Image,
-          folder: 'donations'
-        });
-        imageUrl = uploadResponse.data.url;
+        try {
+          console.log("Starting image upload process...");
+          const base64Image = await convertImageToBase64(formData.donationImage);
+          
+          // Log size of base64 string (remove in production)
+          const sizeInMB = (base64Image.length * 0.75) / (1024 * 1024);
+          console.log(`Base64 image size: ${sizeInMB.toFixed(2)}MB`);
+          
+          // Make sure image isn't too large
+          if (sizeInMB > 10) {
+            throw new Error("Image too large (over 10MB after encoding)");
+          }
+          
+          const uploadResponse = await axios.post(
+            `${import.meta.env.VITE_Backend_URL}/api/upload`,
+            {
+              base64Image,
+              folder: 'donations'
+            },
+            {
+              withCredentials: true,
+              timeout: 30000, // 30 second timeout
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            }
+          );
+          
+          if (!uploadResponse.data.success) {
+            throw new Error(uploadResponse.data.message || "Upload failed");
+          }
+          
+          imageUrl = uploadResponse.data.url;
+          console.log("Image upload successful:", imageUrl);
+        } catch (error) {
+          console.error("Image upload error:", error);
+          enqueueSnackbar('Failed to upload image. Please try a smaller image or try again later.', { variant: 'error' });
+          setIsSubmitting(false);
+          return;
+        }
       }
+
+      console.log(imageUrl);
   
       // Prepare donation data with donor ID
       const donationData = {
-        donor: user.id, // Include donor ID from token
+        donor: user._id, // Include donor ID from token
         foodType: formData.foodType,
         quantity: parseInt(formData.quantity),
         expirationDate: new Date(formData.expirationDate).toISOString(),
         pickupLocation: `${formData.pickupLocation}${formData.address ? ', ' + formData.address : ''}`,
+        description: formData.description,
         imageUrl
       };
   
-      console.log("[DonationForm] Submitting donation with donor ID:", user.id);
-  
-      const response = await api.post('/api/donations/create', donationData);
+      const response = await axios.post(
+        `${import.meta.env.VITE_Backend_URL}/api/donations/create`,
+        donationData
+      );
   
       if (response.status === 201) {
+        enqueueSnackbar('Donation submitted successfully!', { variant: 'success' });
         navigate('/user/Donar/mydonations');
       }
     } catch (error: any) {
       console.error('[DonationForm] Error submitting donation:', error);
   
       if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          localStorage.removeItem('token');
-          alert('Your session has expired. Please login again.');
-          navigate('/user/login');
+        if (error.code === 'ERR_NETWORK') {
+          enqueueSnackbar('Network error uploading image. Image might be too large.', { variant: 'error' });
+        } else if (error.response?.status === 413) {
+          enqueueSnackbar('Image is too large. Please use a smaller image or compress further.', { variant: 'error' });
         } else {
-          alert(error.response?.data?.error || 'Failed to create donation');
+          enqueueSnackbar(error.response?.data?.message || 'Failed to submit donation', { variant: 'error' });
         }
+      } else {
+        enqueueSnackbar('An unexpected error occurred', { variant: 'error' });
       }
     } finally {
       setIsSubmitting(false);
@@ -198,6 +242,12 @@ const DonationForm: React.FC = () => {
               icon: <MapPin className="w-5 h-5" />, 
               component: Textarea,
               placeholder: 'Complete address with landmarks'
+            }, {
+              label: 'Donation Description', 
+              name: 'description', 
+              icon: <FileText className="w-5 h-5" />, 
+              component: Textarea,
+              placeholder: 'Describe the food items, condition, and any other relevant details'
             }].map(({ label, name, icon, type = 'text', component: Component = Input, placeholder }) => (
               <div key={name} className="space-y-1">
                 <Label htmlFor={name} className="text-lg font-medium flex items-center gap-2 text-gray-700">
@@ -211,7 +261,7 @@ const DonationForm: React.FC = () => {
                   onChange={handleChange}
                   placeholder={placeholder}
                   className="mt-1 w-full border rounded-lg p-3 focus:ring-2 focus:ring-red-400"
-                  required
+                  required={name !== 'description'} // Description is optional
                 />
                 {errors[name as keyof typeof errors] && (
                   <p className="text-sm text-red-500">{errors[name as keyof typeof errors]}</p>
