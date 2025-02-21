@@ -1,12 +1,7 @@
-import React from 'react';
-import UserDashboard from './UserDashBoard';
+import React from "react";
+import UserDashboard from "./UserDashBoard";
 
-import { 
-    LayoutDashboard,
-    Bell,
-    CircleUserRound,
-    ChefHat,
-} from "lucide-react";
+import { LayoutDashboard, Bell,MessageCircleCode , CircleUserRound, ChefHat } from "lucide-react";
 
 
 const DonarDashboard: React.FC = () => {
@@ -52,17 +47,33 @@ const DonarDashboard: React.FC = () => {
                 url: "/user/Donar/donarprofile",
                 icon: CircleUserRound,
               },
-           
-           
-            
-            
+
+  
         ],
-      };
+      },
+
+      {
+        name: "Notifications",
+        url: "/user/Donar/notification",
+        icon: Bell,
+      },
+      {
+        name: "Review",
+        url: "/user/Donar/Review",
+        icon: MessageCircleCode ,
+      },
+      {
+        name: "Profile",
+        url: "/user/Donar/donarprofile",
+        icon: CircleUserRound,
+      },
+    ],
+  };
   return (
     <>
-      <UserDashboard data={Donar}/>
+      <UserDashboard data={Donar} />
     </>
-  )
-}
+  );
+};
 
 export default DonarDashboard;
