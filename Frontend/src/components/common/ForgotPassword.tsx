@@ -7,6 +7,7 @@ import { Clock } from "lucide-react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from 'notistack';
+import { Link } from "react-router-dom";
 
 export default function ForgotPassword({
   className,
@@ -238,9 +239,9 @@ export default function ForgotPassword({
       {/* Back to Login Link */}
       <div className="text-center text-sm">
         Remember your password?{" "}
-        <a href="/user/login" className="underline underline-offset-4">
+        <Link to="/user/login" className="underline underline-offset-4">
           Login
-        </a>
+        </Link>
       </div>
     </form>
   );

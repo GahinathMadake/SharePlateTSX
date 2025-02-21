@@ -20,11 +20,7 @@ const userSchema = new mongoose.Schema({
   },
   profileImage: {
     type: String,
-    default: function() {
-      if (this.isNew) {
-        return `https://api.dicebear.com/5.x/initials/svg?seed=${encodeURIComponent(this.name)}`;
-      }
-    }
+    required: true,
   },
   role: {
     type: String,
