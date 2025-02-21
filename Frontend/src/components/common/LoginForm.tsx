@@ -8,6 +8,8 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { useSnackbar } from 'notistack';
+import { useAuth } from "@/context/AuthContext";
+import { useEffect } from "react";
 
 export default function LoginForm({
   className,
@@ -20,46 +22,47 @@ export default function LoginForm({
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
+  // Extract user
+  const {user, fetchUserData} = useAuth();
+
+
   const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // Prevent form refresh
   
-    // Basic Validation
     if (!email || !password) {
-      enqueueSnackbar("Please enter both email and password.", { 
-        variant: 'warning',
-      });
+      enqueueSnackbar("Please enter both email and password.", { variant: 'warning' });
       return;
     }
   
     try {
-      const res = await axios.post(import.meta.env.VITE_Backend_URL + "/api/auth/login", {
-        email,
-        password,
-      });
+      const res = await axios.post(
+        import.meta.env.VITE_Backend_URL + "/api/auth/login",
+        { email, password }, 
+        { withCredentials: true }
+      );
   
-      console.log("Response from server:", res.data);
+      if (res.data.success) {
+        console.log("Login Successful:", res.data);
+        enqueueSnackbar("Login Successful!", { variant: 'success' });
   
-      if (res.data.token) {
-        const token = res.data.token;
-        localStorage.setItem('token', token); // Save token to local storage
-        console.log("Login Successful:", { token });
-        enqueueSnackbar("Login Successful!", { 
-          variant: 'success',
-        });
-        navigate("/user/Donar");
+        await fetchUserData(); 
       } else {
         console.error("Login failed:", res.data);
-        enqueueSnackbar("Login failed. Please try again.", { 
-          variant: 'error',
-        });
+        enqueueSnackbar("Login failed. Please try again.", { variant: 'error' });
       }
     } catch (error) {
       console.error("Login Error:", error);
-      enqueueSnackbar("Login failed. Please check your credentials.", { 
-        variant: 'error',
-      });
+      enqueueSnackbar("Login failed. Please check your credentials.", { variant: 'error' });
     }
   };
+
+  useEffect(() => {
+    if (user?.role) {
+      navigate(`/user/${user.role}`);
+    }
+  }, [user]);
+  
+
 
   return (
     <form className={cn("flex flex-col gap-6", className)} {...props} onSubmit={submitHandler}>

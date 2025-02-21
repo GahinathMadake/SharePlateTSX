@@ -36,16 +36,6 @@ interface SubMenuItem {
 type MenuItem = BaseMenuItem | SubMenuItem;
 
 interface Data {
-  user: {
-    name: string;
-    email: string;
-    avatar: string;
-  };
-  Platform: {
-    name: string;
-    logo: string;
-    plan: string;
-  };
   navMenu: MenuItem[];
 }
 
@@ -57,7 +47,7 @@ export function AppSidebar({ data }: AppSidebarProps) {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <TeamSwitcher teams={data.Platform} />
+        <TeamSwitcher />
       </SidebarHeader>
 
       <SidebarContent>
@@ -78,7 +68,7 @@ export function AppSidebar({ data }: AppSidebarProps) {
       </SidebarContent>
 
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser />
       </SidebarFooter>
 
       <SidebarRail />

@@ -10,22 +10,9 @@ import {
     MessageCircleCode,
 } from "lucide-react";
 
-// Importing Common
-import logo from '../assets/logobg.png';
-
 
 const AdminDashboard: React.FC = () => {
     const Admin = {
-        user: {
-          name: "Rohan Wagh",
-          email: "rohanWagh@gmail.com",
-          avatar: "/avatars/shadcn.jpg",
-        },
-        Platform: {
-          name: "SharePlate",
-          logo: logo,
-          plan: "Admin",
-        },
         navMenu: [
             {
                 name: "Dashboard",
