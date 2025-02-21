@@ -31,16 +31,74 @@ const getTotalDonations = async (req, res) => {
 };
 
 const deliverdDonationsCount = async (req, res) => {
-  try {
-    const foodCount = await Donation.aggregate([
-      {$match:{status:"delivered"}},
-      {$group:{_id:null,total:{$sum:"$quantity"}}}
+
+
+  try{
+  const foodCount=await Donation.aggregate([
+    {$match:{status:"delivered"}},
+    {$group:{_id:null,total:{$sum:"$quantity"}}}
+  ]);
+  res.status(200).json({ totalDeliveredFood: foodCount[0]?.total || 0 });
+}
+catch{
+  res.status(500).json({ error: "Internal server error" });
+}
+
+
+
+}
+
+
+//add on to add dashboard
+
+const getTotalFoodSaved =async (req,res)=>{
+  try{
+    const totalFoodSaved=await Donation.aggregate([
+      { $match: { status: { $in: ["accepted", "delivered"] } } }, // Consider only approved or delivered donations
+      { $group: { _id: null, total: { $sum: "$quantity" } } }, // Sum up quantities
     ]);
-    res.status(200).json({ totalDeliveredFood: foodCount[0]?.total || 0 });
+    console.log("Aggregation Result:", totalFoodSaved);
+    res.json({ totalFoodSaved: totalFoodSaved.length > 0 ? totalFoodSaved[0].total : 0 });
   } catch (error) {
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Failed to calculate food saved" });
   }
-};
+
+  }
+
+
+const getTopDonors=async(req,res)=>{
+
+  try{
+  const topDonors = await Donation.aggregate([
+    { $match: { status: { $in: ["accepted", "delivered"] } } }, // Filter by status
+    { $group: { _id: "$donor", totalDonations: { $sum: "$quantity" } } }, // Group by donor and sum donations
+    { $sort: { totalDonations: -1 } }, // Sort by total donations (descending)
+    { $limit: 5 }, // Limit to top 5 donors
+    {
+      $lookup: {
+        from: "users", // Join with the User collection
+        localField: "_id",
+        foreignField: "_id",
+        as: "donorDetails",
+      },
+    },
+    { $unwind: "$donorDetails" }, // Unwind the joined data
+    {
+      $project: {
+        name: "$donorDetails.name", // Project donor name
+        totalDonations: 1, // Include total donations
+      },
+    },
+  ]);
+  res.json(topDonors);
+} catch (error) {
+  res.status(500).json({ error: "Failed to fetch top donors" });
+ }
+
+}
+
+
+// ...existing code...
 
 const createDonation = async (req, res) => {
   try {
@@ -124,5 +182,10 @@ module.exports = {
   getTotalDonations, 
   deliverdDonationsCount, 
   createDonation,
-  getMyDonations 
+  getMyDonations ,
+  getTotalFoodSaved,
+  getTopDonors,
 };
+
+
+

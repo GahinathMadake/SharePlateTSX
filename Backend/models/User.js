@@ -18,11 +18,13 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  profilePic: {
+  profileImage: {
     type: String,
-    default: function () {
-      return `https://api.dicebear.com/5.x/initials/svg?seed=${encodeURIComponent(this.name)}`;
-    },
+    default: function() {
+      if (this.isNew) {
+        return `https://api.dicebear.com/5.x/initials/svg?seed=${encodeURIComponent(this.name)}`;
+      }
+    }
   },
   role: {
     type: String,

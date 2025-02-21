@@ -38,7 +38,7 @@ const userProfileUpdate = async (req, res) => {
   console.log("Request Body:", req.body);
 
   try {
-    const { _id, name, about, phone, location } = req.body;
+    const { _id, name, about, phone, location, profileImage } = req.body;
 
     // Validate required fields
     if (!name || !about || !phone || !location) {
@@ -51,7 +51,13 @@ const userProfileUpdate = async (req, res) => {
     // Find the user by ID and update their profile
     const updatedUser = await User.findByIdAndUpdate(
       _id,
-      { name, about, phone, location },
+      { 
+        name, 
+        about, 
+        phone, 
+        location,
+        ...(profileImage && { profileImage }) // Only include if profileImage exists
+      },
       { new: true, runValidators: true }
     );
 
@@ -82,21 +88,42 @@ const updateImageProfile = async(req, res) =>{
 
 
 const FetchRoleBasedData = async (req, res) => {
-
   try {
     const { role } = req.query;
-    let query = {};
-    if (role && role !== "all") {
-      query.role = role.toUpperCase(); // Convert role to uppercase before querying
+    console.log("query", req.query);
+    console.log("role:", role);
+
+    if(role === 'all'){
+      users = await User.find({ role: { $ne: "Admin" } });  //exclude admin here
     }
-    const users = await User.find(query);
+    else if(role==='donar'){
+      const users = await User.find({role: 'Donar'});
+    }
+    else if(role==='ngo'){
+      const users = await User.find({role: 'NGO'});
+    }
+    else{
+      res.status(400).json({ message: "Invalid role" });
+    }
     res.json(users);
+    
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error });
+  }
+};
+
+const { getYearlyChartData } = require("../utils/chartData");
+
+const yearlyChartData=async(req,res)=>{
+  try {
+    const yearlyChartData = await getYearlyChartData();
+    res.json(yearlyChartData);
   } catch (error) {
     res.status(500).json({ message: "Server Error", error });
   }
 
-}
+};
 
 
 
-module.exports = {getUser, logOut, userProfileUpdate, updateImageProfile, FetchRoleBasedData};
+module.exports = { getUser, logOut, userProfileUpdate, updateImageProfile, FetchRoleBasedData,yearlyChartData };

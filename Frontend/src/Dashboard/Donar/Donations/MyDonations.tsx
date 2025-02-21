@@ -1,28 +1,28 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { format } from "date-fns";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import React, { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import { format } from 'date-fns';
+import axios from 'axios';
 import {
   BarChart,
   Bar,
-  CartesianGrid,
   XAxis,
   YAxis,
+  CartesianGrid,
   Tooltip,
   Legend,
+  ResponsiveContainer,
   PieChart,
   Pie,
-  Cell,
-  ResponsiveContainer,
-} from "recharts";
-import { ImageOff, Loader2 } from "lucide-react";
+  Cell
+} from 'recharts';
 
 interface Donation {
   _id: string;
   foodType: string;
   quantity: number;
-  expirationDate: string; // ISO string format
+  expirationDate: string;
   pickupLocation: string;
   description: string;
   imageUrl: string;
@@ -31,11 +31,10 @@ interface Donation {
     name: string;
   };
   status: 'pending' | 'accepted' | 'delivered';
-  createdAt: string; // ISO string format
+  createdAt: string;
 }
 
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28'];
+const GRADIENT_IDS = ['gradient-1', 'gradient-2', 'gradient-3'];
 
 const MyDonations: React.FC = () => {
   const [view, setView] = useState<"table" | "graph">("table");
@@ -48,13 +47,14 @@ const MyDonations: React.FC = () => {
       try {
         setLoading(true);
 
+
   
         const response = await axios.get<Donation[]>(
           `${import.meta.env.VITE_Backend_URL}/api/donations/my-donations`,
             {withCredentials: true}
+
+
         );
-  
-        console.log('Received donations:', response.data);
         setDonations(response.data);
       } catch (err) {
         console.error('Error fetching donations:', err);
@@ -63,7 +63,7 @@ const MyDonations: React.FC = () => {
         setLoading(false);
       }
     };
-  
+
     fetchDonations();
   }, []);
 
@@ -106,9 +106,7 @@ const MyDonations: React.FC = () => {
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-red-500 p-4 bg-red-50 rounded-lg">
-          {error}
-        </div>
+        <div className="text-red-500 p-4 bg-red-50 rounded-lg">{error}</div>
       </div>
     );
   }
@@ -139,40 +137,40 @@ const MyDonations: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
-            <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left p-4">Date</th>
-                      <th className="text-left p-4">Food Type</th>
-                      <th className="text-left p-4">Quantity</th>
-                      <th className="text-left p-4">Expiration</th>
-                      <th className="text-left p-4">Status</th>
-                      <th className="text-left p-4">Location</th>
-                      <th className="text-left p-4">Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left p-4">Date</th>
+                    <th className="text-left p-4">Food Type</th>
+                    <th className="text-left p-4">Quantity</th>
+                    <th className="text-left p-4">Expiration</th>
+                    <th className="text-left p-4">Status</th>
+                    <th className="text-left p-4">Location</th>
+                    <th className="text-left p-4">Description</th>
+                  </tr>
+                </thead>
+                <tbody>
                   {donations.map((donation) => (
-                      <tr key={donation._id} className="border-b">
-                        <td className="p-4">
-                          {format(new Date(donation.createdAt), 'MMM dd, yyyy')}
-                        </td>
-                        <td className="p-4">{donation.foodType}</td>
-                        <td className="p-4">{donation.quantity}</td>
-                        <td className="p-4">
-                          {format(new Date(donation.expirationDate), 'MMM dd, yyyy')}
-                        </td>
-                        <td className="p-4">
-                          <span className={`px-2 py-1 rounded-full text-sm ${
-                            donation.status === 'delivered' ? 'bg-green-100 text-green-800' :
-                            donation.status === 'accepted' ? 'bg-blue-100 text-blue-800' :
-                            'bg-yellow-100 text-yellow-800'
-                          }`}>
+                    <tr key={donation._id} className="border-b hover:bg-gray-50">
+                      <td className="p-4">
+                        {format(new Date(donation.createdAt), 'MMM dd, yyyy')}
+                      </td>
+                      <td className="p-4">{donation.foodType}</td>
+                      <td className="p-4">{donation.quantity}</td>
+                      <td className="p-4">
+                        {format(new Date(donation.expirationDate), 'MMM dd, yyyy')}
+                      </td>
+                      <td className="p-4">
+                        <span className={`px-2 py-1 rounded-full text-sm ${
+                          donation.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                          donation.status === 'accepted' ? 'bg-blue-100 text-blue-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
                           {donation.status}
                         </span>
                       </td>
                       <td className="p-4">{donation.pickupLocation}</td>
-                      <td className="p-4">{donation.description || '-'}</td>
+                      <td className="p-4">{donation.description}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -183,40 +181,86 @@ const MyDonations: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
-            <CardHeader>
-              <CardTitle>Monthly Donations</CardTitle>
+            <CardHeader className="items-center pb-0">
+              <CardTitle className="text-xl font-bold">Monthly Donations</CardTitle>
+              <CardDescription className="text-gray-600">
+                Quantity by Month
+              </CardDescription>
             </CardHeader>
             <CardContent className="h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={prepareChartData()}>
+                  <defs>
+                    <linearGradient
+                      id="barGradient"
+                      x1="0%"
+                      y1="0%"
+                      x2="100%"
+                      y2="100%"
+                    >
+                      <stop offset="0%" stopColor="#064e3b" />
+                      <stop offset="100%" stopColor="#000000" />
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="total" fill="#8884d8" />
+                  <Bar dataKey="total" fill="url(#barGradient)" />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader>
-              <CardTitle>Donation Status Distribution</CardTitle>
+            <CardHeader className="items-center pb-0">
+              <CardTitle className="text-xl font-bold">
+                Donation Status Distribution
+              </CardTitle>
+              <CardDescription className="text-gray-600">
+                Status Breakdown
+              </CardDescription>
             </CardHeader>
             <CardContent className="h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
+                  <defs>
+                    {GRADIENT_IDS.map((id, index) => (
+                      <linearGradient
+                        key={id}
+                        id={id}
+                        x1="0%"
+                        y1="0%"
+                        x2="100%"
+                        y2="100%"
+                      >
+                        <stop offset="0%" stopColor="#064e3b" />
+                        <stop 
+                          offset="100%" 
+                          stopColor={index === 0 ? "#000000" : 
+                                   index === 1 ? "#1f2937" : 
+                                   "#374151"}
+                        />
+                      </linearGradient>
+                    ))}
+                  </defs>
                   <Pie
                     data={preparePieData()}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    outerRadius={130}
+                    innerRadius={65}
+                    outerRadius={110}
+                    strokeWidth={3}
                     fill="#8884d8"
                     dataKey="value"
+                    label
                   >
-                    {preparePieData().map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    {preparePieData().map((_, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={`url(#${GRADIENT_IDS[index % GRADIENT_IDS.length]})`}
+                      />
                     ))}
                   </Pie>
                   <Tooltip />
