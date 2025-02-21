@@ -83,6 +83,29 @@ const createDonation = async (req, res) => {
   }
 };
 
-module.exports = { getDonations, getTotalDonations, deliverdDonationsCount, createDonation };
+// Add this function to the existing controller file
+
+const getMyDonations = async (req, res) => {
+  try {
+    const donations = await Donation.find({ donor: req.user._id })
+      .sort({ createdAt: -1 }) // Sort by newest first
+      .populate('donor', 'name'); // Optionally populate donor details
+
+    res.status(200).json(donations);
+  } catch (error) {
+    console.error('[getMyDonations] Error fetching donations:', error);
+    res.status(500).json({ error: "Internal server error", details: error.message });
+  }
+};
+
+// Add getMyDonations to the exports
+module.exports = { 
+  getDonations, 
+  getTotalDonations, 
+  deliverdDonationsCount, 
+  createDonation,
+  getMyDonations 
+};
+
 
 
