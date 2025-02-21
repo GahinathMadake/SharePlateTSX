@@ -38,7 +38,7 @@ const userProfileUpdate = async (req, res) => {
   console.log("Request Body:", req.body);
 
   try {
-    const { _id, name, about, phone, location } = req.body;
+    const { _id, name, about, phone, location, profileImage } = req.body;
 
     // Validate required fields
     if (!name || !about || !phone || !location) {
@@ -51,7 +51,13 @@ const userProfileUpdate = async (req, res) => {
     // Find the user by ID and update their profile
     const updatedUser = await User.findByIdAndUpdate(
       _id,
-      { name, about, phone, location },
+      { 
+        name, 
+        about, 
+        phone, 
+        location,
+        ...(profileImage && { profileImage }) // Only include if profileImage exists
+      },
       { new: true, runValidators: true }
     );
 

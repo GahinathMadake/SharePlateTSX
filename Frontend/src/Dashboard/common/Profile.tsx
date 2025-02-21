@@ -91,7 +91,7 @@ const Profile: React.FC = () => {
         `${import.meta.env.VITE_Backend_URL}/api/upload`,
         {
           base64Image,
-          folder: 'profiles' // Folder name for profile images
+          folder: 'profiles'
         },
         { withCredentials: true }
       );
@@ -103,18 +103,18 @@ const Profile: React.FC = () => {
           profileImage: response.data.url
         };
   
-        // Update local state
-        setProfileImage(response.data.url);
-        setUserData(updatedUserData);
-  
         // Update user profile with new image URL
-        await axios.post(
+        const updateResponse = await axios.post(
           `${import.meta.env.VITE_Backend_URL}/user/updateProfile`,
           updatedUserData,
           { withCredentials: true }
         );
   
-        enqueueSnackbar("Profile image updated successfully!", { variant: "success" });
+        if (updateResponse.data.success) {
+          setUserData(updateResponse.data.updatedUser);
+          setUser(updateResponse.data.updatedUser); // Update global user context
+          enqueueSnackbar("Profile image updated successfully!", { variant: "success" });
+        }
       }
   
       setIsEditing(false);
@@ -142,10 +142,11 @@ const Profile: React.FC = () => {
           <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left">
             {/* Avatar with Upload Option */}
             <div className="relative">
-            <Avatar className="w-24 h-24 border-2 border-white shadow-lg">
-              <AvatarImage src={userData.profileImage || ""} alt="Profile" />
-              <AvatarFallback>{userData.name?.charAt(0)?.toUpperCase()}</AvatarFallback>
-            </Avatar>
+            {/* // Update the Avatar component to use profileImage */}
+              <Avatar className="w-24 h-24 border-2 border-white shadow-lg">
+                <AvatarImage src={userData.profileImage} alt="Profile" />
+                <AvatarFallback>{userData.name?.charAt(0)?.toUpperCase()}</AvatarFallback>
+              </Avatar>
               {isEditing && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
                   <label
