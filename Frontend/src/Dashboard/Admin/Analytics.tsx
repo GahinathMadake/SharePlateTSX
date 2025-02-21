@@ -288,7 +288,7 @@ const chartData = yearlyChartData[selectedYear] || [];
     </Card>
 
         {/* Active Campaigns */}
-        <Card className="hover:shadow-lg transition-shadow duration-300">
+        {/* <Card className="hover:shadow-lg transition-shadow duration-300">
           <CardHeader>
             <CardTitle className="text-lg sm:text-xl">Active Campaigns</CardTitle>
           </CardHeader>
@@ -315,8 +315,32 @@ const chartData = yearlyChartData[selectedYear] || [];
             </div>
           </CardContent>
         </Card>
-      </div>
+      </div> */}
 
+<Card className="hover:shadow-lg transition-shadow duration-300">
+  <CardHeader>
+    <CardTitle className="text-lg sm:text-xl">Carbon Footprint Reduction</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h4 className="font-medium text-sm sm:text-base">CO₂ Emissions Saved</h4>
+          <p className="text-xs sm:text-sm text-gray-500">This Month</p>
+        </div>
+        <span className="text-lg sm:text-xl font-bold text-green-600">2,500 kg</span>
+      </div>
+      <div className="flex justify-between items-center">
+        <div>
+          <h4 className="font-medium text-sm sm:text-base">Equivalent Impact</h4>
+          <p className="text-xs sm:text-sm text-gray-500">Lifetime</p>
+        </div>
+        <span className="text-lg sm:text-xl font-bold text-blue-600">500 Trees Planted</span>
+      </div>
+    </div>
+  </CardContent>
+</Card>
+</div> 
       {/* Recent Activities */}
       <Card className="hover:shadow-lg transition-shadow duration-300">
         <CardHeader>
