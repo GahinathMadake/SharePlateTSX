@@ -1,9 +1,14 @@
 import React, { useState } from "react";
-import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Star ,MessagesSquare} from "lucide-react"; // Import star icon from Lucide React
+import { Star, MessagesSquare } from "lucide-react"; // Import star icon from Lucide React
 
 function Review() {
   const [suggestion, setSuggestion] = useState("");
@@ -43,7 +48,10 @@ function Review() {
 
         {/* Suggestion Textarea */}
         <div className="mt-4">
-          <Label htmlFor="suggestion" className="text-gray-700 text-sm font-semibold">
+          <Label
+            htmlFor="suggestion"
+            className="text-gray-700 text-sm font-semibold"
+          >
             Ngo ABCD
           </Label>
           <Textarea
@@ -56,8 +64,6 @@ function Review() {
           />
         </div>
 
-        
-
         {/* 5-Star Rating Section */}
         <div className="mt-4">
           <Label className="text-gray-700 text-sm font-semibold">
@@ -68,7 +74,9 @@ function Review() {
               <Star
                 key={star}
                 className={`h-5 w-5 cursor-pointer ${
-                  star <= rating ? "text-yellow-500 fill-yellow-500" : "text-gray-300"
+                  star <= rating
+                    ? "text-yellow-500 fill-yellow-500"
+                    : "text-gray-300"
                 }`}
                 onClick={() => handleRatingClick(star)}
               />
@@ -83,7 +91,7 @@ function Review() {
           className="w-full bg-gray-200 text-black hover:bg-gray-300"
           onClick={handleSubmit}
         >
-          Respond to Review 
+          Respond to Review
         </Button>
       </CardFooter>
     </Card>

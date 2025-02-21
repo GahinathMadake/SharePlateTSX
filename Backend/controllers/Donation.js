@@ -1,10 +1,9 @@
 const Donation = require('../models/Donation');
 
 const getDonations = async (req, res) => {
-
     try {
         const { status } = req.params; // Get status from request parameters
-        console.log("status",status);
+        console.log("status", status);
         // Validate status
         const validStatuses = ['pending', 'accepted', 'delivered'];
         if (!validStatuses.includes(status)) {
@@ -13,14 +12,12 @@ const getDonations = async (req, res) => {
     
         // Find donations with the given status
         const donations = await Donation.find({ status });
-       console.log("donations in backend",donations);
+        console.log("donations in backend", donations);
         res.status(200).json(donations);
-      } catch (error) {
+    } catch (error) {
         res.status(500).json({ error: "Internal server error", details: error.message });
-      }
-
-}
-
+    }
+};
 
 const getTotalDonations = async (req, res) => {
   try {
@@ -104,51 +101,82 @@ const getTopDonors=async(req,res)=>{
 // ...existing code...
 
 const createDonation = async (req, res) => {
-  console.log("[createDonation] Received donation creation request");
   try {
-    const { foodType, quantity, expirationDate, pickupLocation, imageUrl } = req.body;
-
-    // Validate required fields
-    if (!foodType || !quantity || !expirationDate || !pickupLocation) {
-      return res.status(400).json({ error: "Missing required fields" });
-    }
-
-    // Create donation object
-    const donationData = {
-      foodType,
-      quantity,
-      expirationDate,
-      pickupLocation,
-      imageUrl,
-      donor: req.user?._id, // Add donor ID if user is authenticated
-    };
-
-    const newDonation = new Donation(donationData);
-    const savedDonation = await newDonation.save();
-
-    res.status(201).json(savedDonation);
+    console.log("[createDonation] Received donation creation request");
+    
+    // Create a new donation using the mongoose model
+    const donation = new Donation({
+      donor: req.body.donor,
+      foodType: req.body.foodType,
+      quantity: req.body.quantity,
+      expirationDate: req.body.expirationDate,
+      pickupLocation: req.body.pickupLocation,
+      description: req.body.description, // New field
+      imageUrl: req.body.imageUrl
+    });
+    
+    // Save the donation
+    const savedDonation = await donation.save();
+    
+    res.status(201).json({
+      success: true,
+      message: 'Donation created successfully',
+      data: savedDonation
+    });
   } catch (error) {
-    console.error('[createDonation] Error creating donation:', error);
-    res.status(500).json({ error: "Internal server error", details: error.message });
+    console.log("[createDonation] Error creating donation:", error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create donation',
+      error: error.message
+    });
   }
 };
-
-// Add this function to the existing controller file
 
 const getMyDonations = async (req, res) => {
   try {
-    const donations = await Donation.find({ donor: req.user._id })
-      .sort({ createdAt: -1 }) // Sort by newest first
-      .populate('donor', 'name'); // Optionally populate donor details
+    console.log('Auth Middleware User:', req.user);
+    
+    // Use req.user.id instead of req.user._id
+    const userDonations = await Donation.find({ donor: req.user.id })
+      .sort({ createdAt: -1 })
+      .populate('donor', 'name')
+      .lean();
 
-    res.status(200).json(donations);
+    console.log('Raw donations found:', userDonations);
+
+    // Transform the data to match frontend expectations
+    const formattedDonations = userDonations.map(donation => {
+      return {
+        _id: donation._id.toString(),
+        foodType: donation.foodType,
+        quantity: Number(donation.quantity),
+        expirationDate: donation.expirationDate.toISOString(),
+        pickupLocation: donation.pickupLocation,
+        description: donation.description || '',
+        imageUrl: donation.imageUrl || '',
+        donor: {
+          _id: donation.donor._id.toString(),
+          name: donation.donor.name || ''
+        },
+        status: donation.status,
+        createdAt: donation.createdAt.toISOString()
+      };
+    });
+
+    console.log('Formatted donations:', formattedDonations);
+    res.status(200).json(formattedDonations);
   } catch (error) {
-    console.error('[getMyDonations] Error fetching donations:', error);
-    res.status(500).json({ error: "Internal server error", details: error.message });
+    console.error('[getMyDonations] Error:', error);
+    res.status(500).json({ 
+      error: "Internal server error", 
+      details: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 };
 
-// Add getMyDonations to the exports
+// Export all functions properly
 module.exports = { 
   getDonations, 
   getTotalDonations, 
