@@ -7,6 +7,7 @@ import {
     Captions,
     CircleUserRound,
     Bell,
+    MessageCircleCode,
 } from "lucide-react";
 
 // Importing Common
@@ -63,6 +64,11 @@ const AdminDashboard: React.FC = () => {
                 icon: Bell, 
             },
             {
+                name: "Review",
+                url: "/user/Admin/Reviewadmin",
+                icon: MessageCircleCode ,
+              },
+            {
                 name: "UserLists",
                 url: "/user/admin/userList",
                 icon: CircleUserRound, 
@@ -72,6 +78,7 @@ const AdminDashboard: React.FC = () => {
               url: "/user/admin/contentManagement",
               icon: CircleUserRound, 
           },
+         
         ],
       };
 
