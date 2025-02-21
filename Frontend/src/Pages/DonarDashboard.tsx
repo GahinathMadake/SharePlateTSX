@@ -27,10 +27,7 @@ const DonarDashboard: React.FC = () => {
                   title:"My Donations",
                   url:'/user/Donar/mydonations'
                 }, 
-                {
-                  title:"Track Location",
-                  url:'/user/Donar/trackloaction'
-                }, 
+               
               ],  
             },
            
@@ -38,11 +35,6 @@ const DonarDashboard: React.FC = () => {
               name: "Notifications",
               url: "/user/Donar/notification",
               icon: Bell,
-            },
-            {
-              name: "Profile",
-              url: "/user/Donar/donarprofile",
-              icon: CircleUserRound,
             },
         ],
     };
