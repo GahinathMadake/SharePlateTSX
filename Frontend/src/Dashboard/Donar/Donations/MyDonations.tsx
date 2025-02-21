@@ -46,9 +46,14 @@ const MyDonations: React.FC = () => {
     const fetchDonations = async () => {
       try {
         setLoading(true);
+
+
+  
         const response = await axios.get<Donation[]>(
           `${import.meta.env.VITE_Backend_URL}/api/donations/my-donations`,
-          { withCredentials: true }
+            {withCredentials: true}
+
+
         );
         setDonations(response.data);
       } catch (err) {
