@@ -12,6 +12,13 @@ import { useAuth } from "@/context/AuthContext";
 import { Separator } from "@/components/ui/separator";
 import { enqueueSnackbar } from "notistack";
 
+// interface UserProps{
+//   _id?:user.id;
+//   name: String;
+//   about: String;
+//   loacation: String,
+
+// }
 
 const Profile: React.FC = () => {
   const { user, setUser } = useAuth();

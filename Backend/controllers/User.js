@@ -99,4 +99,4 @@ const FetchRoleBasedData = async (req, res) => {
 
 
 
-module.exports = {getUser, logOut, userProfileUpdate, updateImageProfile};
+module.exports = {getUser, logOut, userProfileUpdate, updateImageProfile, FetchRoleBasedData};

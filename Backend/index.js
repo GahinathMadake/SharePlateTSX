@@ -6,6 +6,7 @@ const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
 const ngoRoutes = require("./routes/Ngo");
 const donationRoutes = require("./routes/donation");
+const contactRoutes = require('./routes/ContactUs');
 
 require('dotenv').config();
 
@@ -24,7 +25,7 @@ app.use(cookieParser())
 
 
 app.use(cors({
-  origin: "http://localhost:5173",  // ✅ Replace with your frontend URL
+  origin: "http://localhost:5173",
   credentials: true,
 }));
 
@@ -41,7 +42,7 @@ connectDB();
 app.use('/api/auth', authRoutes);
 app.use("/api/ngos", ngoRoutes);
 
-// app.use('/api', userRoutes);
+app.use('/user', contactRoutes);
 app.use('/api/faq', require('./routes/faq'));
 app.use('/user', userRoutes);
 app.use("/api/donations",donationRoutes);

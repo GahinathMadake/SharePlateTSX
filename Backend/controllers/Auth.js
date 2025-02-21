@@ -125,7 +125,7 @@ const OTPVerification = async(req, res)=>{
       },
     };
 
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '12h' });
 
     res.cookie("token", token, {
       httpOnly: true,
@@ -184,7 +184,7 @@ const AuthenticateUser = async (req, res) => {
         },
       };
 
-      const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+      const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '12h' });
 
       res.cookie("token", token, {
         httpOnly: true,
