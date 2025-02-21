@@ -22,11 +22,18 @@ interface Donation {
   _id: string;
   foodType: string;
   quantity: number;
-  expirationDate: string;
+  expirationDate: string; // ISO string format
   pickupLocation: string;
-  status: string;
-  createdAt: string;
+  description: string;
+  imageUrl: string;
+  donor: {
+    _id: string;
+    name: string;
+  };
+  status: 'pending' | 'accepted' | 'delivered';
+  createdAt: string; // ISO string format
 }
+
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28'];
 
@@ -40,28 +47,32 @@ const MyDonations: React.FC = () => {
     const fetchDonations = async () => {
       try {
         setLoading(true);
-        setError(null);
         const token = localStorage.getItem('token');
         
         if (!token) {
           throw new Error('No authentication token found');
         }
-
-        // Change this line:
-        const response = await axios.get(import.meta.env.VITE_Backend_URL+'/api/donations/my-donations', {          headers: { 
-            Authorization: `Bearer ${token}`,
+  
+        const response = await axios.get<Donation[]>(
+          `${import.meta.env.VITE_Backend_URL}/api/donations/my-donations`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            },
+            withCredentials: true
           }
-        });
-
+        );
+  
+        console.log('Received donations:', response.data);
         setDonations(response.data);
-      } catch (err: any) {
+      } catch (err) {
         console.error('Error fetching donations:', err);
-        setError(err.response?.data?.message || 'Failed to fetch donations');
+        setError(err instanceof Error ? err.message : 'Failed to fetch donations');
       } finally {
         setLoading(false);
       }
     };
-
+  
     fetchDonations();
   }, []);
 
@@ -137,34 +148,40 @@ const MyDonations: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left p-4">Date</th>
-                    <th className="text-left p-4">Food Type</th>
-                    <th className="text-left p-4">Quantity</th>
-                    <th className="text-left p-4">Status</th>
-                    <th className="text-left p-4">Location</th>
-                  </tr>
-                </thead>
-                <tbody>
+            <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left p-4">Date</th>
+                      <th className="text-left p-4">Food Type</th>
+                      <th className="text-left p-4">Quantity</th>
+                      <th className="text-left p-4">Expiration</th>
+                      <th className="text-left p-4">Status</th>
+                      <th className="text-left p-4">Location</th>
+                      <th className="text-left p-4">Description</th>
+                    </tr>
+                  </thead>
+                  <tbody>
                   {donations.map((donation) => (
-                    <tr key={donation._id} className="border-b">
-                      <td className="p-4">
-                        {format(new Date(donation.createdAt), 'MMM dd, yyyy')}
-                      </td>
-                      <td className="p-4">{donation.foodType}</td>
-                      <td className="p-4">{donation.quantity}</td>
-                      <td className="p-4">
-                        <span className={`px-2 py-1 rounded-full text-sm ${
-                          donation.status === 'delivered' ? 'bg-green-100 text-green-800' :
-                          donation.status === 'accepted' ? 'bg-blue-100 text-blue-800' :
-                          'bg-yellow-100 text-yellow-800'
-                        }`}>
+                      <tr key={donation._id} className="border-b">
+                        <td className="p-4">
+                          {format(new Date(donation.createdAt), 'MMM dd, yyyy')}
+                        </td>
+                        <td className="p-4">{donation.foodType}</td>
+                        <td className="p-4">{donation.quantity}</td>
+                        <td className="p-4">
+                          {format(new Date(donation.expirationDate), 'MMM dd, yyyy')}
+                        </td>
+                        <td className="p-4">
+                          <span className={`px-2 py-1 rounded-full text-sm ${
+                            donation.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                            donation.status === 'accepted' ? 'bg-blue-100 text-blue-800' :
+                            'bg-yellow-100 text-yellow-800'
+                          }`}>
                           {donation.status}
                         </span>
                       </td>
                       <td className="p-4">{donation.pickupLocation}</td>
+                      <td className="p-4">{donation.description || '-'}</td>
                     </tr>
                   ))}
                 </tbody>
