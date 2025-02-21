@@ -10,6 +10,8 @@ const donationSchema = new mongoose.Schema({
   description: { type: String }, // Add description field
   imageUrl: { type: String },
   donor: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  //store the reciver id also but not required
+  receiver: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   // for status keep 3 values : accepted, delivered, pending
   status: { type: String, enum: ['pending', 'accepted', 'delivered'], default: 'pending' },
   createdAt: { type: Date, default: Date.now },
