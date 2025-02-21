@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Outlet } from "react-router-dom";
+import Spinner from "@/Animations/Spinner";
 
 const ProtectedApp = () => {
   const { user, isLogin, fetchUserData } = useAuth();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log("On Protect App");
     const checkAuth = async () => {
       if (!user && !isLogin) {
         await fetchUserData();
@@ -17,11 +19,17 @@ const ProtectedApp = () => {
     checkAuth();
   }, [user, isLogin, fetchUserData]);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
 
-  return <Outlet />;
+  return <>
+  {
+    loading?
+    <div className='w-full h-screen flex justify-center items-center'>
+        <Spinner />
+    </div>
+    :
+    <Outlet />
+  }
+  </>
 };
 
 export default ProtectedApp;

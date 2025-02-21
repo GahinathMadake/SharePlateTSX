@@ -8,6 +8,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import AnimatedInput from "@/Animations/FormDiv";
 import { useSnackbar } from 'notistack';
+import {Link} from 'react-router-dom'
 
 // Auth context
 import { useAuth } from "@/context/AuthContext";
@@ -376,9 +377,9 @@ export default function SignUpForm({
       {/* Login Link */}
       <div className="text-center text-sm">
         Already have an account?{" "}
-        <a href="/user/login" className="underline underline-offset-4">
+        <Link to="/user/login" className="underline underline-offset-4">
           Login
-        </a>
+        </Link>
       </div>
     </form>
   );

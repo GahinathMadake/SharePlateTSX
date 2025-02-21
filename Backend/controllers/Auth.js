@@ -98,6 +98,7 @@ const OTPVerification = async(req, res)=>{
         message: 'Invalid OTP' 
       });
     }
+    
 
     // Create new user
     const user = new User({
@@ -105,7 +106,9 @@ const OTPVerification = async(req, res)=>{
       email,
       password,
       role,
+      profileImage: `https://api.dicebear.com/5.x/initials/svg?seed=${name}`,
       registrationNumber,
+
       isVerified: role=="NGO"?false:true, // Default to false for NGOs
     });
 
