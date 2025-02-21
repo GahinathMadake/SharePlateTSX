@@ -76,7 +76,7 @@ const AvailableDonations = () => {
         <Badge className='rounded-full text-md'>Connections</Badge>
       </div>
 
-      <div className="my-3 flex gap-3 flex-wrap justify-center items-center">
+      <div className="my-3  flex gap-3 flex-wrap justify-center items-center">
         {courses.map((course, index) => (
           <Card key={index} course={course} />
         ))}

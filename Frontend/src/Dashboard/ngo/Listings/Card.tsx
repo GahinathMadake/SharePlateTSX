@@ -1,7 +1,7 @@
 import React from "react";
 import IconAndLabel from '../common/IconandLable';
 
-import { MapPin , HandPlatter, Phone   } from 'lucide-react';
+import { MapPin , HandPlatter} from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
 interface CourseProps {
