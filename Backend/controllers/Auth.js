@@ -125,14 +125,17 @@ const OTPVerification = async(req, res)=>{
       },
     };
 
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '12h' });
 
-    res.status(200)
-      .header('Authorization', `Bearer ${token}`) // Attach token to the response header
+    res.cookie("token", token, {
+      httpOnly: true,
+      // secure: true,
+      sameSite: "Strict",
+      maxAge: 12 * 60 * 60 * 1000,
+    }).status(200)
       .json({
         success: true,
         message: "User registered successfully!",
-        token // Also send the token in the response body (optional)
     });
 
   } 
@@ -181,9 +184,18 @@ const AuthenticateUser = async (req, res) => {
         },
       };
 
-      jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
-        if (err) throw err;
-        res.json({ token });
+      const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '12h' });
+
+      res.cookie("token", token, {
+        httpOnly: true,
+        // secure: true,
+        sameSite: "Strict",
+        maxAge: 12 * 60 * 60 * 1000,
+      })
+      .status(200)
+      .json({
+        success: true,
+        message: "User Login successfull!",
       });
     } catch (err) {
       console.error(err.message);

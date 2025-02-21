@@ -1,7 +1,7 @@
 import {
   type LucideIcon,
 } from "lucide-react"
-
+import { Link } from "react-router-dom";
 import {
   SidebarMenuButton,
   SidebarMenuItem,
@@ -21,10 +21,10 @@ export function NavProjects({
     <>
       <SidebarMenuItem key={projects.name}>
         <SidebarMenuButton asChild>
-            <a href={projects.url}>
+            <Link to={projects.url}>
               <projects.icon />
               <span>{projects.name}</span>
-            </a>
+            </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
     </>

@@ -1,82 +1,103 @@
 
 import React from 'react';
 import UserDashboard from './UserDashBoard';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/context/AuthContext';
+import { AlertCircle } from 'lucide-react'; 
 
 import { 
     LayoutDashboard,
-    House,
-    Captions,
-    CircleUserRound,
-    Bell,
+    ListChecks,
+    HandPlatter,
+    Star,
 } from "lucide-react";
 
-// Importing Common
-import logo from '../assets/logobg.png';
 
 const NGODashboard: React.FC = () => {
+    const {user} = useAuth();
+    console.log(user);
+
     const NGO = {
-        user: {
-          name: "Rohan Wagh",
-          email: "rohanWagh@gmail.com",
-          avatar: "/avatars/shadcn.jpg",
-        },
-        Platform: {
-          name: "SharePlate",
-          logo: logo,
-          plan: "Admin",
-        },
         navMenu: [
             {
                 name: "Dashboard",
-                url: "/user/Admin",
+                url: "/user/NGO",
                 icon: LayoutDashboard, 
             },
             { 
-                name: "NGO Management", 
-                url: "/user/Admin/ngomanagement", 
-                icon: House,
+                name: "Listings", 
+                url: "/user/NGO/listings", 
+                icon: ListChecks,
             },
             {
-                title: "Courses",
+                title: "Donations",
                 url: "#",
-                icon: Captions,
+                icon: HandPlatter,
                 isActive: false,
                 items:[
                     {
-                        title:"Ongoing",
-                        url:'/student/courses/ongoing'
+                        title:"Track Donations",
+                        url:'/user/NGO/trackdonations'
                     },
                     {
-                        title:"Completed",
-                        url:'/student/courses/completed'
-                    },
-                    {
-                        title:"All",
-                        url:'/student/courses/All'
+                        title:"Donation History",
+                        url:'/user/NGO/donationHistory'
                     },
                 ],
                 
             },
             {
-                name: "Donation Management",
-                url: "/user/Admin/donationmanagement",
-                icon: Bell, 
+                name: "Donar",
+                url: "/user/ngo/review",
+                icon: Star,
             },
-            {
-                name: "UserLists",
-                url: "/user/admin/userList",
-                icon: CircleUserRound, 
-            },
-            {
-              name: "Content Management",
-              url: "/user/admin/contentManagement",
-              icon: CircleUserRound, 
-          },
         ],
       };
+
   return (
     <>
-      <UserDashboard data={NGO}/>
+      {
+        user.isVerified ?
+        <UserDashboard data={NGO}/>
+        :
+        <div className="flex flex-col items-center justify-center min-h-screen">
+            <div className=" border shadow-sm rounded-sm  p-4 text-center max-w-md">
+                {/* Warning Icon */}
+                <AlertCircle className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
+
+                {/* Title */}
+                <h1 className="text-2xl font-bold text-gray-800 mb-2">
+                    Account Not Verified
+                </h1>
+
+                {/* Description */}
+                <p className="text-gray-600 mb-6">
+                Your NGO account is currently not verified. Please contact support or request verification to access the dashboard.
+                </p>
+
+                {/* Action Buttons */}
+                {/* <div className="flex gap-4 justify-center">
+                <Button
+                    onClick={() => {
+                    // Add logic to request verification
+                    console.log("Request Verification");
+                    }}
+                >
+                    Request Verification
+                </Button>
+                <Button
+                    variant="outline" // Assuming you have an outline variant
+                    onClick={() => {
+                    // Add logic to contact support
+                    console.log("Contact Support");
+                    }}
+                >
+                    Contact Support
+                </Button>
+                </div> */}
+            </div>
+        </div>
+      }
     </>
   )
 }

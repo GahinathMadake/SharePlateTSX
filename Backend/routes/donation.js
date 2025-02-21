@@ -1,17 +1,29 @@
 const express = require('express');
 const router = express.Router();
 const { authMiddleware } = require('../middlewares/Authentication');
-const { getDonations, getTotalDonations, deliverdDonationsCount, createDonation } = require('../controllers/Donation');
+const { 
+  getDonations, 
+  getTotalDonations, 
+  deliverdDonationsCount, 
+  createDonation, 
+  getMyDonations,
+  getTotalFoodSaved,
+  getTopDonors,
+} = require('../controllers/Donation');
 
-// Apply auth to specific routes that need it
-// router.get("/totaldonations", authMiddleware, getTotalDonations);
-router.get("/totaldonations",getTotalDonations);
-// router.get("/totaldeliveredfood", authMiddleware, deliverdDonationsCount);
-router.get("/totaldeliveredfood",deliverdDonationsCount);
-// router.get("/:status", authMiddleware, getDonations);
-router.get("/:status", getDonations);
+// Make sure this route is before the /:status route to avoid conflicts
+router.get("/my-donations", authMiddleware, getMyDonations);
 
-// Make the create donation endpoint public
+router.get("/totaldonations", authMiddleware, getTotalDonations);
+
+router.get("/totaldeliveredfood", authMiddleware, deliverdDonationsCount);
+router.get("/totalfoodsaved",authMiddleware,getTotalFoodSaved);
+router.get("/topdonors",authMiddleware,getTopDonors);
+
+router.get("/:status", authMiddleware, getDonations);
+
 router.post("/create", createDonation);
+
+
 
 module.exports = router;

@@ -20,7 +20,7 @@ const donationSchema = new mongoose.Schema({
   pickupLocation: { type: String, required: true },
   imageUrl: { type: String },
   donor: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  status: { type: String, default: 'pending' },
+  status: { type: String, enum: ['pending', 'accepted', 'delivered'], default: 'pending' },
   createdAt: { type: Date, default: Date.now },
 });
 

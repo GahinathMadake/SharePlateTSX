@@ -2,10 +2,14 @@ const express = require('express');
 const router = express.Router();
 
 const {authMiddleware} = require('../middlewares/Authentication');
-const {getUser,FetchRoleBasedData,yearlyChartData} = require('../controllers/User');
+const {getUser, logOut, userProfileUpdate, updateImageProfile, yearlyChartData, FetchRoleBasedData} = require('../controllers/User');
+
 
 router.get("/getUser", authMiddleware, getUser);
 router.get("/role",FetchRoleBasedData);
-router.get("/yearly-chart-data",yearlyChartData);
+router.post("/logout", logOut);
+router.post("/updateProfile", userProfileUpdate);
+router.post("/updateProfilePic", updateImageProfile);
+router.get("/yearly-chart-data",authMiddleware,yearlyChartData);
 
 module.exports = router;

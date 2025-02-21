@@ -51,6 +51,56 @@ catch{
 
 }
 
+
+//add on to add dashboard
+
+const getTotalFoodSaved =async (req,res)=>{
+  try{
+    const totalFoodSaved=await Donation.aggregate([
+      { $match: { status: { $in: ["accepted", "delivered"] } } }, // Consider only approved or delivered donations
+      { $group: { _id: null, total: { $sum: "$quantity" } } }, // Sum up quantities
+    ]);
+    console.log("Aggregation Result:", totalFoodSaved);
+    res.json({ totalFoodSaved: totalFoodSaved.length > 0 ? totalFoodSaved[0].total : 0 });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to calculate food saved" });
+  }
+
+  }
+
+
+const getTopDonors=async(req,res)=>{
+
+  try{
+  const topDonors = await Donation.aggregate([
+    { $match: { status: { $in: ["accepted", "delivered"] } } }, // Filter by status
+    { $group: { _id: "$donor", totalDonations: { $sum: "$quantity" } } }, // Group by donor and sum donations
+    { $sort: { totalDonations: -1 } }, // Sort by total donations (descending)
+    { $limit: 5 }, // Limit to top 5 donors
+    {
+      $lookup: {
+        from: "users", // Join with the User collection
+        localField: "_id",
+        foreignField: "_id",
+        as: "donorDetails",
+      },
+    },
+    { $unwind: "$donorDetails" }, // Unwind the joined data
+    {
+      $project: {
+        name: "$donorDetails.name", // Project donor name
+        totalDonations: 1, // Include total donations
+      },
+    },
+  ]);
+  res.json(topDonors);
+} catch (error) {
+  res.status(500).json({ error: "Failed to fetch top donors" });
+ }
+
+}
+
+
 // ...existing code...
 
 const createDonation = async (req, res) => {
@@ -83,6 +133,31 @@ const createDonation = async (req, res) => {
   }
 };
 
-module.exports = { getDonations, getTotalDonations, deliverdDonationsCount, createDonation };
+// Add this function to the existing controller file
+
+const getMyDonations = async (req, res) => {
+  try {
+    const donations = await Donation.find({ donor: req.user._id })
+      .sort({ createdAt: -1 }) // Sort by newest first
+      .populate('donor', 'name'); // Optionally populate donor details
+
+    res.status(200).json(donations);
+  } catch (error) {
+    console.error('[getMyDonations] Error fetching donations:', error);
+    res.status(500).json({ error: "Internal server error", details: error.message });
+  }
+};
+
+// Add getMyDonations to the exports
+module.exports = { 
+  getDonations, 
+  getTotalDonations, 
+  deliverdDonationsCount, 
+  createDonation,
+  getMyDonations ,
+  getTotalFoodSaved,
+  getTopDonors,
+};
+
 
 

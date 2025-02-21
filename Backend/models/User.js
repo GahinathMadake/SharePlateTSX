@@ -6,6 +6,9 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  about:{
+    type: String,
+  },
   email: {
     type: String,
     required: true,
@@ -14,6 +17,12 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
+  },
+  profilePic: {
+    type: String,
+    default: function () {
+      return `https://api.dicebear.com/5.x/initials/svg?seed=${encodeURIComponent(this.name)}`;
+    },
   },
   role: {
     type: String,

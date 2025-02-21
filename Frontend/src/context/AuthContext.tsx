@@ -1,4 +1,4 @@
-import React, { createContext, useState, ReactNode, useContext } from "react";
+import React, { createContext, useState, useEffect, ReactNode, useContext } from "react";
 import axios from "axios";
 
 // Define the context type
@@ -19,31 +19,50 @@ const AuthContextProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isLogin, setIsLogin] = useState<boolean>(false);
 
   async function fetchUserData() {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) return;
-
-      console.log("Fetching User Data = ", token);
-      const response = await axios.get(`${import.meta.env.VITE_Backend_URL}/user/getUser`,{
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      setUser(response.data);
-      setIsLogin(true);
-    } catch (error) {
+    console.log("Fetching User Data...");
+    
+    try{
+      const response = await axios.get(
+        `${import.meta.env.VITE_Backend_URL}/user/getUser`,
+        {
+          withCredentials: true,
+        }
+      );
+  
+      if (response.data) {
+        setUser(response.data.user);
+        setIsLogin(true);
+      } 
+      else {
+        throw new Error("No user data returned");
+      }
+    } 
+    catch (error) {
       console.error("Error fetching user:", error);
       setIsLogin(false);
       setUser(null);
     }
   }
+  
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    setUser(null);
-    setIsLogin(false);
+  const logout = async () => {
+    try {
+      console.log("Logging Out!!");
+  
+      // Call backend to clear the authentication cookie
+      await axios.post(`${import.meta.env.VITE_Backend_URL}/user/logout`, {}, {
+        withCredentials: true,
+      });
+  
+      // Clear user state in frontend
+      setUser(null);
+      setIsLogin(false);
+    } 
+    catch (error) {
+      console.error("Logout Error:", error);
+    }
   };
+  
 
   // Context value
   const value: AuthContextType = {

@@ -6,22 +6,27 @@ const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
 const ngoRoutes = require("./routes/Ngo");
 const donationRoutes = require("./routes/donation");
+const contactRoutes = require('./routes/ContactUs');
 
 require('dotenv').config();
 
 
 // Initialize Express app
 const app = express();
+const cookieParser = require("cookie-parser");
 
 
 // Allow Cross origin access
 const cors = require('cors');
 
+// Middleware to parse JSON
+app.use(express.json());
+app.use(cookieParser())
+
 
 app.use(cors({
-  origin: "http://localhost:5173",  // ✅ Replace with your frontend URL
+  origin: "http://localhost:5173",
   credentials: true,
-  exposedHeaders: ["Authorization"] // ✅ Allow frontend to access this header
 }));
 
 
@@ -37,7 +42,7 @@ connectDB();
 app.use('/api/auth', authRoutes);
 app.use("/api/ngos", ngoRoutes);
 
-// app.use('/api', userRoutes);
+app.use('/user', contactRoutes);
 app.use('/api/faq', require('./routes/faq'));
 app.use('/user', userRoutes);
 app.use("/api/donations",donationRoutes);
@@ -50,4 +55,9 @@ app.use('/api/upload', require('./routes/upload'));
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+// Add this to your app.js
+app.get('/api/donation/test', (req, res) => {
+  res.json({ message: 'Donation routes are working' });
 });

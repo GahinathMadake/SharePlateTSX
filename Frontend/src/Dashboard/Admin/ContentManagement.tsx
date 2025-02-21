@@ -32,7 +32,9 @@ export default function FAQManagement() {
     // console.log("ID of faqs is ",id);
 
      try{   
-          await axios.delete(`http://localhost:5000/api/faq/${id}`);
+          await axios.delete(`http://localhost:5000/api/faq/${id}`,
+            {withCredentials: true}
+          );
           setFaqs((prevFaqs) => prevFaqs.filter((faq) => faq._id !== id));
           console.log("FAQ deleted successfully");
      }
@@ -44,7 +46,9 @@ export default function FAQManagement() {
   const fetchFAQS = async () => {
 
     try {
-      const response = await axios.get("http://localhost:5000/api/faq");
+      const response = await axios.get("http://localhost:5000/api/faq",
+        {withCredentials: true}
+      );
       setFaqs(response.data);
     } catch (error) {
       console.error("Failed to fetch FAQs", error);
@@ -62,7 +66,9 @@ export default function FAQManagement() {
     try {
       const faqData = { question: faq.question, answer: faq.answer };
       // console.log("data of faq",faqData);
-      const response = await axios.post("http://localhost:5000/api/faq", faqData);
+      const response = await axios.post("http://localhost:5000/api/faq", faqData,
+        {withCredentials: true}
+      );
       // console.log("FAQ Added:", response.data);
       setFaqs([...faqs, response.data]); // Update the FAQs list with the new FAQ
       setIsFaqModalOpen(false); // Close the modal
