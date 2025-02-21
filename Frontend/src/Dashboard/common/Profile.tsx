@@ -81,21 +81,56 @@ const Profile: React.FC = () => {
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
-    const formData = new FormData();
-    formData.append("image", file);
-
+  
     try {
-      const response = await axios.post("YOUR_BACKEND_API_URL", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      setProfileImage(response.data.imageUrl);
+      // Convert file to base64
+      const base64Image = await convertFileToBase64(file);
+  
+      // Send to backend
+      const response = await axios.post(
+        `${import.meta.env.VITE_Backend_URL}/api/upload`,
+        {
+          base64Image,
+          folder: 'profiles' // Folder name for profile images
+        },
+        { withCredentials: true }
+      );
+  
+      if (response.data.success) {
+        // Update user data with new image URL
+        const updatedUserData = {
+          ...userData,
+          profileImage: response.data.url
+        };
+  
+        // Update local state
+        setProfileImage(response.data.url);
+        setUserData(updatedUserData);
+  
+        // Update user profile with new image URL
+        await axios.post(
+          `${import.meta.env.VITE_Backend_URL}/user/updateProfile`,
+          updatedUserData,
+          { withCredentials: true }
+        );
+  
+        enqueueSnackbar("Profile image updated successfully!", { variant: "success" });
+      }
+  
       setIsEditing(false);
     } catch (error) {
       console.error("Image upload failed:", error);
-      alert("Image upload failed. Please try again.");
+      enqueueSnackbar("Image upload failed. Please try again.", { variant: "error" });
     }
+  };
+
+  const convertFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
   };
 
   return (
@@ -107,10 +142,10 @@ const Profile: React.FC = () => {
           <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left">
             {/* Avatar with Upload Option */}
             <div className="relative">
-              <Avatar className="w-24 h-24 border-2 border-white shadow-lg">
-                <AvatarImage src={profileImage || ""} alt="Profile" />
-                <AvatarFallback>AC</AvatarFallback>
-              </Avatar>
+            <Avatar className="w-24 h-24 border-2 border-white shadow-lg">
+              <AvatarImage src={userData.profileImage || ""} alt="Profile" />
+              <AvatarFallback>{userData.name?.charAt(0)?.toUpperCase()}</AvatarFallback>
+            </Avatar>
               {isEditing && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
                   <label
