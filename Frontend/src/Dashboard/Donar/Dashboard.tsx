@@ -3,7 +3,18 @@ import userImage from "../../assets/Donar_img/Dashboard.png";
 import { Link } from "react-router-dom";
 import Chart from "./Chart/Chartuser";
 import { GraduationCap, BadgeCheck, Smile } from "lucide-react";
-import { Pie, PieChart, Tooltip as ChartTooltip, Cell } from "recharts";
+import { 
+  Pie, 
+  PieChart, 
+  Tooltip as ChartTooltip, 
+  Cell, 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  ResponsiveContainer, 
+  Legend 
+} from "recharts";
 import { useAuth } from "@/context/AuthContext";
 import axios from "axios";
 import { useEffect, useState } from "react";
@@ -13,14 +24,11 @@ import {
   CardTitle,
   CardContent,
   CardDescription,
-  CardFooter,
 } from "@/components/ui/card";
 
 interface DashboardStats {
   totalDonations: number;
-  totalDeliveredFood: number;
   totalFoodSaved: number;
-  topDonors: Array<{ name: string; totalDonations: number }>;
 }
 
 const missionVision = {
@@ -32,44 +40,43 @@ const Dashboard = () => {
   const { user } = useAuth();
   const [stats, setStats] = useState<DashboardStats>({
     totalDonations: 0,
-    totalDeliveredFood: 0,
-    totalFoodSaved: 0,
-    topDonors: []
+    totalFoodSaved: 0
   });
-  const [pendingDonations, setPendingDonations] = useState([]);
-  const [acceptedDonations, setAcceptedDonations] = useState([]);
-  const [deliveredDonations, setDeliveredDonations] = useState([]);
+  const [myDonations, setMyDonations] = useState<any[]>([]);
+  const [monthlyStats, setMonthlyStats] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
+    const fetchUserDashboardData = async () => {
       try {
-        const [
-          totalDonationsRes,
-          deliveredFoodRes,
-          foodSavedRes,
-          pendingRes,
-          acceptedRes,
-          deliveredRes
-        ] = await Promise.all([
-          axios.get(`${import.meta.env.VITE_Backend_URL}/api/donations/totaldonations`, { withCredentials: true }),
-          axios.get(`${import.meta.env.VITE_Backend_URL}/api/donations/totaldeliveredfood`, { withCredentials: true }),
-          axios.get(`${import.meta.env.VITE_Backend_URL}/api/donations/totalfoodsaved`, { withCredentials: true }),
-          axios.get(`${import.meta.env.VITE_Backend_URL}/api/donations/pending`, { withCredentials: true }),
-          axios.get(`${import.meta.env.VITE_Backend_URL}/api/donations/accepted`, { withCredentials: true }),
-          axios.get(`${import.meta.env.VITE_Backend_URL}/api/donations/delivered`, { withCredentials: true })
-        ]);
+        const myDonationsRes = await axios.get(
+          `${import.meta.env.VITE_Backend_URL}/api/donations/my-donations`, 
+          { withCredentials: true }
+        );
+
+        setMyDonations(myDonationsRes.data);
+
+        // Calculate monthly statistics
+        const monthlyData = myDonationsRes.data.reduce((acc: any, donation: any) => {
+          const month = new Date(donation.createdAt).toLocaleString('default', { month: 'short' });
+          if (!acc[month]) acc[month] = { month, count: 0, quantity: 0 };
+          acc[month].count += 1;
+          acc[month].quantity += donation.quantity;
+          return acc;
+        }, {});
+
+        setMonthlyStats(Object.values(monthlyData));
+
+        const deliveredDonations = myDonationsRes.data.filter(
+          (donation: any) => donation.status === 'delivered'
+        );
 
         setStats({
-          totalDonations: totalDonationsRes.data.totalDonations,
-          totalDeliveredFood: deliveredFoodRes.data.totalDeliveredFood,
-          totalFoodSaved: foodSavedRes.data.totalFoodSaved,
-          topDonors: [] // Add top donors implementation if needed
+          totalDonations: deliveredDonations.length,
+          totalFoodSaved: deliveredDonations.reduce(
+            (acc: number, curr: any) => acc + curr.quantity, 0
+          )
         });
-
-        setPendingDonations(pendingRes.data);
-        setAcceptedDonations(acceptedRes.data);
-        setDeliveredDonations(deliveredRes.data);
 
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
@@ -78,154 +85,204 @@ const Dashboard = () => {
       }
     };
 
-    fetchDashboardData();
+    fetchUserDashboardData();
   }, []);
 
-  // Prepare chart data
-  const donationData = [
-    { name: "Delivered", visitors: deliveredDonations.length },
-    { name: "Ongoing", visitors: acceptedDonations.length },
+  const statusDistribution = [
+    { name: "Awaiting Review", value: myDonations.filter(d => d.status === 'pending').length },
+    { name: "In Progress", value: myDonations.filter(d => d.status === 'accepted').length },
+    { name: "Delivered", value: myDonations.filter(d => d.status === 'delivered').length }
   ];
 
-  const pendingData = [
-    { name: "Pending", visitors: pendingDonations.length },
-    { name: "Completed", visitors: deliveredDonations.length },
+  const quantityDistribution = [
+    { 
+      name: "Small (1-5 portions)",
+      value: myDonations.filter(d => d.quantity <= 5).length
+    },
+    {
+      name: "Medium (6-15 portions)",
+      value: myDonations.filter(d => d.quantity > 5 && d.quantity <= 15).length
+    },
+    {
+      name: "Large (>15 portions)",
+      value: myDonations.filter(d => d.quantity > 15).length
+    }
   ];
 
-  const acceptedData = [
-    { name: "Accepted", visitors: acceptedDonations.length },
-    { name: "Delivered", visitors: deliveredDonations.length },
-  ];
+  const CHART_COLORS = {
+    green: ['rgba(134, 239, 172, 0.9)', 'rgba(74, 222, 128, 0.9)', 'rgba(34, 197, 94, 0.9)'],
+    blue: ['rgba(147, 197, 253, 0.9)', 'rgba(96, 165, 250, 0.9)', 'rgba(59, 130, 246, 0.9)']
+  };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
 
   return (
-    <div className="p-4 bg-gray-50">
-      <div className="flex flex-col lg:flex-row gap-4">
-        {/* Welcome Section */}
+    <div className="p-4 bg-gray-50 min-h-screen">
+      {/* Welcome Section */}
+      <div className="flex flex-col lg:flex-row gap-4 mb-8">
         <Card className="w-full lg:w-9/12 flex flex-col lg:flex-row items-center gap-6 p-6 shadow-lg">
           <div className="flex flex-col gap-4 text-center lg:text-left">
-            <h1 className="text-3xl font-bold">Hi {user?.name},</h1>
+            <h1 className="text-3xl font-bold">Welcome back, {user?.name}!</h1>
             <p className="text-lg text-gray-700">
-              Every donation makes a difference. What do you want to give today?
+              Your Donation Dashboard
             </p>
             <div className="flex items-center gap-2">
               <Smile className="w-6 h-6 text-yellow-500" />
-              <p className="text-sm text-gray-600">Donate Food, Create Hope</p>
+              <p className="text-sm text-gray-600">Making a positive impact in our community</p>
             </div>
             <Link to="/user/Donar/donationForm">
-              <Button className="bg-gray-800 hover:bg-gray-900 text-white p-4 text-sm">
-                Donate now
+              <Button className="bg-green-600 hover:bg-green-700 text-white px-6 py-3">
+                Start New Donation
               </Button>
             </Link>
           </div>
-          <img src={userImage} alt="User" className="w-60 md:w-72 rounded-md shadow-md" />
+          <img src={userImage} alt="Dashboard" className="w-60 md:w-72 rounded-lg shadow-md" />
         </Card>
 
-        {/* Stats Section */}
         <div className="w-full lg:w-3/12 flex flex-col gap-4">
           {[
             { 
-              title: "Total Donations", 
-              count: stats.totalDonations, 
+              title: "Total Donations Made", 
+              count: myDonations.length, 
               icon: GraduationCap 
             },
             { 
-              title: "Food Saved (Servings)", 
+              title: "Total Portions Donated", 
               count: stats.totalFoodSaved, 
               icon: BadgeCheck 
             },
           ].map((stat, index) => (
-            <div key={index} className="w-full p-4 rounded-md shadow-sm border bg-white flex flex-col items-center">
-              <div className="flex justify-between w-full">
-                <div className="w-[40px] h-[40px] rounded-full bg-blue-500 flex justify-center items-center">
-                  <stat.icon stroke="black" fill="white" />
+            <Card key={index} className="p-4">
+              <div className="flex justify-between items-center mb-2">
+                <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
+                  <stat.icon className="text-white" />
                 </div>
-                <div className="w-32">
-                  <Chart />
-                </div>
+                <span className="text-2xl font-bold">{stat.count}</span>
               </div>
-              <h1 className="text-lg font-semibold">{stat.count}</h1>
               <p className="text-gray-600">{stat.title}</p>
-            </div>
+            </Card>
           ))}
         </div>
       </div>
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-        {[
-          { 
-            title: "Donation Status", 
-            data: donationData,
-            description: "Delivered vs Ongoing"
-          },
-          { 
-            title: "Pending Donations", 
-            data: pendingData,
-            description: "Pending vs Completed"
-          },
-          { 
-            title: "Accepted Donations", 
-            data: acceptedData,
-            description: "Accepted vs Delivered"
-          },
-        ].map((chart, index) => (
-          <Card key={index} className="shadow-md border">
-            <CardHeader className="items-center pb-0">
-              <CardTitle className="text-xl font-bold">{chart.title}</CardTitle>
-              <CardDescription className="text-gray-600">
-                {chart.description}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex justify-center">
-              <PieChart width={320} height={220}>
-                <defs>
-                  <linearGradient
-                    id={`greenBlackGradient-${index}`}
-                    x1="0%"
-                    y1="0%"
-                    x2="100%"
-                    y2="100%"
-                  >
-                    <stop offset="0%" stopColor="#064e3b" />
-                    <stop offset="100%" stopColor="#000000" />
-                  </linearGradient>
-                </defs>
-                <Pie
-                  data={chart.data}
-                  dataKey="visitors"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={65}
-                  outerRadius={110}
-                  strokeWidth={3}
-                  label
-                >
-                  {chart.data.map((_, i) => (
-                    <Cell
-                      key={`cell-${i}`}
-                      fill={`url(#greenBlackGradient-${index})`}
-                    />
-                  ))}
-                </Pie>
+      {/* Charts Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Status Distribution */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Donation Status Overview</CardTitle>
+            <CardDescription>Current status of all your donations</CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center">
+            <PieChart width={300} height={300}>
+              <Pie
+                data={statusDistribution}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                innerRadius={60}
+                outerRadius={80}
+                label
+              >
+                {statusDistribution.map((_, index) => (
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={CHART_COLORS.green[index]}
+                  />
+                ))}
+              </Pie>
+              <ChartTooltip />
+              <Legend />
+            </PieChart>
+          </CardContent>
+        </Card>
+
+        {/* Quantity Distribution */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Donation Size Distribution</CardTitle>
+            <CardDescription>Analysis by portion sizes</CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center">
+            <PieChart width={300} height={300}>
+              <Pie
+                data={quantityDistribution}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                innerRadius={60}
+                outerRadius={80}
+                label
+              >
+                {quantityDistribution.map((_, index) => (
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={CHART_COLORS.blue[index]}
+                  />
+                ))}
+              </Pie>
+              <ChartTooltip />
+              <Legend />
+            </PieChart>
+          </CardContent>
+        </Card>
+
+        {/* Monthly Trends */}
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle>Monthly Donation Trends</CardTitle>
+            <CardDescription>Number of donations and total portions per month</CardDescription>
+          </CardHeader>
+          <CardContent className="h-[400px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={monthlyStats}>
+                <XAxis dataKey="month" />
+                <YAxis yAxisId="left" orientation="left" stroke="#22c55e" />
+                <YAxis yAxisId="right" orientation="right" stroke="#3b82f6" />
                 <ChartTooltip />
-              </PieChart>
-            </CardContent>
-          </Card>
-        ))}
+                <Legend />
+                <Bar
+                  yAxisId="left"
+                  dataKey="count"
+                  name="Number of Donations"
+                  fill="rgba(34, 197, 94, 0.8)"
+                  radius={[4, 4, 0, 0]}
+                />
+                <Bar
+                  yAxisId="right"
+                  dataKey="quantity"
+                  name="Total Portions"
+                  fill="rgba(59, 130, 246, 0.8)"
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Mission & Vision Section */}
-      <div className="px-5 py-4 border shadow-sm rounded-sm bg-white mt-6">
-        <h2 className="font-semibold text-xl text-gray-800">Our Mission</h2>
-        <p className="text-gray-600">{missionVision.mission}</p>
-        <h2 className="mt-6 font-semibold text-xl text-gray-800">Our Vision</h2>
-        <p className="text-gray-600">{missionVision.vision}</p>
-      </div>
+      {/* Mission & Vision */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Our Mission & Vision</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-semibold text-lg">Mission</h3>
+              <p className="text-gray-600">{missionVision.mission}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg">Vision</h3>
+              <p className="text-gray-600">{missionVision.vision}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
