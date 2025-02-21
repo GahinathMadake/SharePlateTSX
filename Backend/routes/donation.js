@@ -10,11 +10,21 @@ const {
   getTotalFoodSaved,
   getTopDonors,
   getMyDonations,
-  addDonationToUser
+  addDonationToUser,
+  getAcceptedDonations,
+  completeDonation,
+  getMyAcceptedAndDeliveredDonations,
+  submitFeedback,
+  getFeedbackDetails
 } = require('../controllers/Donation');
 
 // Make sure this route is before the /:status route to avoid conflicts
 router.get("/my-donations", authMiddleware, getMyDonations);
+router.get("/accepted", authMiddleware, getAcceptedDonations);
+router.patch("/:donationId/complete", authMiddleware, completeDonation);
+router.get("/my-accepted-delivered", authMiddleware, getMyAcceptedAndDeliveredDonations);
+router.post("/:donationId/feedback", authMiddleware, submitFeedback);
+router.get("/:donationId/feedback", authMiddleware, getFeedbackDetails);
 
 router.get("/totaldonations", authMiddleware, getTotalDonations);
 

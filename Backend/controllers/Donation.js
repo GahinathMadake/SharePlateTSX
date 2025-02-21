@@ -1,4 +1,6 @@
 const Donation = require('../models/Donation');
+const Feedback = require('../models/Feedback');
+
 
 const getDonationsUsingStatus = async (req, res) => {
 
@@ -235,6 +237,164 @@ const addDonationToUser = async (req, res) => {
   }
 }
 
+const getAcceptedDonations = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    const donations = await Donation.find({ 
+      receiver: userId,
+      status: "accepted"
+    })
+    .populate('donor', 'name')
+    .sort({ createdAt: -1 });
+
+    res.status(200).json(donations);
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: "Error fetching accepted donations",
+      error: error.message 
+    });
+  }
+};
+
+const completeDonation = async (req, res) => {
+  try {
+    const { donationId } = req.params;
+    const userId = req.user.id;
+
+    const donation = await Donation.findOne({
+      _id: donationId,
+      receiver: userId,
+      status: "accepted"
+    });
+
+    if (!donation) {
+      return res.status(404).json({
+        success: false,
+        message: "Donation not found or not authorized"
+      });
+    }
+
+    donation.status = "delivered";
+    await donation.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Donation marked as delivered"
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error completing donation",
+      error: error.message
+    });
+  }
+};
+
+const getMyAcceptedAndDeliveredDonations = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    const donations = await Donation.find({ 
+      receiver: userId,
+      status: { $in: ["accepted", "delivered"] }
+    })
+    .populate('donor', 'name')
+    .lean();
+
+    const feedbacks = await Feedback.find({
+      ngo: userId,
+      donation: { $in: donations.map(d => d._id) }
+    }).lean();
+
+    const feedbackMap = new Map(feedbacks.map(f => [f.donation.toString(), f]));
+
+    const donationsWithFeedback = donations.map(d => ({
+      ...d,
+      hasFeedback: feedbackMap.has(d._id.toString())
+    }));
+
+    res.status(200).json(donationsWithFeedback);
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Error fetching donations",
+      error: error.message 
+    });
+  }
+};
+
+
+const submitFeedback = async (req, res) => {
+  try {
+    const { donationId } = req.params;
+    const { rating, comment, images } = req.body;
+    const userId = req.user.id;
+
+    const existingFeedback = await Feedback.findOne({
+      ngo: userId,
+      donation: donationId
+    });
+
+    if (existingFeedback) {
+      return res.status(400).json({
+        success: false,
+        message: "Feedback already submitted for this donation"
+      });
+    }
+
+    const feedback = new Feedback({
+      ngo: userId,
+      donation: donationId,
+      rating,
+      comment,
+      images: images || []
+    });
+
+    await feedback.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Feedback submitted successfully",
+      feedback
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error submitting feedback",
+      error: error.message
+    });
+  }
+};
+
+const getFeedbackDetails = async (req, res) => {
+  try {
+    const { donationId } = req.params;
+    const userId = req.user.id;
+
+    const feedback = await Feedback.findOne({
+      ngo: userId,
+      donation: donationId
+    });
+
+    if (!feedback) {
+      return res.status(404).json({
+        success: false,
+        message: "Feedback not found"
+      });
+    }
+
+    res.status(200).json(feedback);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error fetching feedback",
+      error: error.message
+    });
+  }
+};
 
 
 // Export all functions properly
@@ -248,6 +408,11 @@ module.exports = {
   addDonationToUser,
   getTotalFoodSaved,
   getTopDonors,
+  getAcceptedDonations,
+  completeDonation,
+  getMyAcceptedAndDeliveredDonations,
+  submitFeedback,
+  getFeedbackDetails
 };
 
 
