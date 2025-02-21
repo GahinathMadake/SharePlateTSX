@@ -1,6 +1,8 @@
 const Donation = require('../models/Donation');
 
-const getDonations = async (req, res) => {
+const getDonationsUsingStatus = async (req, res) => {
+
+   console.log("Heloooo")
 
     try {
         const { status } = req.params; // Get status from request parameters
@@ -21,6 +23,25 @@ const getDonations = async (req, res) => {
 
 }
 
+const getDonationUsingId = async (req, res) => {
+  try {
+    const { ListId } = req.params;
+      
+    const donation = await Donation.findById(ListId);
+    res.status(200).json({
+      success:true,
+      message:"Attached the Donation",
+      donation
+    });
+    }
+    catch (error) {
+      res.status(500).json({
+        success:false,
+        message: "Internal server error"
+      });
+    }
+}
+
 
 const getTotalDonations = async (req, res) => {
   try {
@@ -34,8 +55,6 @@ const getTotalDonations = async (req, res) => {
 };
 
 const deliverdDonationsCount = async (req, res) => {
-
-
   try{
   const foodCount=await Donation.aggregate([
     {$match:{status:"delivered"}},
@@ -98,13 +117,53 @@ const getMyDonations = async (req, res) => {
   }
 };
 
+
+const addDonationToUser = async (req, res) => {
+  try {
+    const { donationId } = req.params;
+    const userId = req.user.id;
+
+
+    const donation = await Donation.findById(
+      donationId,
+    );
+
+    if (!donation) {
+      return res.status(404).json({
+        success:false,
+        message: "Donation not found" 
+      });
+    }
+
+    if(donation.receiver){
+      return res.status(400).json({
+        success:false,
+        message:"Food already reserved",
+      });
+    }
+
+    donation.receiver = userId;
+    donation.status = "accepted";
+
+    donation.save();
+
+    res.status(200).json({ message: "Donation assigned successfully", donation });
+  } 
+  catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+}
+
+
 // Add getMyDonations to the exports
 module.exports = { 
-  getDonations, 
+  getDonationsUsingStatus,
+  getDonationUsingId,
   getTotalDonations, 
   deliverdDonationsCount, 
   createDonation,
-  getMyDonations 
+  getMyDonations,
+  addDonationToUser
 };
 
 

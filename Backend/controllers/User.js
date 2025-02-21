@@ -1,5 +1,6 @@
 const User = require('../models/User');
 
+
 const  getUser = async (req, res) => {
     try {
       // console.log("Request Received", req.user.email, req.user.id)
@@ -99,4 +100,37 @@ const FetchRoleBasedData = async (req, res) => {
 
 
 
-module.exports = {getUser, logOut, userProfileUpdate, updateImageProfile, FetchRoleBasedData};
+const getDonarDataByID = async (req, res) => {
+  try {
+
+    console.log("jfkhgdjkhgerjtgdfrbejhfvbcdncbnvfdf")
+    const { donationId } = req.params;
+
+    const donor = await User.findById(donationId);
+    if (!donor) {
+      return res.status(404).json({ error: "Donor not found" });
+    }
+
+    res.status(200).json({
+      success:true,
+      message:"User Sent Successfully",
+      donor:{
+        name: donor.name,
+        email: donor.email,
+        phone: donor.phone,
+        location: donor.location,
+        profilePic: donor.profilePic,
+        },
+    });
+  } 
+  catch (error) {
+    res.status(500).json({
+      success:true,
+      message:"User Sent Successfully",
+  });
+}
+}
+
+
+
+module.exports = {getUser, logOut, userProfileUpdate, updateImageProfile, FetchRoleBasedData, getDonarDataByID};
