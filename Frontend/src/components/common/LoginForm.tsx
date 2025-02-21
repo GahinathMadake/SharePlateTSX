@@ -40,7 +40,9 @@ export default function LoginForm({
       console.log("Response from server:", res.data);
   
       if (res.data.token) {
-        console.log("Login Successful:", res.data);
+        const token = res.data.token;
+        localStorage.setItem('token', token); // Save token to local storage
+        console.log("Login Successful:", { token });
         enqueueSnackbar("Login Successful!", { 
           variant: 'success',
         });
@@ -58,7 +60,6 @@ export default function LoginForm({
       });
     }
   };
-
 
   return (
     <form className={cn("flex flex-col gap-6", className)} {...props} onSubmit={submitHandler}>
@@ -130,7 +131,6 @@ export default function LoginForm({
         </Button>
 
       </div>
-
 
       <div className="text-center text-sm">
         Don&apos;t have an account?{" "}
