@@ -47,20 +47,11 @@ const MyDonations: React.FC = () => {
     const fetchDonations = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem('token');
-        
-        if (!token) {
-          throw new Error('No authentication token found');
-        }
+
   
         const response = await axios.get<Donation[]>(
           `${import.meta.env.VITE_Backend_URL}/api/donations/my-donations`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`
-            },
-            withCredentials: true
-          }
+            {withCredentials: true}
         );
   
         console.log('Received donations:', response.data);
