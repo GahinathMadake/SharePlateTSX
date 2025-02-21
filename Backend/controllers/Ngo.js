@@ -36,7 +36,7 @@
 
         try {
             //total ngo count
-           const totalNgos= await User.countDocuments({ role: "ngo" });
+           const totalNgos= await User.countDocuments({ role: "NGO" });
            
            res.status(200).json({ totalNgos });
          } catch (error) {

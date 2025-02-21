@@ -1,18 +1,35 @@
-import React from 'react';
+import React, { useState,useEffect } from 'react';
 import { ChevronUp } from 'lucide-react';
+import axios from 'axios';
 
-const faqData = [
-  { question: "Why should I have a website?", answer: "Having a website helps establish your online presence and reach a wider audience." },
-  { question: "Is Stacker right for me?", answer: "Stacker is suitable for users looking for an easy-to-use website builder." },
-  { question: "Is it easy to use?", answer: "Yes, Stacker is designed to be user-friendly." },
-  { question: "How to start my website?", answer: "You can start by signing up on Stacker and choosing a template." },
-  { question: "Can someone make my website?", answer: "Yes, you can hire professionals or use Stacker's services." },
-  { question: "How to get a custom domain?", answer: "You can purchase a custom domain through Stacker or other domain registrars." },
-  { question: "How to begin online selling?", answer: "Start by setting up an e-commerce section on your website." },
-  { question: "Can I cancel at any time?", answer: "Yes, you can cancel your subscription at any time." }
-];
+
+
+interface Faq {
+  question: string;
+  answer: string;
+}
 
 function App() {
+  
+
+
+const [faqData, setFaqData] = useState<Faq[]>([]);
+
+const fetchfaqData= async()=>{
+
+  try{
+  const Data=await axios.get(`${import.meta.env.VITE_Backend_URL}/api/faq`);
+  setFaqData(Data.data);
+  }catch (error) {
+    console.error("Failed to fetch FAQs", error);
+  }
+
+};
+
+useEffect(() => {
+  fetchfaqData();
+}, []);
+
   return (
     <div className="max-w-3xl mx-auto py-10">
       

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Avatar } from "@/components/ui/avatar";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Bar, BarChart, Legend } from 'recharts';
 import { ArrowUpRight, Users, Package, Clock, AlertCircle, CheckCircle, MapPin, Calendar, Target } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState, useEffect } from "react";
@@ -72,19 +72,52 @@ const Dashboard = () => {
   const [totalNgos, setTotalNgos] =useState("");  
   const [pendingNgosCount, setPendingNgosCount] =useState("");
   const [totalDeliveredFood, setTotalDeliveredFood] =useState("");
-
-
+  const [yearlyChartData, setYearlyChartData] = useState({});
+  const[totalFoodSaved,setTotalFoodSaved]=useState(0);
+  interface Donor {
+    name: string;
+    totalDonations: number;
+  }
+  
+  const [topDonors, setTopDonors] = useState<Donor[]>([]);
+  
   useEffect(() => {
     fetchTotalDonations();
     fetchTotalNgos();
     fetchPendingNgos();
     fetchTotalDeliveredFood();
+    fetchYearlyData();
+    calculateEnvironmentImpact();
+    fetchTopDonors();
   },[])
+
+const fetchYearlyData = async () => {
+
+   try {
+    
+    const response = await fetch("http://localhost:5000/user/yearly-chart-data",
+      {credentials: 'include'}
+    );
+    const data = await response.json();
+    setYearlyChartData(data);
+
+   }
+   catch(error) {
+    console.error("Error fetching yearly data", error);
+  }
+
+
+
+}
+
+const chartData = yearlyChartData[selectedYear] || [];
 
 
   const fetchTotalDonations = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/donations/totaldonations");
+      const response = await axios.get("http://localhost:5000/api/donations/totaldonations",
+        {withCredentials: true}
+      );
       setTotalDonations(response.data.totalDonations);
     } catch (error) {
       console.error("Error fetching total donations:", error);
@@ -94,7 +127,9 @@ const Dashboard = () => {
   
   const fetchTotalNgos = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/ngos/totalngos");
+      const response = await axios.get("http://localhost:5000/api/ngos/totalngos",
+        {withCredentials: true}
+      );
       setTotalNgos(response.data.totalNgos);
     } catch (error) {
       console.error("Error fetching total ngos:", error);
@@ -103,7 +138,9 @@ const Dashboard = () => {
 
   const fetchPendingNgos = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/ngos/pending");
+      const response = await axios.get("http://localhost:5000/api/ngos/pending",
+        {withCredentials: true}
+      );
       console.log("ngos data",response.data);
       setPendingNgosCount(response.data.PendingNgosCount);
     } catch (error) {
@@ -114,7 +151,9 @@ const Dashboard = () => {
 
   const fetchTotalDeliveredFood = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/donations/totaldeliveredfood");
+      const response = await axios.get("http://localhost:5000/api/donations/totaldeliveredfood",
+        {withCredentials: true}
+      );
       setTotalDeliveredFood(response.data.totalDeliveredFood);
     } catch (error) {
       console.error("Error fetching total delivered food:", error);
@@ -123,6 +162,45 @@ const Dashboard = () => {
   };
 
 
+  const fetchTopDonors =async ()=>{
+    try{
+      
+      const response = await axios.get(`${import.meta.env.VITE_Backend_URL}/api/donations/topdonors`, {
+        withCredentials: true,
+      });
+      console.log(response.data);
+      setTopDonors(response.data);
+
+    }catch(error){
+      console.error("Error fetching top donors:", error);
+    }
+  }
+
+
+  const calculateEnvironmentImpact =async () =>{
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_Backend_URL}/api/donations/totalfoodsaved`, {
+        withCredentials: true,
+      });
+      setTotalFoodSaved(response.data.totalFoodSaved);
+    } catch (error) {
+      console.error("Error fetching total food saved:", error);
+    }
+  }
+  
+  const mealWeight = 0.5; // kg per meal (adjust as needed)
+  const emissionFactor = 2.5; // kg CO₂ per kg of food
+  const co2PerTree = 5; // kg CO₂ sequestered per tree
+  const waterFootprint = 10; // liters of water per kg of food
+  
+  const totalFoodWeight = totalFoodSaved * mealWeight;
+  
+
+   // Calculations
+   const co2Saved = totalFoodWeight * emissionFactor;
+   const treesPlanted = co2Saved / co2PerTree;
+   const mealsProvided = totalFoodSaved; // No change, since quantity = meals
+   const waterSaved = totalFoodWeight * waterFootprint;
 
   const metrics: MetricCard[] = [
     {
@@ -199,6 +277,8 @@ const Dashboard = () => {
     }
   ];
 
+ 
+
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
       {/* Header */}
@@ -234,85 +314,107 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Food Redistribution Trends */}
         <Card className="hover:shadow-lg transition-shadow duration-300">
-          <CardHeader>
-            <div className="flex flex-col sm:flex-row justify-between items-center">
-              <CardTitle className="text-lg sm:text-xl mb-2 sm:mb-0">Food Redistribution Trends</CardTitle>
-              <Select value={selectedYear} onValueChange={(value) => setSelectedYear(value)}>
-                <SelectTrigger className="w-[120px]">
-                  <SelectValue placeholder="Select Year" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="2023">2023</SelectItem>
-                  <SelectItem value="2024">2024</SelectItem>
-                  <SelectItem value="2025">2025</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </CardHeader>
-          <CardContent className="h-60 sm:h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={yearlyChartData[selectedYear]}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Line type="monotone" dataKey="donations" stroke="#3B82F6" name="Donations" />
-                <Line type="monotone" dataKey="redistributed" stroke="#10B981" name="Redistributed" />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Active Campaigns */}
-        <Card className="hover:shadow-lg transition-shadow duration-300">
-          <CardHeader>
-            <CardTitle className="text-lg sm:text-xl">Active Campaigns</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4 sm:space-y-6">
-              {campaigns.map((campaign, index) => (
-                <div key={index} className="space-y-2">
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
-                    <div>
-                      <h4 className="font-medium text-sm sm:text-base">{campaign.name}</h4>
-                      <p className="text-xs sm:text-sm text-gray-500">Target: {campaign.target}</p>
-                      <p className="text-xs sm:text-sm text-gray-500 flex items-center">
-                        <MapPin className="mr-1" size={12} /> {campaign.location}
-                      </p>
-                    </div>
-                    <span className="text-xs sm:text-sm text-gray-500 flex items-center mt-2 sm:mt-0">
-                      <Calendar className="mr-1" size={12} /> Ends: {campaign.endDate}
-                    </span>
-                  </div>
-                  <Progress value={campaign.progress} className={campaign.color} />
-                  <p className="text-xs sm:text-sm text-gray-600 text-right">{campaign.progress}% Complete</p>
-                </div>
+      <CardHeader>
+        <div className="flex flex-col sm:flex-row justify-between items-center">
+          <CardTitle className="text-lg sm:text-xl mb-2 sm:mb-0">Food Redistribution Trends</CardTitle>
+          <Select value={selectedYear} onValueChange={(value) => setSelectedYear(value)}>
+            <SelectTrigger className="w-[120px]">
+              <SelectValue placeholder="Select Year" />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.keys(yearlyChartData).map((year) => (
+                <SelectItem key={year} value={year}>
+                  {year}
+                </SelectItem>
               ))}
-            </div>
-          </CardContent>
-        </Card>
+            </SelectContent>
+          </Select>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <ResponsiveContainer width="100%" height={400}>
+          <BarChart data={chartData}>
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="donations" fill="#8884d8" name="Donations" />
+            <Bar dataKey="redistributed" fill="#82ca9d" name="Redistributed" />
+          </BarChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
+
+<Card className="hover:shadow-lg transition-shadow duration-300">
+  <CardHeader>
+    <CardTitle className="text-lg sm:text-xl">Environmental Impact</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <div className="space-y-4 sm:space-y-6">
+      {/* Carbon Footprint Reduction */}
+      <div className="space-y-2">
+        <h4 className="font-medium text-sm sm:text-base">Carbon Footprint Reduction</h4>
+        <div className="flex justify-between items-center">
+          <p className="text-xs sm:text-sm text-gray-500">CO₂ Emissions Saved (This Month)</p>
+          <span className="text-sm sm:text-base font-bold text-green-600">{co2Saved} kg</span>
+        </div>
+        <div className="flex justify-between items-center">
+          <p className="text-xs sm:text-sm text-gray-500">Equivalent Impact (Lifetime)</p>
+          <span className="text-sm sm:text-base font-bold text-blue-600">{treesPlanted} Tress Planted</span>
+        </div>
       </div>
 
-      {/* Recent Activities */}
-      <Card className="hover:shadow-lg transition-shadow duration-300">
-        <CardHeader>
-          <CardTitle className="text-lg sm:text-xl">Recent Activities</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {recentActivities.map((activity, index) => (
-              <div key={index} className="flex items-center space-x-4">
-                {activity.icon}
-                <div>
-                  <p className="font-medium text-sm sm:text-base">{activity.type}</p>
-                  <p className="text-xs sm:text-sm text-gray-500">{activity.description}</p>
-                  <p className="text-xs sm:text-sm text-gray-400">{activity.date}</p>
-                </div>
-              </div>
-            ))}
+      {/* Divider */}
+      <div className="border-t border-gray-200" />
+
+      {/* Food Waste Reduction Impact */}
+      <div className="space-y-2">
+        <h4 className="font-medium text-sm sm:text-base">Food Waste Reduction Impact</h4>
+        <div className="flex justify-between items-center">
+          <p className="text-xs sm:text-sm text-gray-500">Meals Provided (This Month)</p>
+          <span className="text-sm sm:text-base font-bold text-green-600">{mealsProvided} Meals</span>
+        </div>
+        <div className="flex justify-between items-center">
+          <p className="text-xs sm:text-sm text-gray-500">Water Saved (Lifetime)</p>
+          <span className="text-sm sm:text-base font-bold text-blue-600">{waterSaved} Gallons</span>
+        </div>
+      </div>
+    </div>
+  </CardContent>
+</Card>
+</div> 
+     
+
+      {/* Top Donors */}
+      
+      {/* Top Donors */}
+<Card className="hover:shadow-lg transition-shadow duration-300">
+  <CardHeader>
+    <CardTitle className="text-lg sm:text-xl">Top Donors</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <div className="space-y-4">
+      {topDonors.map((donor, index) => (
+        <div key={index} className="flex items-center space-x-4">
+          {/* Icon */}
+          <div className="p-2 bg-blue-100 rounded-full">
+            <Users className="w-5 h-5 text-blue-600" /> {/* Replace with your desired icon */}
           </div>
-        </CardContent>
-      </Card>
+          {/* Donor Details */}
+          <div className="flex-1">
+            <p className="font-medium text-sm sm:text-base">{donor.name}</p>
+            <p className="text-xs sm:text-sm text-gray-500">Total Donations: {donor.totalDonations} Servings</p>
+          </div>
+          {/* Rank Badge */}
+          <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
+            <span className="text-sm font-semibold text-green-600">#{index + 1}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  </CardContent>
+</Card>
+
     </div>
   );
 };
