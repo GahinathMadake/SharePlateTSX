@@ -56,3 +56,8 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+// Add this to your app.js
+app.get('/api/donation/test', (req, res) => {
+  res.json({ message: 'Donation routes are working' });
+});
