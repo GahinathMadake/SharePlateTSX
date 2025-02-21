@@ -6,7 +6,9 @@ const {
   getDonationUsingId,
   getTotalDonations, 
   deliverdDonationsCount, 
-  createDonation, 
+  createDonation,
+  getTotalFoodSaved,
+  getTopDonors,
   getMyDonations,
   addDonationToUser
 } = require('../controllers/Donation');
@@ -15,7 +17,13 @@ const {
 router.get("/my-donations", authMiddleware, getMyDonations);
 
 router.get("/totaldonations", authMiddleware, getTotalDonations);
+
 router.get("/totaldeliveredfood", authMiddleware, deliverdDonationsCount);
+router.get("/totalfoodsaved",authMiddleware,getTotalFoodSaved);
+router.get("/topdonors",authMiddleware,getTopDonors);
+
+router.get("/:status", authMiddleware, getDonations);
+
 router.get("/:status", authMiddleware, getDonationsUsingStatus);
 router.get("donation/:ListId", authMiddleware, getDonationUsingId);
 router.post("/create", createDonation);

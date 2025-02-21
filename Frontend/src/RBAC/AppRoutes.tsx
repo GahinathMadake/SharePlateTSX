@@ -26,10 +26,9 @@ import DonarDash from "../Dashboard/Donar/Dashboard";
 import NewDonations from "../Dashboard/Donar/Donations/NewDonations";
 import MyDonations from "../Dashboard/Donar/Donations/MyDonations";
 import DonationForm from "../Dashboard/Donar/Donations/DonationForm";
-import ConfirmDonation  from "../Dashboard/Donar/Donations/ConfirmDonation";
-import TrackLocation from "../Dashboard/Donar/Donations/TrackLocation";
 import Notification from "../Dashboard/Donar/Notification";
-import Donarprofile from "../Dashboard/Donar/Donarprofile";
+import Reviewdonar from "../Dashboard/Donar/Reviewdonar";
+
 
 // Import NGO Components
 import NGODash from '../Dashboard/ngo/Dashboard';
@@ -85,15 +84,14 @@ function App(){
                     <Route path='newdonation' element={<NewDonations />} />
                     <Route path='mydonations' element={<MyDonations />} />
                     <Route path='donationForm' element={<DonationForm/>}/>
-                    <Route path='confirmdonation' element={<ConfirmDonation/>}/>
-                    <Route path='trackloaction' element={<TrackLocation/>}/>
                     <Route path='notification' element={<Notification/>}/>
-                    <Route path='donarprofile' element={<Donarprofile/>}/>
+                    
                     <Route index element={<NGODash />} />
 
                     {/* User Profile  */}
                     <Route path="id/:userId" element={<Profile />} />
                     <Route path="contact" element={<Contact />} />
+                    <Route path="reviews" element={<Reviewdonar/>}/>
                 </Route>
             </Route>
 

@@ -5,20 +5,34 @@ import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useNavigate } from "react-router-dom";
 import { Textarea } from '@/components/ui/textarea';
-import { Upload, Calendar, MapPin, Pizza, ClipboardList } from 'lucide-react';
+import { Upload, Calendar, MapPin, Pizza, ClipboardList, FileText } from 'lucide-react';
 import axios from 'axios';
-import api, { getUserFromToken } from '../../../services/apiService';
+import { useAuth } from '@/context/AuthContext';
 import imageCompression from 'browser-image-compression';
+import { useSnackbar } from 'notistack';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'; // Import Shadcn UI AlertDialog
 
 const DonationForm: React.FC = () => {
   const navigate = useNavigate();
-  
+  const { enqueueSnackbar } = useSnackbar();
+  const { user } = useAuth();
+
   const [formData, setFormData] = useState({
     foodType: '',
     quantity: '',
     expirationDate: '',
     pickupLocation: '',
     address: '',
+    description: '',
     donationImage: null as File | null,
   });
 
@@ -28,18 +42,25 @@ const DonationForm: React.FC = () => {
     expirationDate: '',
     pickupLocation: '',
     address: '',
+    description: '',
     donationImage: '',
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showConfirmationDialog, setShowConfirmationDialog] = useState(false); // State for confirmation dialog
+
   const compressImage = async (file: File): Promise<File> => {
+    console.log(`Original image size: ${(file.size / (1024 * 1024)).toFixed(2)}MB`);
     const options = {
-      maxSizeMB: 1,
-      maxWidthOrHeight: 1920,
-      useWebWorker: true
+      maxSizeMB: 0.5,
+      maxWidthOrHeight: 1200,
+      useWebWorker: true,
+      initialQuality: 0.7,
     };
-    
     try {
-      return await imageCompression(file, options);
+      const compressedFile = await imageCompression(file, options);
+      console.log(`Compressed to: ${(compressedFile.size / (1024 * 1024)).toFixed(2)}MB`);
+      return compressedFile;
     } catch (error) {
       console.error('Error compressing image:', error);
       throw error;
@@ -50,30 +71,22 @@ const DonationForm: React.FC = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value, type } = e.target as HTMLInputElement;
-  
     if (type === 'file') {
       const fileInput = e.target as HTMLInputElement;
       if (fileInput.files && fileInput.files[0]) {
         const file = fileInput.files[0];
-        
-        // Validate file size (max 5MB before compression)
         if (file.size > 5 * 1024 * 1024) {
-          setErrors({ 
-            ...errors, 
-            donationImage: 'Image size should be less than 5MB' 
-          });
+          setErrors({ ...errors, donationImage: 'Image size should be less than 5MB' });
+          enqueueSnackbar('Image size should be less than 5MB', { variant: 'error' });
           return;
         }
-  
         try {
           const compressedFile = await compressImage(file);
           setFormData({ ...formData, [name]: compressedFile });
           setErrors({ ...errors, [name]: '' });
         } catch (error) {
-          setErrors({ 
-            ...errors, 
-            donationImage: 'Error processing image. Please try another image.' 
-          });
+          setErrors({ ...errors, donationImage: 'Error processing image. Please try another image.' });
+          enqueueSnackbar('Error processing image. Please try another image.', { variant: 'error' });
         }
       }
     } else {
@@ -91,70 +104,64 @@ const DonationForm: React.FC = () => {
     });
   };
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setShowConfirmationDialog(true); // Show confirmation dialog
+  };
+
+  const handleConfirmSubmit = async () => {
+    setShowConfirmationDialog(false); // Close confirmation dialog
     setIsSubmitting(true);
-    console.log("[DonationForm] Form submission started");
-  
+
     try {
-      // Check if user is logged in and token is valid
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.error("[DonationForm] No token found, redirecting to login");
+      if (!user) {
+        enqueueSnackbar('Please login to submit a donation', { variant: 'warning' });
         navigate('/user/login');
         return;
       }
 
-      console.log("[DonationForm] Token from local storage:", token);
-  
-      const user = getUserFromToken();
-      if (!user || !user.id) {
-        console.error("[DonationForm] No user information found, redirecting to login");
-        navigate('/user/login');
-        return;
-      }
-  
-      // Upload image if present
       let imageUrl = '';
       if (formData.donationImage) {
-        const base64Image = await convertImageToBase64(formData.donationImage);
-        const uploadResponse = await api.post('/api/upload', {
-          base64Image,
-          folder: 'donations'
-        });
-        imageUrl = uploadResponse.data.url;
+        try {
+          const base64Image = await convertImageToBase64(formData.donationImage);
+          const uploadResponse = await axios.post(
+            `${import.meta.env.VITE_Backend_URL}/api/upload`,
+            { base64Image, folder: 'donations' },
+            { withCredentials: true, timeout: 30000, headers: { 'Content-Type': 'application/json' } }
+          );
+          imageUrl = uploadResponse.data.url;
+        } catch (error) {
+          enqueueSnackbar('Failed to upload image. Please try a smaller image or try again later.', { variant: 'error' });
+          setIsSubmitting(false);
+          return;
+        }
       }
-  
-      // Prepare donation data with donor ID
+
       const donationData = {
-        donor: user.id, // Include donor ID from token
+        donor: user._id,
         foodType: formData.foodType,
         quantity: parseInt(formData.quantity),
         expirationDate: new Date(formData.expirationDate).toISOString(),
         pickupLocation: `${formData.pickupLocation}${formData.address ? ', ' + formData.address : ''}`,
-        imageUrl
+        description: formData.description,
+        imageUrl,
       };
-  
-      console.log("[DonationForm] Submitting donation with donor ID:", user.id);
-  
-      const response = await api.post('/api/donations/create', donationData);
-  
+
+      const response = await axios.post(
+        `${import.meta.env.VITE_Backend_URL}/api/donations/create`,
+        donationData
+      );
+
       if (response.status === 201) {
+        enqueueSnackbar('Donation submitted successfully!', { variant: 'success' });
         navigate('/user/Donar/mydonations');
       }
     } catch (error: any) {
       console.error('[DonationForm] Error submitting donation:', error);
-  
       if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          localStorage.removeItem('token');
-          alert('Your session has expired. Please login again.');
-          navigate('/user/login');
-        } else {
-          alert(error.response?.data?.error || 'Failed to create donation');
-        }
+        enqueueSnackbar(error.response?.data?.message || 'Failed to submit donation', { variant: 'error' });
+      } else {
+        enqueueSnackbar('An unexpected error occurred', { variant: 'error' });
       }
     } finally {
       setIsSubmitting(false);
@@ -198,6 +205,12 @@ const DonationForm: React.FC = () => {
               icon: <MapPin className="w-5 h-5" />, 
               component: Textarea,
               placeholder: 'Complete address with landmarks'
+            }, {
+              label: 'Donation Description', 
+              name: 'description', 
+              icon: <FileText className="w-5 h-5" />, 
+              component: Textarea,
+              placeholder: 'Describe the food items, condition, and any other relevant details'
             }].map(({ label, name, icon, type = 'text', component: Component = Input, placeholder }) => (
               <div key={name} className="space-y-1">
                 <Label htmlFor={name} className="text-lg font-medium flex items-center gap-2 text-gray-700">
@@ -211,7 +224,7 @@ const DonationForm: React.FC = () => {
                   onChange={handleChange}
                   placeholder={placeholder}
                   className="mt-1 w-full border rounded-lg p-3 focus:ring-2 focus:ring-red-400"
-                  required
+                  required={name !== 'description'}
                 />
                 {errors[name as keyof typeof errors] && (
                   <p className="text-sm text-red-500">{errors[name as keyof typeof errors]}</p>
@@ -235,17 +248,37 @@ const DonationForm: React.FC = () => {
             </div>
 
             <div className="flex justify-center pt-4">
-            <Button 
-              type="submit"
-              disabled={isSubmitting}
-              className="bg-red-600 hover:bg-red-500 text-white text-lg py-3 px-6 rounded-xl shadow-md disabled:opacity-50"
-            >
-              {isSubmitting ? 'Submitting...' : 'Confirm Donation'}
-            </Button>
+              <Button 
+                type="submit"
+                disabled={isSubmitting}
+                className="bg-red-600 hover:bg-red-500 text-white text-lg py-3 px-6 rounded-xl shadow-md disabled:opacity-50"
+              >
+                {isSubmitting ? 'Submitting...' : 'Confirm Donation'}
+              </Button>
             </div>
           </form>
         </CardContent>
       </Card>
+
+      {/* Shadcn UI Confirmation Dialog */}
+      <AlertDialog open={showConfirmationDialog} onOpenChange={setShowConfirmationDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Donation</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to submit this donation? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowConfirmationDialog(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmSubmit}>
+              Confirm
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

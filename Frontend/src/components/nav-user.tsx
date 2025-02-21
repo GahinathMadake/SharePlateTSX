@@ -1,5 +1,5 @@
-"use client"
-import { Link } from "react-router-dom"
+"use client";
+import { Link } from "react-router-dom";
 import {
   User,
   UserPlus,
@@ -7,13 +7,9 @@ import {
   CircleHelp,
   ChevronsUpDown,
   LogOut,
-} from "lucide-react"
+} from "lucide-react";
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,7 +18,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -34,8 +30,8 @@ import {
 import { useAuth } from "@/context/AuthContext";
 
 export function NavUser() {
-  const { isMobile } = useSidebar()
-  const {user, logout} = useAuth();
+  const { isMobile } = useSidebar();
+  const { user, logout } = useAuth();
 
   return (
     <SidebarMenu>
@@ -47,8 +43,8 @@ export function NavUser() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.profilePic} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarImage src={user.profileImage} alt={user.name} />
+                <AvatarFallback className="rounded-lg"></AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">{user.name}</span>
@@ -58,7 +54,6 @@ export function NavUser() {
             </SidebarMenuButton>
           </DropdownMenuTrigger>
 
-
           <DropdownMenuContent
             className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
             side={isMobile ? "bottom" : "right"}
@@ -67,10 +62,10 @@ export function NavUser() {
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
-                </Avatar>
+              <Avatar className="h-8 w-8 rounded-lg">
+                <AvatarImage src={user.profilePic} alt={user.name} />
+                <AvatarFallback className="rounded-lg"></AvatarFallback>
+              </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">{user.name}</span>
                   <span className="truncate text-xs">{user.email}</span>
@@ -81,7 +76,6 @@ export function NavUser() {
             <DropdownMenuSeparator />
 
             <DropdownMenuGroup>
-              
               <Link to={`id/${user.email}`}>
                 <DropdownMenuItem>
                   <User />
@@ -89,12 +83,12 @@ export function NavUser() {
                 </DropdownMenuItem>
               </Link>
 
-              <Link to='connections'>
+              {/* <Link to="connections">
                 <DropdownMenuItem>
-                  <UserPlus  />
+                  <UserPlus />
                   Connections
                 </DropdownMenuItem>
-              </Link>
+              </Link> */}
 
               <Link to={`/user/${user.role}/reviews`}>
                 <DropdownMenuItem>
@@ -118,9 +112,8 @@ export function NavUser() {
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>
-          
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
-  )
+  );
 }

@@ -1,144 +1,130 @@
-import React, { useState } from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash, Plus } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Plus, Edit, Trash } from "lucide-react";
 
-const ContentManagement = () => {
-  // State for FAQs
-  const [faqs, setFaqs] = useState([
-    { id: 1, question: "How do I donate food?", answer: "You can donate food by visiting our website and filling out the donation form." },
-    { id: 2, question: "What items can I donate?", answer: "You can donate non-perishable food items, clothes, and other essentials." },
-  ]);
-
-  // State for Blog Posts
-  const [blogPosts, setBlogPosts] = useState([
-    { id: 1, title: "5 Ways to Reduce Food Waste", content: "Here are some tips to reduce food waste...", image: "https://example.com/image1.jpg" },
-    { id: 2, title: "The Impact of Food Donations", content: "Food donations can make a huge difference...", image: "https://example.com/image2.jpg" },
-  ]);
-
-  // State for managing modals and selected items
+export default function FAQManagement() {
+ 
   const [selectedFaq, setSelectedFaq] = useState(null);
-  const [selectedBlogPost, setSelectedBlogPost] = useState(null);
   const [isFaqModalOpen, setIsFaqModalOpen] = useState(false);
-  const [isBlogModalOpen, setIsBlogModalOpen] = useState(false);
+  const [newFaq, setNewFaq] = useState({ question: "", answer: "" });
+  const [faqs, setFaqs] = useState<Faq[]>([]);
 
-  // Handle FAQ operations
-  const handleFaqSubmit = (faq) => {
-    if (faq.id) {
-      // Edit existing FAQ
-      setFaqs(faqs.map(f => f.id === faq.id ? faq : f));
-    } else {
-      // Add new FAQ
-      setFaqs([...faqs, { ...faq, id: faqs.length + 1 }]);
+  interface Faq {
+    _id:number;
+    question: string;
+    answer: string;
+  }
+
+  
+
+  const handleDeleteFaq = async (id: number) => {
+    if (!id) {
+      console.error("Invalid FAQ ID:", id);
+      return;
     }
-    setIsFaqModalOpen(false);
+    // console.log("ID of faqs is ",id);
+
+     try{   
+          await axios.delete(`http://localhost:5000/api/faq/${id}`,
+            {withCredentials: true}
+          );
+          setFaqs((prevFaqs) => prevFaqs.filter((faq) => faq._id !== id));
+          console.log("FAQ deleted successfully");
+     }
+     catch(error){
+           console.error("Failed to delete FAQ", error);
+     }
   };
 
-  const handleDeleteFaq = (id) => {
-    setFaqs(faqs.filter(f => f.id !== id));
-  };
+  const fetchFAQS = async () => {
 
-  // Handle Blog Post operations
-  const handleBlogPostSubmit = (post) => {
-    if (post.id) {
-      // Edit existing blog post
-      setBlogPosts(blogPosts.map(p => p.id === post.id ? post : p));
-    } else {
-      // Add new blog post
-      setBlogPosts([...blogPosts, { ...post, id: blogPosts.length + 1 }]);
+    try {
+      const response = await axios.get("http://localhost:5000/api/faq",
+        {withCredentials: true}
+      );
+      setFaqs(response.data);
+    } catch (error) {
+      console.error("Failed to fetch FAQs", error);
     }
-    setIsBlogModalOpen(false);
-  };
 
-  const handleDeleteBlogPost = (id) => {
-    setBlogPosts(blogPosts.filter(p => p.id !== id));
+
+  }
+
+  useEffect(() => {
+    fetchFAQS();
+  }, []);
+
+
+  const handleAddFaq = async (faq: Faq) => {
+    try {
+      const faqData = { question: faq.question, answer: faq.answer };
+      // console.log("data of faq",faqData);
+      const response = await axios.post("http://localhost:5000/api/faq", faqData,
+        {withCredentials: true}
+      );
+      // console.log("FAQ Added:", response.data);
+      setFaqs([...faqs, response.data]); // Update the FAQs list with the new FAQ
+      setIsFaqModalOpen(false); // Close the modal
+      setNewFaq({ question: "", answer: "" }); // Reset the form
+    } catch (error) {
+      console.error("Error adding FAQ:", error);
+    }
   };
+  
+
+
+  
 
   return (
-    // <div className="flex min-h-screen w-full bg-gray-50 justify-center items-center">
-    //   <div className="w-full max-w-7xl p-4 sm:p-6 lg:p-8 bg-white rounded-lg shadow-md">
-    <div className="flex min-h-screen w-full bg-gray-50 justify-center">
-      <div className="p-4 sm:p-6 lg:p-8 w-full max-w-7xl">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">Content Management</h1>
+    <div className="flex min-h-screen w-full bg-gradient-to-br from-blue-50 to-purple-50 justify-center p-4 sm:p-6 lg:p-8">
+      <div className="w-full max-w-7xl">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">FAQ Management</h1>
 
         <Tabs defaultValue="faqs">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="faqs">Manage FAQs</TabsTrigger>
-            <TabsTrigger value="blog">Blog Posts</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-1 bg-gradient-to-r from-blue-500 to-purple-600 p-1 rounded-lg">
+            <TabsTrigger value="faqs" className="text-white hover:bg-white/10 rounded-md py-2">
+              Manage FAQs
+            </TabsTrigger>
           </TabsList>
 
-          {/* Manage FAQs */}
           <TabsContent value="faqs">
-            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+            <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 border border-gray-200">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold">FAQs</h2>
-                <Button onClick={() => { setSelectedFaq(null); setIsFaqModalOpen(true); }}>
+                <h2 className="text-xl font-bold text-gray-800">FAQs</h2>
+                <Button
+                  onClick={() => { setSelectedFaq(null); setIsFaqModalOpen(true); }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
                   <Plus className="mr-2" size={16} /> Add FAQ
                 </Button>
               </div>
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Question</TableHead>
-                    <TableHead>Answer</TableHead>
-                    <TableHead>Actions</TableHead>
+                  <TableRow className="bg-gradient-to-r from-blue-50 to-purple-50">
+                    <TableHead className="text-blue-800">Question</TableHead>
+                    <TableHead className="text-purple-800">Answer</TableHead>
+                    <TableHead className="text-gray-800">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {faqs.map((faq) => (
-                    <TableRow key={faq.id}>
-                      <TableCell>{faq.question}</TableCell>
-                      <TableCell>{faq.answer}</TableCell>
+                    <TableRow key={faq._id} className="hover:bg-gray-50 transition-colors">
+                      <TableCell className="font-medium text-gray-700">{faq.question}</TableCell>
+                      <TableCell className="text-gray-600">{faq.answer}</TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="sm" onClick={() => { setSelectedFaq(faq); setIsFaqModalOpen(true); }}>
-                          <Edit className="mr-2" size={16} /> Edit
-                        </Button>
-                        <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleDeleteFaq(faq.id)}>
-                          <Trash className="mr-2" size={16} /> Delete
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </TabsContent>
-
-          {/* Blog Posts */}
-          <TabsContent value="blog">
-            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold">Blog Posts</h2>
-                <Button onClick={() => { setSelectedBlogPost(null); setIsBlogModalOpen(true); }}>
-                  <Plus className="mr-2" size={16} /> Add Blog Post
-                </Button>
-              </div>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Content</TableHead>
-                    <TableHead>Image</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {blogPosts.map((post) => (
-                    <TableRow key={post.id}>
-                      <TableCell>{post.title}</TableCell>
-                      <TableCell>{post.content.substring(0, 50)}...</TableCell>
-                      <TableCell>
-                        <img src={post.image} alt={post.title} className="w-16 h-16 object-cover rounded" />
-                      </TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm" onClick={() => { setSelectedBlogPost(post); setIsBlogModalOpen(true); }}>
-                          <Edit className="mr-2" size={16} /> Edit
-                        </Button>
-                        <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleDeleteBlogPost(post.id)}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-600 hover:bg-red-50"
+                          onClick={() => handleDeleteFaq(faq._id)}
+                        >
                           <Trash className="mr-2" size={16} /> Delete
                         </Button>
                       </TableCell>
@@ -152,68 +138,39 @@ const ContentManagement = () => {
 
         {/* FAQ Modal */}
         <Dialog open={isFaqModalOpen} onOpenChange={setIsFaqModalOpen}>
-          <DialogContent>
+          <DialogContent className="bg-white rounded-lg shadow-xl">
             <DialogHeader>
-              <DialogTitle>{selectedFaq ? "Edit FAQ" : "Add FAQ"}</DialogTitle>
+              <DialogTitle className="text-xl font-bold text-gray-800">
+               Add FAQ
+              </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <Input
                 placeholder="Question"
-                value={selectedFaq?.question || ""}
-                onChange={(e) => setSelectedFaq({ ...selectedFaq, question: e.target.value })}
+                value={newFaq.question}
+                onChange={(e) => setNewFaq({ ...newFaq, question: e.target.value })}
+                className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
               />
               <Textarea
                 placeholder="Answer"
-                value={selectedFaq?.answer || ""}
-                onChange={(e) => setSelectedFaq({ ...selectedFaq, answer: e.target.value })}
+                value={newFaq.answer}
+                onChange={(e) => setNewFaq({ ...newFaq, answer: e.target.value })}
+                className="border-gray-300 focus:border-purple-500 focus:ring-purple-500"
               />
             </div>
             <DialogFooter>
               <Button
-                variant="success"
-                onClick={() => handleFaqSubmit(selectedFaq)}
+                // variant="success"
+                onClick={()=>handleAddFaq(newFaq)}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 Save
               </Button>
-              <Button variant="outline" onClick={() => setIsFaqModalOpen(false)}>
-                Cancel
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Blog Post Modal */}
-        <Dialog open={isBlogModalOpen} onOpenChange={setIsBlogModalOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{selectedBlogPost ? "Edit Blog Post" : "Add Blog Post"}</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <Input
-                placeholder="Title"
-                value={selectedBlogPost?.title || ""}
-                onChange={(e) => setSelectedBlogPost({ ...selectedBlogPost, title: e.target.value })}
-              />
-              <Textarea
-                placeholder="Content"
-                value={selectedBlogPost?.content || ""}
-                onChange={(e) => setSelectedBlogPost({ ...selectedBlogPost, content: e.target.value })}
-              />
-              <Input
-                type="url"
-                placeholder="Image URL"
-                value={selectedBlogPost?.image || ""}
-                onChange={(e) => setSelectedBlogPost({ ...selectedBlogPost, image: e.target.value })}
-              />
-            </div>
-            <DialogFooter>
               <Button
-                variant="success"
-                onClick={() => handleBlogPostSubmit(selectedBlogPost)}
+                variant="outline"
+                onClick={() => setIsFaqModalOpen(false)}
+                className="text-gray-700 hover:bg-gray-50"
               >
-                Save
-              </Button>
-              <Button variant="outline" onClick={() => setIsBlogModalOpen(false)}>
                 Cancel
               </Button>
             </DialogFooter>
@@ -222,6 +179,4 @@ const ContentManagement = () => {
       </div>
     </div>
   );
-};
-
-export default ContentManagement;
+}
