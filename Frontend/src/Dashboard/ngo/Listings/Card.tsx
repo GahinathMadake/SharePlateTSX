@@ -27,7 +27,7 @@ interface Donor {
   email: string;
   phone: string;
   location: string;
-  profilePic: string;
+  profileImage: string;
 }
 
 interface Donation {
@@ -66,7 +66,7 @@ const Card: React.FC<DonationProp> = ({ donation }) => {
     email: "",
     phone: "",
     location: "",
-    profilePic: "",
+    profileImage: "",
   });
   const [loading, setLoading] = useState(false);
 
@@ -158,7 +158,7 @@ const Card: React.FC<DonationProp> = ({ donation }) => {
                     ) : donorData ? (
                       <>
                         <div className="flex items-center gap[5px] mt-4">
-                          <img src={donorData.profilePic} alt={donorData.name} className="w-[30px] h-[30px] rounded-full" />
+                          <img src={donorData.profileImage} alt={donorData.name} className="w-[30px] h-[30px] rounded-full" />
                           <p className="ml-2 opacity-90">{donorData.name}</p>
                         </div>
                         <p className="text-gray-600 text-sm">@{donorData.email}</p>

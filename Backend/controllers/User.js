@@ -146,7 +146,7 @@ const getDonarDataByID = async (req, res) => {
         email: donor.email,
         phone: donor.phone,
         location: donor.location,
-        profilePic: donor.profilePic,
+        profileImage: donor.profileImage,
         },
     });
   } 
@@ -160,4 +160,4 @@ const getDonarDataByID = async (req, res) => {
 
 
 
-module.exports = {getUser, logOut, userProfileUpdate, updateImageProfile, FetchRoleBasedData, getDonarDataByID};
+module.exports = {getUser, logOut, userProfileUpdate, updateImageProfile, yearlyChartData, FetchRoleBasedData, getDonarDataByID};

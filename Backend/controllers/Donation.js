@@ -237,43 +237,6 @@ const addDonationToUser = async (req, res) => {
 
 
 
-const addDonationToUser = async (req, res) => {
-  try {
-    const { donationId } = req.params;
-    const userId = req.user.id;
-
-
-    const donation = await Donation.findById(
-      donationId,
-    );
-
-    if (!donation) {
-      return res.status(404).json({
-        success:false,
-        message: "Donation not found" 
-      });
-    }
-
-    if(donation.receiver){
-      return res.status(400).json({
-        success:false,
-        message:"Food already reserved",
-      });
-    }
-
-    donation.receiver = userId;
-    donation.status = "accepted";
-
-    donation.save();
-
-    res.status(200).json({ message: "Donation assigned successfully", donation });
-  } 
-  catch (error) {
-    res.status(500).json({ message: "Server error", error });
-  }
-}
-
-
 // Export all functions properly
 module.exports = { 
   getDonationsUsingStatus,

@@ -22,8 +22,6 @@ router.get("/totaldeliveredfood", authMiddleware, deliverdDonationsCount);
 router.get("/totalfoodsaved",authMiddleware,getTotalFoodSaved);
 router.get("/topdonors",authMiddleware,getTopDonors);
 
-router.get("/:status", authMiddleware, getDonations);
-
 router.get("/:status", authMiddleware, getDonationsUsingStatus);
 router.get("donation/:ListId", authMiddleware, getDonationUsingId);
 router.post("/create", createDonation);
