@@ -1,7 +1,6 @@
 
 import React from 'react';
 import UserDashboard from './UserDashBoard';
-import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import { AlertCircle } from 'lucide-react'; 
 
@@ -45,6 +44,11 @@ const NGODashboard: React.FC = () => {
                     },
                 ],
                 
+            },
+            {
+                name: "Near Recycling Partners",
+                url: "/user/ngo/allDonor",
+                icon: Star,
             },
             {
                 name: "Donar",
