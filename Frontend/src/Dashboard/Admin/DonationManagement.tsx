@@ -84,12 +84,6 @@ return (
           >
             Delivered
           </TabsTrigger>
-          <TabsTrigger
-            value="expired"
-            className="data-[state=active]:text-gray-900 data-[state=active]:border-b-2 data-[state=active]:border-gray-900 py-2 px-4 text-sm font-medium text-gray-500 hover:text-gray-900 transition-all"
-          >
-            Expired/Rejected
-          </TabsTrigger>
         </TabsList>
 
         {/* Pending Donations */}

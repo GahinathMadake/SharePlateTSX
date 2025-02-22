@@ -10,10 +10,12 @@ const {
   getTotalFoodSaved,
   getTopDonors,
   getMyDonations,
-  addDonationToUser
+  addDonationToUser,
+  getMatchNgos,
 } = require('../controllers/Donation');
 
 // Make sure this route is before the /:status route to avoid conflicts
+router.post("/match-ngos", authMiddleware, getMatchNgos);
 router.get("/my-donations", authMiddleware, getMyDonations);
 
 router.get("/totaldonations", authMiddleware, getTotalDonations);
