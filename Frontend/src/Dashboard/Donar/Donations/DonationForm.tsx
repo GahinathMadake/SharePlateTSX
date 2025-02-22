@@ -21,6 +21,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'; // Import Shadcn UI AlertDialog
 
+
 const DonationForm: React.FC = () => {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
@@ -112,12 +113,15 @@ const DonationForm: React.FC = () => {
   };
 
   const handleConfirmSubmit = async () => {
-    setShowConfirmationDialog(false); // Close confirmation dialog
+    setShowConfirmationDialog(false);
     setIsSubmitting(true);
-
+  
     try {
       if (!user) {
-        enqueueSnackbar('Please login to submit a donation', { variant: 'warning' });
+        enqueueSnackbar('Please login to submit a donation', { 
+          variant: 'warning',
+          anchorOrigin: { vertical: 'top', horizontal: 'right' }
+        });
         navigate('/user/login');
         return;
       }
@@ -129,11 +133,14 @@ const DonationForm: React.FC = () => {
           const uploadResponse = await axios.post(
             `${import.meta.env.VITE_Backend_URL}/api/upload`,
             { base64Image, folder: 'donations' },
-            { withCredentials: true, timeout: 30000, headers: { 'Content-Type': 'application/json' } }
+            { withCredentials: true, timeout: 30000 }
           );
           imageUrl = uploadResponse.data.url;
         } catch (error) {
-          enqueueSnackbar('Failed to upload image. Please try a smaller image or try again later.', { variant: 'error' });
+          enqueueSnackbar('Failed to upload image. Please try a smaller image.', { 
+            variant: 'error',
+            anchorOrigin: { vertical: 'top', horizontal: 'right' }
+          });
           setIsSubmitting(false);
           return;
         }
@@ -146,25 +153,93 @@ const DonationForm: React.FC = () => {
         expirationDate: new Date(formData.expirationDate).toISOString(),
         pickupLocation: `${formData.pickupLocation}${formData.address ? ', ' + formData.address : ''}`,
         description: formData.description,
-        name:formData.name,
+        name: formData.name,
         imageUrl,
       };
 
+      // Create donation
       const response = await axios.post(
         `${import.meta.env.VITE_Backend_URL}/api/donations/create`,
-        donationData
+        donationData,
+        { withCredentials: true }
       );
-
-      if (response.status === 201) {
-        enqueueSnackbar('Donation submitted successfully!', { variant: 'success' });
+  
+      if (response.status === 201 && response.data.data._id) {
+        // Match with nearby NGOs using the correct donation ID
+        try {
+          const matchResponse = await axios.post(
+            `${import.meta.env.VITE_Backend_URL}/api/donations/match-ngos`,
+            { 
+              donorId: response.data.data._id,
+              pickupLocation: donationData.pickupLocation,
+              expirationDate: donationData.expirationDate
+            },
+            { 
+              withCredentials: true,
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            }
+          );
+  
+          if (matchResponse.data.matches?.length > 0) {
+            const matchCount = matchResponse.data.matches.length;
+            enqueueSnackbar(
+              `Donation created! Notified ${matchCount} nearby NGO${matchCount > 1 ? 's' : ''}.`, 
+              {
+                variant: 'success',
+                anchorOrigin: { vertical: 'top', horizontal: 'right' },
+                autoHideDuration: 5000
+              }
+            );
+          } else {
+            enqueueSnackbar(
+              'Donation created successfully! No nearby NGOs found at the moment.', 
+              {
+                variant: 'info',
+                anchorOrigin: { vertical: 'top', horizontal: 'right' },
+                autoHideDuration: 5000
+              }
+            );
+          }
+        } catch (matchError) {
+          console.error('Error matching with NGOs:', matchError);
+          if (axios.isAxiosError(matchError)) {
+            enqueueSnackbar(
+              `Donation created but failed to notify NGOs: ${matchError.response?.data?.error || 'Unknown error'}`,
+              {
+                variant: 'warning',
+                anchorOrigin: { vertical: 'top', horizontal: 'right' }
+              }
+            );
+          }
+        }
+  
+        // Reset form
+        setFormData({
+          foodType: '',
+          quantity: '',
+          expirationDate: '',
+          pickupLocation: '',
+          address: '',
+          description: '',
+          name: "",
+          donationImage: null
+        });
+  
+        // Navigate to my donations page
         navigate('/user/Donar/mydonations');
       }
-    } catch (error: any) {
-      console.error('[DonationForm] Error submitting donation:', error);
+    } catch (error) {
+      console.error('Donation submission error:', error);
       if (axios.isAxiosError(error)) {
-        enqueueSnackbar(error.response?.data?.message || 'Failed to submit donation', { variant: 'error' });
-      } else {
-        enqueueSnackbar('An unexpected error occurred', { variant: 'error' });
+        enqueueSnackbar(
+          error.response?.data?.message || 'Failed to submit donation',
+          {
+            variant: 'error',
+            anchorOrigin: { vertical: 'top', horizontal: 'right' }
+          }
+        );
       }
     } finally {
       setIsSubmitting(false);
