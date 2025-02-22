@@ -12,18 +12,10 @@ import { useAuth } from "@/context/AuthContext";
 import { Separator } from "@/components/ui/separator";
 import { enqueueSnackbar } from "notistack";
 
-// interface UserProps{
-//   _id?:user.id;
-//   name: String;
-//   about: String;
-//   loacation: String,
 
-// }
 
 const Profile: React.FC = () => {
   const { user, setUser } = useAuth();
-
-  const [profileImage, setProfileImage] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editMode, setEditProfileData] = useState(false);
 

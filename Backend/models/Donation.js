@@ -7,6 +7,10 @@ const donationSchema = new mongoose.Schema({
   quantity: { type: Number, required: true },
   expirationDate: { type: Date, required: true },
   pickupLocation: { type: String, required: true },
+  name:{
+    type:String,
+    default: "Food",
+  },
   description: { type: String }, // Add description field
   imageUrl: { type: String },
   donor: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

@@ -88,14 +88,12 @@ const Card: React.FC<DonationProp> = ({ donation }) => {
   };
 
 
-  const addDonationToUser = async (donationId: string) => {
-    donationId = donation._id;
+  const addDonationToUser = async () => {
     try {
       const response = await axios.put(
-        `${import.meta.env.VITE_Backend_URL}/api/donations/${donationId}/assign`,
-        {
-          withCredentials: true,
-        }
+        `${import.meta.env.VITE_Backend_URL}/api/donations/${donation._id}/assign`,
+        {},
+        {withCredentials: true,}
       );
   
       if (response.data.success) {
@@ -182,7 +180,7 @@ const Card: React.FC<DonationProp> = ({ donation }) => {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onclick={addDonationToUser}>Continue</AlertDialogAction>
+              <AlertDialogAction onClick={addDonationToUser}>Continue</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

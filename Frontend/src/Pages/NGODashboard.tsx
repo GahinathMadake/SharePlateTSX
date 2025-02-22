@@ -48,7 +48,7 @@ const NGODashboard: React.FC = () => {
             },
             {
                 name: "Donar",
-                url: "/user/ngo/review",
+                url: "/user/ngo/allDonor",
                 icon: Star,
             },
         ],
