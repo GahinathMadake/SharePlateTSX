@@ -5,8 +5,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin } from 'lucide-react';
 import Spinner from '@/Animations/Spinner';
-import { toast } from 'sonner';
 import { useSnackbar } from 'notistack';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogFooter,
+} from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
 
 interface Donation {
   _id: string;
@@ -23,9 +30,65 @@ interface Donation {
   };
 }
 
+interface OTPDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (otp: string) => void;
+  isVerifying: boolean;
+}
+
+const OTPDialog: React.FC<OTPDialogProps> = ({ isOpen, onClose, onSubmit, isVerifying }) => {
+  const [otp, setOtp] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(otp);
+  };
+
+  return (
+    <AlertDialog open={isOpen} onOpenChange={onClose}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Enter Delivery OTP</AlertDialogTitle>
+        </AlertDialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Input
+            type="text"
+            placeholder="Enter 6-digit OTP"
+            value={otp}
+            onChange={(e) => setOtp(e.target.value)}
+            maxLength={6}
+            pattern="\d{6}"
+            required
+          />
+          <AlertDialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={isVerifying}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={otp.length !== 6 || isVerifying}
+            >
+              {isVerifying ? 'Verifying...' : 'Verify & Complete'}
+            </Button>
+          </AlertDialogFooter>
+        </form>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};
+
 const TrackDonations = () => {
   const [donations, setDonations] = useState<Donation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedDonation, setSelectedDonation] = useState<string | null>(null);
+  const [isOTPDialogOpen, setIsOTPDialogOpen] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
@@ -42,35 +105,49 @@ const TrackDonations = () => {
       setDonations(response.data);
     } catch (error) {
       console.error("Error fetching accepted donations:", error);
-      enqueueSnackbar('Failed to fetch donations', { 
-        variant: 'error',
-        anchorOrigin: { vertical: 'top', horizontal: 'right' }
-      });
+      enqueueSnackbar('Failed to fetch donations', { variant: 'error' });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCompleteDelivery = async (donationId: string) => {
+  const handleVerifyOTP = async (otp: string) => {
+    if (!selectedDonation) return;
+
     try {
+      setIsVerifying(true);
+      // First verify OTP
+      await axios.post(
+        `${import.meta.env.VITE_Backend_URL}/api/donations/${selectedDonation}/verify-otp`,
+        { otp },
+        { withCredentials: true }
+      );
+
+      // If OTP is valid, complete the delivery
       await axios.patch(
-        `${import.meta.env.VITE_Backend_URL}/api/donations/${donationId}/complete`,
+        `${import.meta.env.VITE_Backend_URL}/api/donations/${selectedDonation}/complete`,
         {},
         { withCredentials: true }
       );
       
-      setDonations(prev => prev.filter(d => d._id !== donationId));
-      enqueueSnackbar('Delivery completed successfully!', { 
-        variant: 'success',
-        anchorOrigin: { vertical: 'top', horizontal: 'right' }
-      });
-    } catch (error) {
-      console.error("Error completing delivery:", error);
-      enqueueSnackbar('Failed to complete delivery', { 
-        variant: 'error',
-        anchorOrigin: { vertical: 'top', horizontal: 'right' }
-      });
+      setDonations(prev => prev.filter(d => d._id !== selectedDonation));
+      enqueueSnackbar('Delivery completed successfully!', { variant: 'success' });
+      setIsOTPDialogOpen(false);
+      setSelectedDonation(null);
+    } catch (error: any) {
+      console.error("Error verifying OTP:", error);
+      enqueueSnackbar(
+        error.response?.data?.message || 'Failed to verify OTP',
+        { variant: 'error' }
+      );
+    } finally {
+      setIsVerifying(false);
     }
+  };
+
+  const handleCompleteDelivery = (donationId: string) => {
+    setSelectedDonation(donationId);
+    setIsOTPDialogOpen(true);
   };
 
   if (loading) {
@@ -136,6 +213,16 @@ const TrackDonations = () => {
           </p>
         )}
       </div>
+
+      <OTPDialog
+        isOpen={isOTPDialogOpen}
+        onClose={() => {
+          setIsOTPDialogOpen(false);
+          setSelectedDonation(null);
+        }}
+        onSubmit={handleVerifyOTP}
+        isVerifying={isVerifying}
+      />
     </div>
   );
 };

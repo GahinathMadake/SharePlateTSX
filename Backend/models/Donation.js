@@ -14,6 +14,14 @@ const donationSchema = new mongoose.Schema({
   receiver: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   // for status keep 3 values : accepted, delivered, pending
   status: { type: String, enum: ['pending', 'accepted', 'delivered'], default: 'pending' },
+  otp: { 
+    type: String,
+    default: null 
+  },
+  otpExpires: { 
+    type: Date,
+    default: null 
+  },
   createdAt: { type: Date, default: Date.now },
 });
 
