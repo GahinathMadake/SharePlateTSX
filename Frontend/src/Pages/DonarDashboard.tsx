@@ -24,6 +24,10 @@ const DonarDashboard: React.FC = () => {
                   url:'/user/Donar/newdonation',
                 },
                 {
+                  title:"Donation Activity",
+                  url:'/user/Donar/donationactivity',
+                },
+                {
                   title:"My Donations",
                   url:'/user/Donar/mydonations'
                 }, 
