@@ -207,38 +207,41 @@ function Dashboard() {
   </div>
 </section>
 
-      {/* Related NGOs Section */}
-      <div className="mt-8 animate-fade-in-up delay-900">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Related NGOs</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Card className="transform transition-all hover:scale-105">
-            <CardHeader>
-              <CardTitle className="text-xl font-bold text-gray-800">Food for All</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 mt-2">A global initiative to reduce food waste and feed the hungry.</p>
-            </CardContent>
-          </Card>
-          <Card className="transform transition-all hover:scale-105">
-            <CardHeader>
-              <CardTitle className="text-xl font-bold text-gray-800">Zero Hunger</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 mt-2">Working towards a world without hunger by 2030.</p>
-            </CardContent>
-          </Card>
-          <Card className="transform transition-all hover:scale-105">
-            <CardHeader>
-              <CardTitle className="text-xl font-bold text-gray-800">Save the Food</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 mt-2">Rescuing surplus food and delivering it to those in need.</p>
-            </CardContent>
-          </Card>
-        </div>
+    {/* Related NGOs Section */}
+    <div className="mt-8">
+  <h2 className="text-2xl font-bold text-gray-800 mb-4">Related NGOs</h2>
+  <div className="flex flex-col sm:flex-row bg-white rounded-lg shadow-md overflow-hidden">
+    {/* First NGO Section */}
+    <div className="flex-1 p-6 border-r border-red-700">
+      <div className="transform transition-all hover:scale-105">
+        <h3 className="text-xl font-bold text-gray-800">Food for All</h3>
+        <p className="text-gray-600 mt-2">A global initiative to reduce food waste and feed the hungry.</p>
       </div>
+    </div>
 
-   
+    {/* Vertical Line */}
+    <div className="w-px bg-red-700"></div>
+
+    {/* Second NGO Section */}
+    <div className="flex-1 p-6 border-r border-red-700">
+      <div className="transform transition-all hover:scale-105">
+        <h3 className="text-xl font-bold text-gray-800">Zero Hunger</h3>
+        <p className="text-gray-600 mt-2">Working towards a world without hunger by 2030.</p>
+      </div>
+    </div>
+
+    {/* Vertical Line */}
+    <div className="w-px bg-red-700"></div>
+
+    {/* Third NGO Section */}
+    <div className="flex-1 p-6">
+      <div className="transform transition-all hover:scale-105">
+        <h3 className="text-xl font-bold text-gray-800">Save the Food</h3>
+        <p className="text-gray-600 mt-2">Rescuing surplus food and delivering it to those in need.</p>
+      </div>
+    </div>
+  </div>
+</div>
      
     </div>
   );
