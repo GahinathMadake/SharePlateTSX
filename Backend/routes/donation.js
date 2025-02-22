@@ -40,6 +40,6 @@ router.get("/topdonors",authMiddleware,getTopDonors);
 router.get("/:status", authMiddleware, getDonationsUsingStatus);
 router.get("donation/:ListId", authMiddleware, getDonationUsingId);
 router.post("/create", createDonation);
-router.post("/:donationId/assign", addDonationToUser);
+router.put("/:donationId/assign", authMiddleware, addDonationToUser);
 
 module.exports = router;

@@ -37,7 +37,7 @@ const Navbar: React.FC<NavbarProps> = ({ className }) => {
           ) : (
             <Link to='/user/NGO'>
               <div className='flex items-center gap-2'>
-                <img src={user.imageUrl} alt='user' className='w-[30px] h-[30px] md:w-[40px] md:h-[40px] rounded-full border-2 border-gray-300' />
+                <img src={user.profileImage} alt='user' className='w-[30px] h-[30px] md:w-[40px] md:h-[40px] rounded-full border-2 border-gray-300' />
               </div>
             </Link>
           )}
@@ -63,7 +63,7 @@ const Navbar: React.FC<NavbarProps> = ({ className }) => {
               ) : (
                 <Link to='/user/NGO' onClick={() => setIsOpen(false)}>
                   <div className='mt-4 flex items-center gap-2'>
-                    <img src={user.imageUrl} alt='user' className='w-[40px] h-[40px] rounded-full border-2 border-gray-300' />
+                    <img src={user.profileImage} alt='user' className='w-[40px] h-[40px] rounded-full border-2 border-gray-300' />
                   </div>
                 </Link>
               )}

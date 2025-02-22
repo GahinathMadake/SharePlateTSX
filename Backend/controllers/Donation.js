@@ -1,4 +1,5 @@
 const Donation = require('../models/Donation');
+const User = require('../models/User');
 const Feedback = require('../models/Feedback');
 const sendEmail = require('../utils/sendEmail');
 const otpVerificationTemplate = require('../helper/OTPVerification');
@@ -18,7 +19,7 @@ const getDonationsUsingStatus = async (req, res) => {
     
         // Find donations with the given status
         const donations = await Donation.find({ status });
-        console.log("donations in backend", donations);
+        // console.log("donations in backend", donations);
         res.status(200).json(donations);
     } catch (error) {
         res.status(500).json({ error: "Internal server error", details: error.message });
@@ -136,6 +137,7 @@ const createDonation = async (req, res) => {
       quantity: req.body.quantity,
       expirationDate: req.body.expirationDate,
       pickupLocation: req.body.pickupLocation,
+      name:req.body.name,
       description: req.body.description, // New field
       imageUrl: req.body.imageUrl
     });
@@ -219,6 +221,8 @@ const addDonationToUser = async (req, res) => {
       });
     }
 
+
+
     if(donation.receiver){
       return res.status(400).json({
         success:false,
@@ -229,12 +233,28 @@ const addDonationToUser = async (req, res) => {
     donation.receiver = userId;
     donation.status = "accepted";
 
+    const userDonor = await User.findById(donation.donor);
+
+    // Send OTP via email
+    const subject = 'Shareplat - Your Donation Accepted';
+    const text = `Your Donation of ${donation.description}, was reserved by NGO`;
+    const htmlBody = `<h1>Your Donation of ${donation.description}, was reserved by NGO</h1>`;
+
+    await sendEmail(userDonor.email, subject, text, htmlBody);
+
     donation.save();
 
-    res.status(200).json({ message: "Donation assigned successfully", donation });
+    res.status(200).json({ 
+      success:true,
+      message: "Donation assigned successfully",
+    });
   } 
   catch (error) {
-    res.status(500).json({ message: "Server error", error });
+    console.log(error);
+    res.status(500).json({
+      success:false,
+      message: "Server error", error 
+    });
   }
 }
 
