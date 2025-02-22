@@ -18,11 +18,12 @@ const {
   submitFeedback,
   getFeedbackDetails,
   generateDeliveryOTP,
-  verifyDeliveryOTP
+  verifyDeliveryOTP,
+  getNgoDashboardData   // <-- imported new method
 } = require('../controllers/Donation');
 
 // Base routes
-router.post("/create", authMiddleware, createDonation); // Added authMiddleware
+router.post("/create", authMiddleware, createDonation);
 router.get("/totaldonations", authMiddleware, getTotalDonations);
 router.get("/totaldeliveredfood", authMiddleware, deliverdDonationsCount);
 router.get("/totalfoodsaved", authMiddleware, getTotalFoodSaved);
@@ -30,6 +31,9 @@ router.get("/topdonors", authMiddleware, getTopDonors);
 router.get("/my-donations", authMiddleware, getMyDonations);
 router.get("/accepted", authMiddleware, getAcceptedDonations);
 router.get("/my-accepted-delivered", authMiddleware, getMyAcceptedAndDeliveredDonations);
+
+// New route for NGO dashboard data
+router.get("/ngo-dashboard", authMiddleware, getNgoDashboardData);
 
 // Routes with parameters
 router.get("/:status", authMiddleware, getDonationsUsingStatus);

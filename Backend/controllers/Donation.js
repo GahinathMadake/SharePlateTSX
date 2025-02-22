@@ -696,6 +696,35 @@ const verifyDeliveryOTP = async (req, res) => {
   }
 };
 
+const getNgoDashboardData = async (req, res) => {
+  try {
+    const ngoId = req.user.id;
+    // Donations that have been accepted or delivered
+    const processedDonations = await Donation.find({
+      receiver: ngoId,
+      status: { $in: ["accepted", "delivered"] },
+    });
+    const totalDonations = processedDonations.length;
+    const totalFoodSaved = processedDonations.reduce(
+      (total, donation) => total + donation.quantity,
+      0
+    );
+    // Pending donations for this NGO
+    const pendingDonations = await Donation.countDocuments({
+      status: "pending",
+    });
+
+    const currentliveDonations = await Donation.countDocuments({
+      receiver: ngoId,
+      status: "accepted",
+    });
+
+    res.status(200).json({ totalDonations, totalFoodSaved, pendingDonations , currentliveDonations});
+  } catch (error) {
+    console.error("Error fetching NGO dashboard data:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
 
 // Export all functions properly
 module.exports = { 
@@ -715,7 +744,8 @@ module.exports = {
   submitFeedback,
   getFeedbackDetails,
   generateDeliveryOTP,
-  verifyDeliveryOTP
+  verifyDeliveryOTP,
+  getNgoDashboardData
 };
 
 
