@@ -25,6 +25,7 @@ import axios from "axios";
 interface Donor {
   name: string;
   email: string;
+  about:string,
   phone: string;
   location: string;
   profileImage: string;
@@ -33,6 +34,7 @@ interface Donor {
 interface Donation {
   _id: string;
   description: string;
+  name:string;
   donor: string;
   foodType: string;
   imageUrl: string;
@@ -63,6 +65,7 @@ const formatToIST = (isoDate: string) => {
 const Card: React.FC<DonationProp> = ({ donation }) => {
   const [donorData, setDonorData] = useState<Donor>({
     name: "",
+    about:"",
     email: "",
     phone: "",
     location: "",
@@ -123,7 +126,7 @@ const Card: React.FC<DonationProp> = ({ donation }) => {
       </div>
 
       <h1 className="opacity-90 py-1 text-xl font-semibold">
-        {donation.description}
+        {donation.name}
       </h1>
 
       <p className="opacity-70">{donation.description}</p>
@@ -160,7 +163,7 @@ const Card: React.FC<DonationProp> = ({ donation }) => {
                           <p className="ml-2 opacity-90">{donorData.name}</p>
                         </div>
                         <p className="text-gray-600 text-sm">@{donorData.email}</p>
-                        <p className="mt-2 text-gray-700">Accent Chair for Living Room with Soft Velvet Upholstery, Wooden Legs, and Elegant Design.</p>
+                        <p className="mt-2 text-gray-700">{donorData.about}</p>
                         <div className="py-2 flex justify-between">
                           <IconAndLabel item={{label:donation.pickupLocation, icon:MapPin}} />
                           <IconAndLabel item={{label:donorData.phone, icon:Phone}} />
@@ -171,9 +174,9 @@ const Card: React.FC<DonationProp> = ({ donation }) => {
                     )
                   }
 
-                  <h2 className="mt-3 mb-2 text-2xl font-semibold">{donation.description}</h2>
+                  <h2 className="mt-3 mb-2 text-2xl font-semibold">{donation.name}</h2>
                   <IconAndLabel item={{label:donation.foodType, icon:HandPlatter}} />
-                  <p className="mt-2 text-gray-700">Accent Chair for Living Room with Soft Velvet Upholstery, Wooden Legs, and Elegant Design.</p>
+                  <p className="mt-2 text-gray-700">{donation.description}</p>
           
                 </div>
               </div>
