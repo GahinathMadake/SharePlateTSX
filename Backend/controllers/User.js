@@ -144,6 +144,7 @@ const getDonarDataByID = async (req, res) => {
       donor:{
         name: donor.name,
         email: donor.email,
+        about:donor.about,
         phone: donor.phone,
         location: donor.location,
         profileImage: donor.profileImage,

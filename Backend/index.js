@@ -32,6 +32,7 @@ const ngoRoutes = require("./routes/Ngo");
 const donationRoutes = require("./routes/donation");
 const contactRoutes = require('./routes/ContactUs');
 const uploadRoutes = require('./routes/upload');
+const feedBackRoutes = require('./routes/feedback');
 
 // Define routes
 app.use('/api/auth', authRoutes);
@@ -41,6 +42,7 @@ app.use('/api/faq', require('./routes/faq'));
 app.use('/user', userRoutes);
 app.use("/api/donations", donationRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/feedback/user', feedBackRoutes);
 
 // Test route
 app.get('/api/donation/test', (req, res) => {

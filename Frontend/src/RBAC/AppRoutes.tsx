@@ -20,7 +20,8 @@ import NgoRegistration from "../Dashboard/Admin/NgoManagementDashboard";
 import ActiveUser from "../Dashboard/Admin/UserList";
 import DonationManagement from "../Dashboard/Admin/DonationManagement";
 import ContentManagement  from "../Dashboard/Admin/ContentManagement";
-import Reviewadmin from "../Dashboard/Admin/Reviewadmin";
+import ReviewAdmin from "../Dashboard/Admin/Reviewadmin";
+
 // Donar Dashboard Components
 import DonarDash from "../Dashboard/Donar/Dashboard";
 import NewDonations from "../Dashboard/Donar/Donations/NewDonations";
@@ -28,6 +29,7 @@ import MyDonations from "../Dashboard/Donar/Donations/MyDonations";
 import DonationForm from "../Dashboard/Donar/Donations/DonationForm";
 import Notification from "../Dashboard/Donar/Notification";
 import Reviewdonar from "../Dashboard/Donar/Reviewdonar";
+import Donationactivity from "@/Dashboard/Donar/Donations/Donationactivity";
 
 
 // Import NGO Components
@@ -35,6 +37,7 @@ import NGODash from '../Dashboard/ngo/Dashboard';
 import AvailableDonations from "../Dashboard/ngo/AvailableDonations";
 import Donations from "../Dashboard/ngo/Donations/MyDonations";
 import TrackDonations from "../Dashboard/ngo/Donations/TrackDonations";
+import Donor from "@/Dashboard/ngo/Donor";
 
 import Profile from '../Dashboard/common/Profile';
 import Review from "../Dashboard/ngo/Review";
@@ -60,7 +63,10 @@ function App(){
                     <Route path='donationmanagement' element={<DonationManagement />} />
                     <Route path='userList' element={<ActiveUser/>} />
                     <Route path='contentManagement' element={<ContentManagement />} />
-                    <Route path='Reviewdonar' element={<Reviewdonar/>}/>
+
+                    //<Route path='Reviewdonar' element={<Reviewdonar/>}/>
+                    <Route path='Reviewadmin' element={<ReviewAdmin />} />
+
                 </Route>
             </Route>
             
@@ -71,6 +77,7 @@ function App(){
                     <Route path="listings" element={<AvailableDonations />} />
                     <Route path="trackdonations" element={<TrackDonations />} />
                     <Route path="donationhistory" element={<Donations />} />
+                    <Route path="allDonor" element={<Donor />} />
 
                     {/* User Profiles */}
                     <Route path="id/:userId" element={<Profile />} />
@@ -86,6 +93,8 @@ function App(){
                     <Route path='mydonations' element={<MyDonations />} />
                     <Route path='donationForm' element={<DonationForm/>}/>
                     <Route path='notification' element={<Notification/>}/>
+                    <Route path='donationactivity' element={<Donationactivity/>}/>
+                    
                     
                     <Route index element={<NGODash />} />
 
