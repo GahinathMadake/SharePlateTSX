@@ -7,6 +7,10 @@ const donationSchema = new mongoose.Schema({
   quantity: { type: Number, required: true },
   expirationDate: { type: Date, required: true },
   pickupLocation: { type: String, required: true },
+  name:{
+    type:String,
+    default: "Food",
+  },
   description: { type: String }, // Add description field
   imageUrl: { type: String },
   donor: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
@@ -14,6 +18,14 @@ const donationSchema = new mongoose.Schema({
   receiver: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   // for status keep 3 values : accepted, delivered, pending
   status: { type: String, enum: ['pending', 'accepted', 'delivered'], default: 'pending' },
+  otp: { 
+    type: String,
+    default: null 
+  },
+  otpExpires: { 
+    type: Date,
+    default: null 
+  },
   createdAt: { type: Date, default: Date.now },
 });
 

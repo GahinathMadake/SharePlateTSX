@@ -33,6 +33,7 @@ const DonationForm: React.FC = () => {
     pickupLocation: '',
     address: '',
     description: '',
+    name:"",
     donationImage: null as File | null,
   });
 
@@ -43,6 +44,7 @@ const DonationForm: React.FC = () => {
     pickupLocation: '',
     address: '',
     description: '',
+    name:"",
     donationImage: '',
   });
 
@@ -144,6 +146,7 @@ const DonationForm: React.FC = () => {
         expirationDate: new Date(formData.expirationDate).toISOString(),
         pickupLocation: `${formData.pickupLocation}${formData.address ? ', ' + formData.address : ''}`,
         description: formData.description,
+        name:formData.name,
         imageUrl,
       };
 
@@ -178,12 +181,27 @@ const DonationForm: React.FC = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-5">
-            {[{
+            {[
+              {
+                label: 'Name of Food', 
+                name: 'name', 
+                icon: <FileText className="w-5 h-5" />,  
+                type: 'text'
+              },
+              {
+                label: 'Donation Description', 
+                name: 'description', 
+                icon: <FileText className="w-5 h-5" />, 
+                component: Textarea,
+                placeholder: 'Describe the food items, condition, and any other relevant details'
+              },
+              {
               label: 'Food Type', 
               name: 'foodType', 
               icon: <Pizza className="w-5 h-5" />,
               placeholder: 'e.g., Cooked Food, Packaged Food, etc.'
-            }, {
+            }, 
+            {
               label: 'Quantity (Servings)', 
               name: 'quantity', 
               icon: <ClipboardList className="w-5 h-5" />, 
@@ -205,13 +223,8 @@ const DonationForm: React.FC = () => {
               icon: <MapPin className="w-5 h-5" />, 
               component: Textarea,
               placeholder: 'Complete address with landmarks'
-            }, {
-              label: 'Donation Description', 
-              name: 'description', 
-              icon: <FileText className="w-5 h-5" />, 
-              component: Textarea,
-              placeholder: 'Describe the food items, condition, and any other relevant details'
-            }].map(({ label, name, icon, type = 'text', component: Component = Input, placeholder }) => (
+            },
+          ].map(({ label, name, icon, type = 'text', component: Component = Input, placeholder }) => (
               <div key={name} className="space-y-1">
                 <Label htmlFor={name} className="text-lg font-medium flex items-center gap-2 text-gray-700">
                   {icon} {label}
