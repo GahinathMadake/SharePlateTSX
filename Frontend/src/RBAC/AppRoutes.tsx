@@ -20,6 +20,7 @@ import NgoRegistration from "../Dashboard/Admin/NgoManagementDashboard";
 import ActiveUser from "../Dashboard/Admin/UserList";
 import DonationManagement from "../Dashboard/Admin/DonationManagement";
 import ContentManagement  from "../Dashboard/Admin/ContentManagement";
+import ReviewAdmin from "../Dashboard/Admin/Reviewadmin";
 
 // Donar Dashboard Components
 import DonarDash from "../Dashboard/Donar/Dashboard";
@@ -62,6 +63,7 @@ function App(){
                     <Route path='donationmanagement' element={<DonationManagement />} />
                     <Route path='userList' element={<ActiveUser/>} />
                     <Route path='contentManagement' element={<ContentManagement />} />
+                    <Route path='Reviewadmin' element={<ReviewAdmin />} />
                 </Route>
             </Route>
             
