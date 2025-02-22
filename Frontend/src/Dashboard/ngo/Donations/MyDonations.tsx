@@ -32,7 +32,7 @@ interface Donation {
   description: string;
   imageUrl: string;
   status: string;
-  donor: {
+  donor?: {
     _id: string;
     name: string;
   };
@@ -43,6 +43,8 @@ interface FeedbackDetails {
   rating: number;
   comment: string;
   images: string[];
+  createdAt?: string;
+  ngoName?: string;
 }
 
 interface FeedbackDialogProps {
@@ -51,7 +53,7 @@ interface FeedbackDialogProps {
   feedback: FeedbackDetails | null;
 }
 
-const FeedbackDialog = ({ isOpen, onClose, feedback }: FeedbackDialogProps) => {
+const FeedbackDialog: React.FC<FeedbackDialogProps> = ({ isOpen, onClose, feedback }) => {
   if (!feedback) return null;
 
   return (
@@ -65,7 +67,7 @@ const FeedbackDialog = ({ isOpen, onClose, feedback }: FeedbackDialogProps) => {
             {Array.from({ length: 5 }).map((_, index) => (
               <Star
                 key={index}
-                className={index < feedback.rating ? "fill-yellow-400" : ""}
+                className={`h-5 w-5 ${index < (feedback.rating || 0) ? "fill-yellow-400" : "text-gray-300"}`}
               />
             ))}
           </div>
@@ -90,13 +92,18 @@ const FeedbackDialog = ({ isOpen, onClose, feedback }: FeedbackDialogProps) => {
               </div>
             </div>
           )}
+          {feedback.createdAt && (
+            <p className="text-sm text-gray-500">
+              Submitted on: {new Date(feedback.createdAt).toLocaleDateString()}
+            </p>
+          )}
         </div>
       </AlertDialogContent>
     </AlertDialog>
   );
 };
 
-const MyDonations = () => {
+const MyDonations: React.FC = () => {
   const [donations, setDonations] = useState<Donation[]>([]);
   const [loading, setLoading] = useState(true);
   const { enqueueSnackbar } = useSnackbar();
@@ -119,10 +126,21 @@ const MyDonations = () => {
         `${import.meta.env.VITE_Backend_URL}/api/donations/my-accepted-delivered`,
         { withCredentials: true }
       );
-      setDonations(response.data);
+
+      // Transform and validate the data
+      const validatedDonations = response.data.map((donation: any) => ({
+        ...donation,
+        donor: donation.donor || { name: 'Anonymous' },
+        hasFeedback: !!donation.hasFeedback
+      }));
+
+      setDonations(validatedDonations);
     } catch (error) {
       console.error("Error fetching donations:", error);
-      enqueueSnackbar('Failed to fetch donations', { variant: 'error' });
+      enqueueSnackbar('Failed to fetch donations', { 
+        variant: 'error',
+        anchorOrigin: { vertical: 'top', horizontal: 'right' }
+      });
     } finally {
       setLoading(false);
     }
@@ -131,7 +149,7 @@ const MyDonations = () => {
   const handleImageUpload = async (files: File[]) => {
     if (!files || files.length === 0) return [];
     
-    const uploadedUrls = [];
+    const uploadedUrls: string[] = [];
     setUploadingImages(true);
   
     try {
@@ -144,10 +162,7 @@ const MyDonations = () => {
               const base64Image = e.target?.result as string;
               const response = await axios.post(
                 `${import.meta.env.VITE_Backend_URL}/api/upload`,
-                {
-                  base64Image,
-                  folder: 'feedback'
-                },
+                { base64Image, folder: 'feedback' },
                 { withCredentials: true }
               );
               
@@ -177,17 +192,16 @@ const MyDonations = () => {
   };
 
   const handleSubmitFeedback = async (donationId: string) => {
+    if (!selectedRating) {
+      enqueueSnackbar('Please select a rating', { variant: 'warning' });
+      return;
+    }
+
     try {
-      if (selectedImages.length > 0) {
-        setUploadingImages(true);
-      }
-      
-      // Upload images first if any are selected
       const imageUrls = selectedImages.length > 0 ? 
         await handleImageUpload(selectedImages) : 
         [];
   
-      // Submit feedback with image URLs
       await axios.post(
         `${import.meta.env.VITE_Backend_URL}/api/donations/${donationId}/feedback`,
         {
@@ -223,8 +237,11 @@ const MyDonations = () => {
         `${import.meta.env.VITE_Backend_URL}/api/donations/${donationId}/feedback`,
         { withCredentials: true }
       );
-      setFeedbackDetails(response.data);
-      setIsFeedbackDialogOpen(true);
+      
+      if (response.data) {
+        setFeedbackDetails(response.data);
+        setIsFeedbackDialogOpen(true);
+      }
     } catch (error) {
       console.error("Error fetching feedback:", error);
       enqueueSnackbar('Failed to fetch feedback details', { variant: 'error' });
@@ -274,7 +291,7 @@ const MyDonations = () => {
                 <div className="border-t pt-2">
                   <p className="text-sm">
                     <span className="font-medium">Donor: </span>
-                    {donation.donor.name}
+                    {donation.donor?.name || 'Anonymous'}
                   </p>
                 </div>
               </CardContent>
@@ -360,10 +377,11 @@ const MyDonations = () => {
           </p>
         )}
       </div>
+
       <FeedbackDialog
-      isOpen={isFeedbackDialogOpen}
-      onClose={() => setIsFeedbackDialogOpen(false)}
-      feedback={feedbackDetails}
+        isOpen={isFeedbackDialogOpen}
+        onClose={() => setIsFeedbackDialogOpen(false)}
+        feedback={feedbackDetails}
       />
     </div>
   );

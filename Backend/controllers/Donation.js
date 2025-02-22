@@ -1,6 +1,7 @@
 const Donation = require('../models/Donation');
 const Feedback = require('../models/Feedback');
-
+const sendEmail = require('../utils/sendEmail');
+const otpVerificationTemplate = require('../helper/OTPVerification');
 
 const getDonationsUsingStatus = async (req, res) => {
 
@@ -296,32 +297,31 @@ const getMyAcceptedAndDeliveredDonations = async (req, res) => {
   try {
     const userId = req.user.id;
     
-    const donations = await Donation.find({ 
+    const donations = await Donation.find({
       receiver: userId,
-      status: { $in: ["accepted", "delivered"] }
+      status: { $in: ['accepted', 'delivered'] }
     })
-    .populate('donor', 'name')
-    .lean();
+    .populate('donor', 'name')  // Ensure donor field is populated
+    .sort({ createdAt: -1 });
 
-    const feedbacks = await Feedback.find({
-      ngo: userId,
-      donation: { $in: donations.map(d => d._id) }
-    }).lean();
+    // Check for existing feedback for each donation
+    const donationsWithFeedbackStatus = await Promise.all(
+      donations.map(async (donation) => {
+        const feedback = await Feedback.findOne({ donation: donation._id });
+        return {
+          ...donation.toObject(),
+          hasFeedback: !!feedback
+        };
+      })
+    );
 
-    const feedbackMap = new Map(feedbacks.map(f => [f.donation.toString(), f]));
-
-    const donationsWithFeedback = donations.map(d => ({
-      ...d,
-      hasFeedback: feedbackMap.has(d._id.toString())
-    }));
-
-    res.status(200).json(donationsWithFeedback);
+    res.status(200).json(donationsWithFeedbackStatus);
   } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ 
-      success: false, 
+    console.error('Error in getMyAcceptedAndDeliveredDonations:', error);
+    res.status(500).json({
+      success: false,
       message: "Error fetching donations",
-      error: error.message 
+      error: error.message
     });
   }
 };
@@ -372,25 +372,177 @@ const submitFeedback = async (req, res) => {
 const getFeedbackDetails = async (req, res) => {
   try {
     const { donationId } = req.params;
-    const userId = req.user.id;
-
+    
+    // First find the feedback directly
     const feedback = await Feedback.findOne({
-      ngo: userId,
       donation: donationId
-    });
+    }).populate('ngo', 'name');
 
     if (!feedback) {
       return res.status(404).json({
         success: false,
-        message: "Feedback not found"
+        message: "No feedback found for this donation"
       });
     }
 
-    res.status(200).json(feedback);
+    // Format the response
+    const response = {
+      rating: feedback.rating,
+      comment: feedback.comment || '',
+      images: feedback.images || [],
+      createdAt: feedback.createdAt,
+      ngoName: feedback.ngo?.name || 'Anonymous'
+    };
+
+    res.status(200).json(response);
+    
   } catch (error) {
+    console.error('Error in getFeedbackDetails:', error);
     res.status(500).json({
       success: false,
       message: "Error fetching feedback",
+      error: error.message
+    });
+  }
+};
+
+const generateDeliveryOTP = async (req, res) => {
+  try {
+    const { donationId } = req.params;
+    const userId = req.user.id;
+
+    // Find donation and populate both receiver and donor details
+    const donation = await Donation.findOne({
+      _id: donationId,
+      donor: userId,
+      status: "accepted"
+    }).populate('receiver', 'email name')
+      .populate('donor', 'name');
+
+    if (!donation) {
+      return res.status(404).json({
+        success: false,
+        message: "Donation not found or not authorized"
+      });
+    }
+
+    // Generate a 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // Set OTP expiration time (e.g., 30 minutes from now)
+    const otpExpires = new Date(Date.now() + 30 * 60 * 1000);
+
+    // Store OTP and expiration in donation document
+    donation.otp = otp;
+    donation.otpExpires = otpExpires;
+    await donation.save();
+
+    // Create email content
+    const emailSubject = 'SharePlate - Delivery OTP';
+    const textContent = `Your delivery OTP is: ${otp}. This OTP will expire in 30 minutes.`;
+    
+    // Create custom HTML template for delivery OTP
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <body style="font-family: Arial, sans-serif; padding: 20px;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #f9f9f9; padding: 20px; border-radius: 10px;">
+            <h2 style="color: #2E7D32; text-align: center;">SharePlate Delivery OTP</h2>
+            <p>Hello ${donation.receiver.name},</p>
+            <p>A delivery OTP has been generated for the food donation from ${donation.donor.name}.</p>
+            <p>Donation details:</p>
+            <ul>
+              <li>Food Type: ${donation.foodType}</li>
+              <li>Quantity: ${donation.quantity} servings</li>
+              <li>Pickup Location: ${donation.pickupLocation}</li>
+            </ul>
+            <div style="background-color: #E8F5E9; padding: 15px; border-radius: 5px; text-align: center; margin: 20px 0;">
+              <h3 style="margin: 0; color: #2E7D32;">Your OTP: ${otp}</h3>
+              <p style="margin: 10px 0 0 0; font-size: 0.9em; color: #666;">Valid for 30 minutes</p>
+            </div>
+            <p style="font-size: 0.9em; color: #666; text-align: center;">
+              Please provide this OTP to the donor when collecting the donation.
+            </p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    // Send OTP email to NGO
+    await sendEmail(
+      donation.receiver.email,
+      emailSubject,
+      textContent,
+      htmlContent
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "OTP generated and sent to NGO",
+      otp: otp,
+      expiresAt: otpExpires
+    });
+
+  } catch (error) {
+    console.error('Error in generateDeliveryOTP:', error);
+    res.status(500).json({
+      success: false,
+      message: "Error generating OTP",
+      error: error.message
+    });
+  }
+};
+
+const verifyDeliveryOTP = async (req, res) => {
+  try {
+    const { donationId } = req.params;
+    const { otp } = req.body;
+    const userId = req.user.id;
+
+    const donation = await Donation.findOne({
+      _id: donationId,
+      receiver: userId,
+      status: "accepted"
+    });
+
+    if (!donation) {
+      return res.status(404).json({
+        success: false,
+        message: "Donation not found or not authorized"
+      });
+    }
+
+    if (!donation.otp || !donation.otpExpires) {
+      return res.status(400).json({
+        success: false,
+        message: "No OTP generated for this donation"
+      });
+    }
+
+    if (Date.now() > donation.otpExpires) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP has expired"
+      });
+    }
+
+    if (donation.otp !== otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "OTP verified successfully"
+    });
+
+  } catch (error) {
+    console.error('Error in verifyDeliveryOTP:', error);
+    res.status(500).json({
+      success: false,
+      message: "Error verifying OTP",
       error: error.message
     });
   }
@@ -412,7 +564,9 @@ module.exports = {
   completeDonation,
   getMyAcceptedAndDeliveredDonations,
   submitFeedback,
-  getFeedbackDetails
+  getFeedbackDetails,
+  generateDeliveryOTP,
+  verifyDeliveryOTP
 };
 
 

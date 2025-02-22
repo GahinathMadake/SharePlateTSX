@@ -15,7 +15,9 @@ const {
   completeDonation,
   getMyAcceptedAndDeliveredDonations,
   submitFeedback,
-  getFeedbackDetails
+  getFeedbackDetails,
+  generateDeliveryOTP,
+  verifyDeliveryOTP
 } = require('../controllers/Donation');
 
 // Make sure this route is before the /:status route to avoid conflicts
@@ -25,6 +27,9 @@ router.patch("/:donationId/complete", authMiddleware, completeDonation);
 router.get("/my-accepted-delivered", authMiddleware, getMyAcceptedAndDeliveredDonations);
 router.post("/:donationId/feedback", authMiddleware, submitFeedback);
 router.get("/:donationId/feedback", authMiddleware, getFeedbackDetails);
+router.post("/:donationId/generate-otp", authMiddleware, generateDeliveryOTP);
+router.post("/:donationId/verify-otp", authMiddleware, verifyDeliveryOTP);
+
 
 router.get("/totaldonations", authMiddleware, getTotalDonations);
 

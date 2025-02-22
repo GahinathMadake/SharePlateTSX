@@ -28,6 +28,7 @@ import MyDonations from "../Dashboard/Donar/Donations/MyDonations";
 import DonationForm from "../Dashboard/Donar/Donations/DonationForm";
 import Notification from "../Dashboard/Donar/Notification";
 import Reviewdonar from "../Dashboard/Donar/Reviewdonar";
+import Donationactivity from "@/Dashboard/Donar/Donations/Donationactivity";
 
 
 // Import NGO Components
@@ -85,6 +86,8 @@ function App(){
                     <Route path='mydonations' element={<MyDonations />} />
                     <Route path='donationForm' element={<DonationForm/>}/>
                     <Route path='notification' element={<Notification/>}/>
+                    <Route path='donationactivity' element={<Donationactivity/>}/>
+                    
                     
                     <Route index element={<NGODash />} />
 
