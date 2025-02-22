@@ -38,6 +38,7 @@ import AvailableDonations from "../Dashboard/ngo/AvailableDonations";
 import Donations from "../Dashboard/ngo/Donations/MyDonations";
 import TrackDonations from "../Dashboard/ngo/Donations/TrackDonations";
 import Donor from "@/Dashboard/ngo/Donor";
+import Provider from "../Dashboard/ngo/Provider";
 
 import Profile from '../Dashboard/common/Profile';
 import Review from "../Dashboard/ngo/Review";
@@ -78,7 +79,7 @@ function App(){
                     <Route path="trackdonations" element={<TrackDonations />} />
                     <Route path="donationhistory" element={<Donations />} />
                     <Route path="allDonor" element={<Donor />} />
-
+                    <Route path="provider" element={<Provider/>}/>
                     {/* User Profiles */}
                     <Route path="id/:userId" element={<Profile />} />
                     <Route path="reviews" element={<Review />} />
