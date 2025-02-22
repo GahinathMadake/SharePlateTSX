@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar, MapPin } from 'lucide-react';
 import Spinner from '@/Animations/Spinner';
 import { useSnackbar } from 'notistack';
+import { useAuth } from "@/context/AuthContext";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -14,6 +15,7 @@ import {
   AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
+import MapComponent from './MapComponent'; // Import the MapComponent
 
 interface Donation {
   _id: string;
@@ -84,12 +86,21 @@ const OTPDialog: React.FC<OTPDialogProps> = ({ isOpen, onClose, onSubmit, isVeri
 };
 
 const TrackDonations = () => {
+  const { user } = useAuth();
   const [donations, setDonations] = useState<Donation[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDonation, setSelectedDonation] = useState<string | null>(null);
   const [isOTPDialogOpen, setIsOTPDialogOpen] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [showMap, setShowMap] = useState(false);
+  const [origin, setOrigin] = useState<string>('');
+  const [destination, setDestination] = useState<string>('');
   const { enqueueSnackbar } = useSnackbar();
+
+  // Fetch the logged-in NGO's location (assuming it's stored in context or state)
+  const loggedInNGO = {
+    location: 'NGO Location Address', // Replace with actual NGO location from your state/context
+  };
 
   useEffect(() => {
     fetchAcceptedDonations();
@@ -150,6 +161,17 @@ const TrackDonations = () => {
     setIsOTPDialogOpen(true);
   };
 
+  const handleShowMap = (pickupLocation: string) => {
+    // Set origin (NGO's location) and destination (donor's pickup location)
+    setOrigin(loggedInNGO.location);
+    setDestination(pickupLocation);
+    setShowMap(true); // Show the map
+  };
+
+  const handleCloseMap = () => {
+    setShowMap(false); // Hide the map
+  };
+
   if (loading) {
     return (
       <div className='w-full h-[80vh] flex justify-center items-center'>
@@ -196,13 +218,20 @@ const TrackDonations = () => {
                 </div>
               </CardContent>
 
-              <CardFooter>
+              <CardFooter className="flex flex-col gap-2">
                 <Button 
                   className="w-full"
                   variant="default"
                   onClick={() => handleCompleteDelivery(donation._id)}
                 >
                   Complete Delivery
+                </Button>
+                <Button 
+                  className="w-full"
+                  variant="outline"
+                  onClick={() => handleShowMap(donation.pickupLocation)}
+                >
+                  View Map
                 </Button>
               </CardFooter>
             </Card>
@@ -213,6 +242,19 @@ const TrackDonations = () => {
           </p>
         )}
       </div>
+
+      {/* Show the MapComponent in a centered pop-up */}
+      <AlertDialog open={showMap} onOpenChange={handleCloseMap}>
+        <AlertDialogContent className="max-w-4xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Route Map</AlertDialogTitle>
+          </AlertDialogHeader>
+          <MapComponent origin={user.location} destination={destination} />
+          <AlertDialogFooter>
+            <Button onClick={handleCloseMap}>Close</Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <OTPDialog
         isOpen={isOTPDialogOpen}
