@@ -8,7 +8,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import AnimatedInput from "@/Animations/FormDiv";
 import { useSnackbar } from 'notistack';
-import {Link} from 'react-router-dom'
+import { Link } from 'react-router-dom';
 
 // Auth context
 import { useAuth } from "@/context/AuthContext";
@@ -48,6 +48,10 @@ export default function SignUpForm({
     role: "Donar",
   });
 
+  // Password validation state
+  const [isPasswordValid, setIsPasswordValid] = useState<boolean>(true);
+  const [passwordErrorMessage, setPasswordErrorMessage] = useState<string>("");
+
   // Timer effect
   useEffect(() => {
     let interval: number | undefined;
@@ -78,6 +82,34 @@ export default function SignUpForm({
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
+  // Password validation rules
+  const validatePassword = (password: string): boolean => {
+    const minLength = 8; // Minimum password length
+    const hasUppercase = /[A-Z]/.test(password); // Check for at least one uppercase letter
+    const hasNumber = /[0-9]/.test(password); // Check for at least one number
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password); // Check for at least one special character
+
+    if (password.length < minLength) {
+      setPasswordErrorMessage("Password must be at least 8 characters long.");
+      return false;
+    }
+    if (!hasUppercase) {
+      setPasswordErrorMessage("Password must contain at least one uppercase letter.");
+      return false;
+    }
+    if (!hasNumber) {
+      setPasswordErrorMessage("Password must contain at least one number.");
+      return false;
+    }
+    if (!hasSpecialChar) {
+      setPasswordErrorMessage("Password must contain at least one special character.");
+      return false;
+    }
+
+    setPasswordErrorMessage(""); // Clear error message if password is valid
+    return true;
+  };
+
   const handleChange = (index: number, value: string) => {
     const newOtp = [...otp];
     newOtp[index] = value.slice(-1);
@@ -101,12 +133,12 @@ export default function SignUpForm({
       ...prevData,
       [name]: value,
     }));
+
+    // Validate password in real-time
+    if (name === "password") {
+      setIsPasswordValid(validatePassword(value));
+    }
   };
-
-
-
-
-  // Login Functionality
 
   const sendOtpHandler = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -114,6 +146,14 @@ export default function SignUpForm({
     // Basic validation
     if (userData.password !== userData.confirmPassword) {
       enqueueSnackbar("Passwords do not match", { 
+        variant: 'error',
+      });
+      return;
+    }
+
+    // Validate password before sending OTP
+    if (!validatePassword(userData.password)) {
+      enqueueSnackbar(passwordErrorMessage, { 
         variant: 'error',
       });
       return;
@@ -144,8 +184,6 @@ export default function SignUpForm({
     }
   };
 
-
-
   const verifyOtpHandler = async () => {
     const enteredOtp = otp.join("");
     console.log("Entered OTP:", enteredOtp);
@@ -157,8 +195,7 @@ export default function SignUpForm({
       return;
     }
 
-    try{
-      
+    try {
       const response = await axios.post(
         `${import.meta.env.VITE_Backend_URL}/api/auth/verify-otp`,
         { userData, otp: enteredOtp },
@@ -167,19 +204,17 @@ export default function SignUpForm({
       
       console.log("OTP verified:", response.data);
 
-      if(response.data.success){
+      if (response.data.success) {
         fetchUserData();
         enqueueSnackbar("Registration Successful!", { 
           variant: 'success',
         });
-      }
-      else{
+      } else {
         enqueueSnackbar(response.data.message, { 
           variant: 'error',
         });
       }
-    }
-    catch (error) {
+    } catch (error) {
       console.error("OTP verification error:", (error as Error).message);
       enqueueSnackbar("Failed to verify OTP. Please try again or request a new OTP.", { 
         variant: 'error',
@@ -192,8 +227,6 @@ export default function SignUpForm({
       navigate(`/user/${user.role}`);
     }
   }, [user]);
-
-  
 
   return (
     <form className={cn("flex flex-col gap-6", className)} {...props} onSubmit={sendOtpHandler}>
@@ -327,6 +360,10 @@ export default function SignUpForm({
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
+            {/* Display password error message */}
+            {!isPasswordValid && (
+              <p className="text-sm text-red-500 mt-1">{passwordErrorMessage}</p>
+            )}
           </div>
 
           {/* Confirm Password */}

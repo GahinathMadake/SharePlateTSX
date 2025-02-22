@@ -63,7 +63,10 @@ function App(){
                     <Route path='donationmanagement' element={<DonationManagement />} />
                     <Route path='userList' element={<ActiveUser/>} />
                     <Route path='contentManagement' element={<ContentManagement />} />
+
+                    //<Route path='Reviewdonar' element={<Reviewdonar/>}/>
                     <Route path='Reviewadmin' element={<ReviewAdmin />} />
+
                 </Route>
             </Route>
             
