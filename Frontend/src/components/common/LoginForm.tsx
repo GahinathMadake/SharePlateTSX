@@ -23,29 +23,28 @@ export default function LoginForm({
   const { enqueueSnackbar } = useSnackbar();
 
   // Extract user
-  const {user, fetchUserData} = useAuth();
-
+  const { user, fetchUserData } = useAuth();
 
   const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // Prevent form refresh
-  
+
     if (!email || !password) {
       enqueueSnackbar("Please enter both email and password.", { variant: 'warning' });
       return;
     }
-  
+
     try {
       const res = await axios.post(
         import.meta.env.VITE_Backend_URL + "/api/auth/login",
-        { email, password }, 
+        { email, password },
         { withCredentials: true }
       );
-  
+
       if (res.data.success) {
         console.log("Login Successful:", res.data);
         enqueueSnackbar("Login Successful!", { variant: 'success' });
-  
-        await fetchUserData(); 
+
+        await fetchUserData();
       } else {
         console.error("Login failed:", res.data);
         enqueueSnackbar("Login failed. Please try again.", { variant: 'error' });
@@ -61,12 +60,9 @@ export default function LoginForm({
       navigate(`/user/${user.role}`);
     }
   }, [user]);
-  
-
 
   return (
     <form className={cn("flex flex-col gap-6", className)} {...props} onSubmit={submitHandler}>
-      
       {/* Form content remains the same */}
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">Login to your account</h1>
@@ -88,35 +84,35 @@ export default function LoginForm({
         </div>
 
         <div className="grid gap-2">
-      <div className="flex items-center">
-        <Label>
-          Password<sup className="text-[red]">*</sup>
-        </Label>
-        <Link
-          to="/user/forgotPassword"
-          className="ml-auto text-sm underline-offset-4 hover:underline"
-        >
-          Forgot your password?
-        </Link>
-      </div>
-      <div className="relative">
-        <Input
-          type={showPassword ? "text" : "password"}
-          name="password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="pr-10" // To make space for the icon
-        />
-        <button
-          type="button"
-          onClick={() => setShowPassword((prev) => !prev)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-transform duration-200 "
-        >
-            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-        </button>
-      </div>
-    </div>
+          <div className="flex items-center">
+            <Label>
+              Password<sup className="text-[red]">*</sup>
+            </Label>
+            <Link
+              to="/user/forgotPassword"
+              className="ml-auto text-sm underline-offset-4 hover:underline"
+            >
+              Forgot your password?
+            </Link>
+          </div>
+          <div className="relative">
+            <Input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="pr-10" // To make space for the icon
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-transform duration-200"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
+        </div>
 
         <Button type="submit" className="w-full">
           Login
@@ -132,7 +128,6 @@ export default function LoginForm({
           {/* GitHub icon SVG can be added here */}
           Login with Google
         </Button>
-
       </div>
 
       <div className="text-center text-sm">

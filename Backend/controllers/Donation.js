@@ -1,8 +1,136 @@
 const Donation = require('../models/Donation');
 const User = require('../models/User');
+const axios = require('axios');
 const Feedback = require('../models/Feedback');
 const sendEmail = require('../utils/sendEmail');
 const otpVerificationTemplate = require('../helper/OTPVerification');
+
+// const { calculateDistance, calculateMaxDistance, sendEmail, generateNGOEmail } = require("../utils");
+const {calculateDistance}= require("../utils/calculateDistance");
+const {calculateMaxDistance}= require("../utils/calculateMaxDistance");
+const {generateNGOEmail}= require("../utils/generateNgoEmail");
+
+require("dotenv").config();
+
+
+const getMatchNgos = async (req, res) => {
+  try {
+    const { donorId } = req.body;
+
+    // Fetch donor details
+    const donor = await Donation.findById(donorId).populate("donor");
+    if (!donor) {
+      console.log(donor);
+      return res.status(404).json({ error: "Donor not found" });
+    }
+
+    // Fetch all NGOs
+    const ngos = await User.find({ role: "NGO" }).select("email location");
+
+    console.log("matching ngo fetch", ngos);
+    // Convert pickup location to lat/lng using Google Geocoding API
+    const geocodeResponse = await axios.get(
+      `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
+        donor.pickupLocation
+      )}&key=${process.env.GOOGLE_MAPS_API_KEY}`
+    );
+
+    if (!geocodeResponse.data.results || geocodeResponse.data.results.length === 0) {
+      console.error("No results found for address:", donor.pickupLocation);
+      throw new Error("No results found for address");
+    }
+
+    const { lat: donorLat, lng: donorLng } =
+      geocodeResponse.data.results[0].geometry.location;
+
+    // Current date
+    const currentDate = new Date();
+
+    // Calculate dynamic maximum distance
+    const maxDistance = calculateMaxDistance(donor.expirationDate, currentDate);
+
+    // Match NGOs
+    const matches = await Promise.all(
+      ngos.map(async (ngo) => {
+        // Convert NGO location to lat/lng using Google Geocoding API
+        const ngoGeocodeResponse = await axios.get(
+          `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
+            ngo.location
+          )}&key=${process.env.GOOGLE_MAPS_API_KEY}`
+        );
+
+        if (!ngoGeocodeResponse.data.results || ngoGeocodeResponse.data.results.length === 0) {
+          console.error("No results found for NGO address:", ngo.location);
+          return null; // Skip this NGO
+        }
+
+        const { lat: ngoLat, lng: ngoLng } =
+          ngoGeocodeResponse.data.results[0].geometry.location;
+
+        // Calculate distance
+        const distance = calculateDistance(donorLat, donorLng, ngoLat, ngoLng);
+
+        // Calculate estimated travel time (in hours)
+        const averageSpeed = 30; // Average travel speed in km/h
+        const travelTime = distance / averageSpeed;
+
+        // Calculate NGO-specific expiration time
+        const expirationDate = new Date(donor.expirationDate);
+        const ngoExpirationTime = expirationDate - travelTime * 1000 * 60 * 60; // Convert travelTime (hours) to milliseconds
+
+        // Calculate NGO-specific time difference
+        const timeDifference = (ngoExpirationTime - currentDate) / (1000 * 60 * 60); // Convert milliseconds to hours
+
+        // Check if the food can reach the NGO before it expires
+        if (timeDifference <= 0) {
+          console.log("Skipping NGO:", ngo.email, "because travel time exceeds expiration time");
+          return null; // Skip this NGO if the food cannot reach in time
+        }
+
+        // Assign weights to distance and expiration time
+        const distanceWeight = 0.6; // Higher weight for distance
+        const expirationWeight = 0.4; // Lower weight for expiration time
+
+        // Normalize distance (lower distance = higher score)
+        const normalizedDistance = Math.max(0, 1 - distance / maxDistance);
+
+        // Normalize expiration time (earlier expiration = higher score)
+        const maxExpirationHours = 168; // Maximum expiration hours for normalization (7 days)
+        const normalizedExpiration = Math.max(0, 1 - timeDifference / maxExpirationHours);
+
+        // Calculate combined score
+        const score =
+          distanceWeight * normalizedDistance + expirationWeight * normalizedExpiration;
+
+        return { ...ngo.toObject(), distance, timeDifference, travelTime, score };
+      })
+    );
+
+    // Filter valid matches within max distance
+    const validMatches = matches.filter(
+      (match) => match !== null && match.distance <= maxDistance
+    );
+
+    // Sort matches by score (highest score first)
+    validMatches.sort((a, b) => b.score - a.score);
+
+    // Log matched NGOs
+    console.log("Matched NGOs:", validMatches);
+
+    // Send emails to matched NGOs
+    for (const match of validMatches) {
+      const { subject, text, html } = generateNGOEmail(donor.donor, donor);
+      await sendEmail(match.email, subject, text, html);
+    }
+
+    res.json({ matches: validMatches });
+  } catch (error) {
+    console.error("Error matching donor with NGOs:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+
 
 const getDonationsUsingStatus = async (req, res) => {
 
@@ -551,6 +679,35 @@ const verifyDeliveryOTP = async (req, res) => {
   }
 };
 
+const getNgoDashboardData = async (req, res) => {
+  try {
+    const ngoId = req.user.id;
+    // Donations that have been accepted or delivered
+    const processedDonations = await Donation.find({
+      receiver: ngoId,
+      status: { $in: ["accepted", "delivered"] },
+    });
+    const totalDonations = processedDonations.length;
+    const totalFoodSaved = processedDonations.reduce(
+      (total, donation) => total + donation.quantity,
+      0
+    );
+    // Pending donations for this NGO
+    const pendingDonations = await Donation.countDocuments({
+      status: "pending",
+    });
+
+    const currentliveDonations = await Donation.countDocuments({
+      receiver: ngoId,
+      status: "accepted",
+    });
+
+    res.status(200).json({ totalDonations, totalFoodSaved, pendingDonations , currentliveDonations});
+  } catch (error) {
+    console.error("Error fetching NGO dashboard data:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
 
 // Export all functions properly
 module.exports = { 
@@ -563,13 +720,15 @@ module.exports = {
   addDonationToUser,
   getTotalFoodSaved,
   getTopDonors,
+  getMatchNgos,
   getAcceptedDonations,
   completeDonation,
   getMyAcceptedAndDeliveredDonations,
   submitFeedback,
   getFeedbackDetails,
   generateDeliveryOTP,
-  verifyDeliveryOTP
+  verifyDeliveryOTP,
+  getNgoDashboardData
 };
 
 

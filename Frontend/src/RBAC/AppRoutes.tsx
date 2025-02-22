@@ -20,6 +20,7 @@ import NgoRegistration from "../Dashboard/Admin/NgoManagementDashboard";
 import ActiveUser from "../Dashboard/Admin/UserList";
 import DonationManagement from "../Dashboard/Admin/DonationManagement";
 import ContentManagement  from "../Dashboard/Admin/ContentManagement";
+import ReviewAdmin from "../Dashboard/Admin/Reviewadmin";
 
 // Donar Dashboard Components
 import DonarDash from "../Dashboard/Donar/Dashboard";
@@ -37,6 +38,7 @@ import AvailableDonations from "../Dashboard/ngo/AvailableDonations";
 import Donations from "../Dashboard/ngo/Donations/MyDonations";
 import TrackDonations from "../Dashboard/ngo/Donations/TrackDonations";
 import Donor from "@/Dashboard/ngo/Donor";
+import Provider from "../Dashboard/ngo/Provider";
 
 import Profile from '../Dashboard/common/Profile';
 import Review from "../Dashboard/ngo/Review";
@@ -62,6 +64,10 @@ function App(){
                     <Route path='donationmanagement' element={<DonationManagement />} />
                     <Route path='userList' element={<ActiveUser/>} />
                     <Route path='contentManagement' element={<ContentManagement />} />
+
+                    //<Route path='Reviewdonar' element={<Reviewdonar/>}/>
+                    <Route path='Reviewadmin' element={<ReviewAdmin />} />
+
                 </Route>
             </Route>
             
@@ -73,7 +79,7 @@ function App(){
                     <Route path="trackdonations" element={<TrackDonations />} />
                     <Route path="donationhistory" element={<Donations />} />
                     <Route path="allDonor" element={<Donor />} />
-
+                    <Route path="provider" element={<Provider/>}/>
                     {/* User Profiles */}
                     <Route path="id/:userId" element={<Profile />} />
                     <Route path="reviews" element={<Review />} />
