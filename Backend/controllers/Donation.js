@@ -27,15 +27,13 @@ const getMatchNgos = async (req, res) => {
     // Fetch all NGOs
     const ngos = await User.find({ role: "NGO" }).select("email location");
 
-
-    console.log("matching ngo fetch",ngos);
+    console.log("matching ngo fetch", ngos);
     // Convert pickup location to lat/lng using Google Geocoding API
     const geocodeResponse = await axios.get(
       `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
         donor.pickupLocation
       )}&key=${process.env.GOOGLE_MAPS_API_KEY}`
     );
-   // console.log("geocodeResponse",geocodeResponse);
 
     if (!geocodeResponse.data.results || geocodeResponse.data.results.length === 0) {
       console.error("No results found for address:", donor.pickupLocation);
@@ -60,50 +58,50 @@ const getMatchNgos = async (req, res) => {
             ngo.location
           )}&key=${process.env.GOOGLE_MAPS_API_KEY}`
         );
-    
+
         if (!ngoGeocodeResponse.data.results || ngoGeocodeResponse.data.results.length === 0) {
           console.error("No results found for NGO address:", ngo.location);
           return null; // Skip this NGO
         }
-    
+
         const { lat: ngoLat, lng: ngoLng } =
           ngoGeocodeResponse.data.results[0].geometry.location;
-    
+
         // Calculate distance
         const distance = calculateDistance(donorLat, donorLng, ngoLat, ngoLng);
-    
+
         // Calculate estimated travel time (in hours)
         const averageSpeed = 30; // Average travel speed in km/h
         const travelTime = distance / averageSpeed;
-    
+
         // Calculate NGO-specific expiration time
         const expirationDate = new Date(donor.expirationDate);
         const ngoExpirationTime = expirationDate - travelTime * 1000 * 60 * 60; // Convert travelTime (hours) to milliseconds
-    
+
         // Calculate NGO-specific time difference
         const timeDifference = (ngoExpirationTime - currentDate) / (1000 * 60 * 60); // Convert milliseconds to hours
-    
+
         // Check if the food can reach the NGO before it expires
         if (timeDifference <= 0) {
           console.log("Skipping NGO:", ngo.email, "because travel time exceeds expiration time");
           return null; // Skip this NGO if the food cannot reach in time
         }
-    
+
         // Assign weights to distance and expiration time
         const distanceWeight = 0.6; // Higher weight for distance
         const expirationWeight = 0.4; // Lower weight for expiration time
-    
+
         // Normalize distance (lower distance = higher score)
         const normalizedDistance = Math.max(0, 1 - distance / maxDistance);
-    
+
         // Normalize expiration time (earlier expiration = higher score)
         const maxExpirationHours = 168; // Maximum expiration hours for normalization (7 days)
         const normalizedExpiration = Math.max(0, 1 - timeDifference / maxExpirationHours);
-    
+
         // Calculate combined score
         const score =
           distanceWeight * normalizedDistance + expirationWeight * normalizedExpiration;
-    
+
         return { ...ngo.toObject(), distance, timeDifference, travelTime, score };
       })
     );
@@ -115,6 +113,9 @@ const getMatchNgos = async (req, res) => {
 
     // Sort matches by score (highest score first)
     validMatches.sort((a, b) => b.score - a.score);
+
+    // Log matched NGOs
+    console.log("Matched NGOs:", validMatches);
 
     // Send emails to matched NGOs
     for (const match of validMatches) {
