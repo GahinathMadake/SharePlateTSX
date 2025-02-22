@@ -19,46 +19,17 @@ export default function LoginForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [isPasswordValid, setIsPasswordValid] = useState<boolean>(true); // Track password validity
-  const [errorMessage, setErrorMessage] = useState<string>(""); // Error message for invalid passwords
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
   // Extract user
   const { user, fetchUserData } = useAuth();
 
-  // Password validation rules
-  const validatePassword = (password: string): boolean => {
-    const minLength = 8; // Minimum password length
-    const hasUppercase = /[A-Z]/.test(password); // Check for at least one uppercase letter
-
-    if (password.length < minLength) {
-      setErrorMessage("Password must be at least 8 characters long.");
-      return false;
-    }
-    if (!hasUppercase) {
-      setErrorMessage("Password must contain at least one uppercase letter.");
-      return false;
-    }
-
-    setErrorMessage(""); // Clear error message if password is valid
-    return true;
-  };
-
   const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // Prevent form refresh
 
     if (!email || !password) {
       enqueueSnackbar("Please enter both email and password.", { variant: 'warning' });
-      return;
-    }
-
-    // Validate password before submission
-    const isPasswordValid = validatePassword(password);
-    setIsPasswordValid(isPasswordValid);
-
-    if (!isPasswordValid) {
-      enqueueSnackbar(errorMessage, { variant: 'error' });
       return;
     }
 
@@ -130,10 +101,7 @@ export default function LoginForm({
               name="password"
               required
               value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                setIsPasswordValid(validatePassword(e.target.value)); // Validate password on change
-              }}
+              onChange={(e) => setPassword(e.target.value)}
               className="pr-10" // To make space for the icon
             />
             <button
@@ -144,10 +112,6 @@ export default function LoginForm({
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
-          {/* Display error message if password is invalid */}
-          {!isPasswordValid && (
-            <p className="text-sm text-red-500 mt-1">{errorMessage}</p>
-          )}
         </div>
 
         <Button type="submit" className="w-full">
