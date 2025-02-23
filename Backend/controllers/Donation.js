@@ -295,32 +295,12 @@ const getMyDonations = async (req, res) => {
     // Use req.user.id instead of req.user._id
     const userDonations = await Donation.find({ donor: req.user.id })
       .sort({ createdAt: -1 })
-      .populate('donor', 'name')
+      .populate('receiver', 'name')
       .lean();
 
     console.log('Raw donations found:', userDonations);
 
-    // Transform the data to match frontend expectations
-    const formattedDonations = userDonations.map(donation => {
-      return {
-        _id: donation._id.toString(),
-        foodType: donation.foodType,
-        quantity: Number(donation.quantity),
-        expirationDate: donation.expirationDate.toISOString(),
-        pickupLocation: donation.pickupLocation,
-        description: donation.description || '',
-        imageUrl: donation.imageUrl || '',
-        donor: {
-          _id: donation.donor._id.toString(),
-          name: donation.donor.name || ''
-        },
-        status: donation.status,
-        createdAt: donation.createdAt.toISOString()
-      };
-    });
-
-    console.log('Formatted donations:', formattedDonations);
-    res.status(200).json(formattedDonations);
+    res.status(200).json(userDonations);
   } catch (error) {
     console.error('[getMyDonations] Error:', error);
     res.status(500).json({ 
@@ -486,6 +466,8 @@ const submitFeedback = async (req, res) => {
       donation: donationId
     });
 
+    const donation = await Donation.findById(donationId);
+
     if (existingFeedback) {
       return res.status(400).json({
         success: false,
@@ -496,6 +478,7 @@ const submitFeedback = async (req, res) => {
     const feedback = new Feedback({
       ngo: userId,
       donation: donationId,
+      donor:donation.donor,
       rating,
       comment,
       images: images || []
@@ -726,6 +709,30 @@ const getNgoDashboardData = async (req, res) => {
   }
 };
 
+const getalldonations = async (req, res) => {
+  try {
+    const donations = await Donation.find();
+    res.status(200).json(donations);
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// write function to get all accepted donations created by a donor who is logged in
+
+const getAcceptedDonationsByDonor = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const donations = await Donation.find({
+      donor: userId,
+      status: "accepted",
+    });
+    res.status(200).json(donations);
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 // Export all functions properly
 module.exports = { 
   getDonationsUsingStatus,
@@ -745,7 +752,9 @@ module.exports = {
   getFeedbackDetails,
   generateDeliveryOTP,
   verifyDeliveryOTP,
-  getNgoDashboardData
+  getNgoDashboardData,
+  getalldonations,
+  getAcceptedDonationsByDonor,
 };
 
 
