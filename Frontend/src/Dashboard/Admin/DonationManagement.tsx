@@ -200,7 +200,7 @@ return (
           </div>
         </TabsContent>
 
-        Expired/Rejected Donations
+        {/* Expired/Rejected Donations
         <TabsContent value="expired" className="mt-6">
           <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 sm:p-6">
             <table className="w-full">
@@ -215,7 +215,7 @@ return (
               </thead>
               <tbody>
                 {donations
-                  .filter((donation) => donation.status === "Expired" || donation.status === "Rejected")
+                  .filter((donation) => donation.status === "accepted")
                   .map((donation) => (
                     <tr key={donation._id} className="hover:bg-gray-50 transition-colors">
                       <td className="p-3 text-sm text-gray-800">{donation.foodType}</td>
@@ -236,7 +236,7 @@ return (
               </tbody>
             </table>
           </div>
-        </TabsContent>
+        </TabsContent> */}
       </Tabs>
     </div>
   </div>

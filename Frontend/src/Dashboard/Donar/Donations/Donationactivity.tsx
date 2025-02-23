@@ -8,10 +8,16 @@ import Spinner from '@/Animations/Spinner';
 import { useSnackbar } from 'notistack';
 import {
   AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+
 
 interface Donation {
   _id: string;
@@ -82,6 +88,10 @@ const FeedbackDialog = ({ isOpen, onClose, feedback }: FeedbackDialogProps) => {
             </div>
           )}
         </div>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction>Continue</AlertDialogAction>
+        </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
   );
