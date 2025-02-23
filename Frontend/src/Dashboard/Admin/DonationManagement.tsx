@@ -30,7 +30,7 @@ const FoodDonationManagement = () => {
 
   const fetchDonations = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/donations/${status}`,
+      const response = await axios.get(`${import.meta.env.VITE_Backend_URL}/api/donations/${status}`,
         {withCredentials: true}
       );
       setDonations(response.data);

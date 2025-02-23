@@ -39,35 +39,10 @@ interface RecentActivity {
 }
 
 // Sample data for different years
-const yearlyChartData: { [key: string]: ChartData[] } = {
-  "2023": [
-    { name: 'Jan', donations: 4000, redistributed: 2400 },
-    { name: 'Feb', donations: 3000, redistributed: 1398 },
-    { name: 'Mar', donations: 2000, redistributed: 9800 },
-    { name: 'Apr', donations: 2780, redistributed: 3908 },
-    { name: 'May', donations: 1890, redistributed: 4800 },
-    { name: 'Jun', donations: 2390, redistributed: 3800 },
-  ],
-  "2024": [
-    { name: 'Jan', donations: 5000, redistributed: 3000 },
-    { name: 'Feb', donations: 3500, redistributed: 2000 },
-    { name: 'Mar', donations: 2500, redistributed: 10000 },
-    { name: 'Apr', donations: 3000, redistributed: 4500 },
-    { name: 'May', donations: 2200, redistributed: 5000 },
-    { name: 'Jun', donations: 2800, redistributed: 4000 },
-  ],
-  "2025": [
-    { name: 'Jan', donations: 6000, redistributed: 3500 },
-    { name: 'Feb', donations: 4000, redistributed: 2500 },
-    { name: 'Mar', donations: 3000, redistributed: 12000 },
-    { name: 'Apr', donations: 3500, redistributed: 5000 },
-    { name: 'May', donations: 2500, redistributed: 6000 },
-    { name: 'Jun', donations: 3000, redistributed: 4500 },
-  ],
-};
+
 
 const Dashboard = () => {
-  const [selectedYear, setSelectedYear] = useState("2024");
+  const [selectedYear, setSelectedYear] = useState("2025");
   const [totalDonations, setTotalDonations] =useState("");
   const [totalNgos, setTotalNgos] =useState("");  
   const [pendingNgosCount, setPendingNgosCount] =useState("");
@@ -95,7 +70,7 @@ const fetchYearlyData = async () => {
 
    try {
     
-    const response = await fetch("http://localhost:5000/user/yearly-chart-data",
+    const response = await fetch(`${import.meta.env.VITE_Backend_URL}/user/yearly-chart-data`,
       {credentials: 'include'}
     );
     const data = await response.json();
@@ -115,7 +90,7 @@ const chartData = yearlyChartData[selectedYear] || [];
 
   const fetchTotalDonations = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/donations/totaldonations",
+      const response = await axios.get(`${import.meta.env.VITE_Backend_URL}/api/donations/totaldonations`,
         {withCredentials: true}
       );
       setTotalDonations(response.data.totalDonations);
@@ -127,7 +102,7 @@ const chartData = yearlyChartData[selectedYear] || [];
   
   const fetchTotalNgos = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/ngos/totalngos",
+      const response = await axios.get(`${import.meta.env.VITE_Backend_URL}/api/ngos/totalngos`,
         {withCredentials: true}
       );
       setTotalNgos(response.data.totalNgos);
@@ -138,7 +113,7 @@ const chartData = yearlyChartData[selectedYear] || [];
 
   const fetchPendingNgos = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/ngos/pending",
+      const response = await axios.get(`${import.meta.env.VITE_Backend_URL}/api/ngos/pending`,
         {withCredentials: true}
       );
       console.log("ngos data",response.data);
@@ -151,7 +126,7 @@ const chartData = yearlyChartData[selectedYear] || [];
 
   const fetchTotalDeliveredFood = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/donations/totaldeliveredfood",
+      const response = await axios.get(`${import.meta.env.VITE_Backend_URL}/totaldeliveredfood`,
         {withCredentials: true}
       );
       setTotalDeliveredFood(response.data.totalDeliveredFood);

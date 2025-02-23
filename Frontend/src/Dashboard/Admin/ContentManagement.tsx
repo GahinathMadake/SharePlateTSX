@@ -32,7 +32,7 @@ export default function FAQManagement() {
     // console.log("ID of faqs is ",id);
 
      try{   
-          await axios.delete(`http://localhost:5000/api/faq/${id}`,
+          await axios.delete(`${import.meta.env.VITE_Backend_URL}/api/faq/${id}`,
             {withCredentials: true}
           );
           setFaqs((prevFaqs) => prevFaqs.filter((faq) => faq._id !== id));
@@ -46,7 +46,7 @@ export default function FAQManagement() {
   const fetchFAQS = async () => {
 
     try {
-      const response = await axios.get("http://localhost:5000/api/faq",
+      const response = await axios.get(`${import.meta.env.VITE_Backend_URL}/api/faq`,
         {withCredentials: true}
       );
       setFaqs(response.data);
@@ -66,7 +66,7 @@ export default function FAQManagement() {
     try {
       const faqData = { question: faq.question, answer: faq.answer };
       // console.log("data of faq",faqData);
-      const response = await axios.post("http://localhost:5000/api/faq", faqData,
+      const response = await axios.post(`${import.meta.env.VITE_Backend_URL}/api/faq`, faqData,
         {withCredentials: true}
       );
       // console.log("FAQ Added:", response.data);

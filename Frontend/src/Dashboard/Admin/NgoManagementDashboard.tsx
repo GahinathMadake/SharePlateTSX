@@ -31,7 +31,7 @@ const NgoManagementDashboard = () => {
   /*
    */
   useEffect(() => {
-    fetch("http://localhost:5000/api/ngos/pending",
+    fetch(`${import.meta.env.VITE_Backend_URL}/api/ngos/pending`,
       {credentials: 'include'}
     )
       .then((res) => res.json())
@@ -45,7 +45,7 @@ const NgoManagementDashboard = () => {
   
   const handleApprove = async (id: number) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/ngos/approve/${id}`, {
+      const response = await axios.get(`${import.meta.env.VITE_Backend_URL}/api/ngos/approve/${id}`, {
         withCredentials: true, 
       });
       
@@ -72,7 +72,7 @@ const NgoManagementDashboard = () => {
 
 
   const handleReject =async (id: number) => {
-  const response = await fetch(`http://localhost:5000/api/ngos/reject/${id}`, {
+  const response = await fetch(`${import.meta.env.VITE_Backend_URL}/api/ngos/reject/${id}`, {
     method: "DELETE",
     credentials: 'include',
     body: JSON.stringify({ rejectionReason }),  // Send rejection reason
