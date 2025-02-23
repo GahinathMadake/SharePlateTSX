@@ -70,23 +70,23 @@ function Dashboard() {
     {
       title: "Total Accepted/Delivered Donations",
       value: ngoStats.totalDonations,
-      color: "bg-gray-400",
+      color: "bg-gray-500",
     },
     {
       title: "Total Food Saved (Kg)",
       value: ngoStats.totalFoodSaved * 0.55,
-      color: "bg-green-300",
+      color: "bg-green-500",
     },
     {
       title: "Available Donations",
       value: ngoStats.pendingDonations,
      
-      color: "bg-gray-400",
+      color: "bg-gray-500",
     },
     {
       title: "Reserved Donations",
       value: ngoStats.currentliveDonations,
-      color: "bg-red-400",
+      color: "bg-red-500",
     },
   ];
 
@@ -207,7 +207,7 @@ function Dashboard() {
  
           <Button className="flex flex-col items-center justify-center gap-3 p-6 w-full h-40 bg-green-50 text-green-700 rounded-xl hover:bg-green-100 transition-all transform hover:scale-105 animate-fade-in-up delay-200">
             <FolderPlus className="w-12 h-12" />
-            <span className="text-lg font-semibold text-center">Create Project</span>
+            <span className="text-lg font-semibold text-center">Add review</span>
           </Button>
        
 
