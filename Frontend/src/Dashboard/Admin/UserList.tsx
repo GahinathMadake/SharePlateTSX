@@ -34,7 +34,7 @@ const ActiveUser = () => {
   const fetchUsers = async () => {
     try {
       console.log(roleFilter);
-      const response = await axios.get(`http://localhost:5000/user/role/?role=${roleFilter}`,
+      const response = await axios.get(`${import.meta.env.VITE_Backend_URL}/user/role/?role=${roleFilter}`,
         {withCredentials: true}
       );
       setUsers(response.data);

@@ -30,7 +30,7 @@ export default function FAQManagement() {
       return;
     }
     try {   
-      await axios.delete(`http://localhost:5000/api/faq/${id}`, { withCredentials: true });
+      await axios.delete(`${import.meta.env.VITE_Backend_URL}/api/faq/${id}`, { withCredentials: true });
       setFaqs((prevFaqs) => prevFaqs.filter((faq) => faq._id !== id));
       enqueueSnackbar("FAQ deleted successfully", { variant: "success" });
     } catch (error) {
@@ -41,7 +41,7 @@ export default function FAQManagement() {
 
   const fetchFAQS = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/faq", { withCredentials: true });
+      const response = await axios.get(`${import.meta.env.VITE_Backend_URL}/api/faq`, { withCredentials: true });
       setFaqs(response.data);
     } catch (error) {
       console.error("Failed to fetch FAQs", error);
@@ -56,7 +56,7 @@ export default function FAQManagement() {
   const handleAddFaq = async (faq: Faq) => {
     try {
       const faqData = { question: faq.question, answer: faq.answer };
-      const response = await axios.post("http://localhost:5000/api/faq", faqData, { withCredentials: true });
+      const response = await axios.post(`${import.meta.env.VITE_Backend_URL}/api/faq`, faqData, { withCredentials: true });
       setFaqs([...faqs, response.data]); // Update the FAQs list with the new FAQ
       enqueueSnackbar("FAQ added successfully", { variant: "success" });
       setIsFaqModalOpen(false); // Close the modal
