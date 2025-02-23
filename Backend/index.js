@@ -1,4 +1,5 @@
 const express = require('express');
+const axios = require('axios');
 const connectDB = require('./config/Database');
 const cors = require('cors');
 const cookieParser = require("cookie-parser");
@@ -21,6 +22,25 @@ app.use(cookieParser());
 // Configure Express to handle large payloads
 app.use(express.json({limit: "50mb"}));
 app.use(express.urlencoded({limit: "50mb", extended: true, parameterLimit:50000}));
+
+
+
+// API Call Frontend
+const API_KEY = 'AIzaSyDwVTRKadnAxjs5Go4T2nO9l0ETxySHlTo'; // Replace with your Google Maps API key
+
+app.get('/api/nearby-places', async (req, res) => {
+  const { lat, lng, radius, type } = req.query;
+
+  try {
+    const response = await axios.get(
+      `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radius}&type=${type}&key=${API_KEY}`
+    );
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error fetching nearby places:', error);
+    res.status(500).json({ error: 'Failed to fetch nearby places' });
+  }
+});
 
 // Connect to MongoDB
 connectDB();

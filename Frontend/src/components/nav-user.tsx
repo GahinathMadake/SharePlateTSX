@@ -90,12 +90,15 @@ export function NavUser() {
                 </DropdownMenuItem>
               </Link> */}
 
-              <Link to={`/user/${user.role}/reviews`}>
+              {
+                user.role==="Donar" && 
+                <Link to={`/user/${user.role}/reviews`}>
                 <DropdownMenuItem>
                   <Star />
                   Reviews
                 </DropdownMenuItem>
               </Link>
+              }
 
               <Link to={`/user/${user.role}/contact`}>
                 <DropdownMenuItem>
