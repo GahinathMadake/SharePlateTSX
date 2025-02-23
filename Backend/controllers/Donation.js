@@ -735,6 +735,21 @@ const getalldonations = async (req, res) => {
   }
 };
 
+// write function to get all accepted donations created by a donor who is logged in
+
+const getAcceptedDonationsByDonor = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const donations = await Donation.find({
+      donor: userId,
+      status: "accepted",
+    });
+    res.status(200).json(donations);
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 // Export all functions properly
 module.exports = { 
   getDonationsUsingStatus,
@@ -755,7 +770,8 @@ module.exports = {
   generateDeliveryOTP,
   verifyDeliveryOTP,
   getNgoDashboardData,
-  getalldonations
+  getalldonations,
+  getAcceptedDonationsByDonor,
 };
 
 
