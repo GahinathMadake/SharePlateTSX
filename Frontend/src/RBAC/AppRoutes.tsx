@@ -21,6 +21,7 @@ import ActiveUser from "../Dashboard/Admin/UserList";
 import DonationManagement from "../Dashboard/Admin/DonationManagement";
 import ContentManagement  from "../Dashboard/Admin/ContentManagement";
 import ReviewAdmin from "../Dashboard/Admin/Reviewadmin";
+import UserQueries from "@/Dashboard/Admin/UserQueries";
 
 // Donar Dashboard Components
 import DonarDash from "../Dashboard/Donar/Dashboard";
@@ -64,8 +65,10 @@ function App(){
                     <Route path='donationmanagement' element={<DonationManagement />} />
                     <Route path='userList' element={<ActiveUser/>} />
                     <Route path='contentManagement' element={<ContentManagement />} />
+                    <Route path='userqueries' element={<UserQueries />} />
+                    
 
-                    //<Route path='Reviewdonar' element={<Reviewdonar/>}/>
+                    <Route path='Reviewdonar' element={<Reviewdonar/>}/>
                     <Route path='Reviewadmin' element={<ReviewAdmin />} />
 
                 </Route>

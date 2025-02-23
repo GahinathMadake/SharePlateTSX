@@ -47,14 +47,14 @@ const NGODashboard: React.FC = () => {
             },
             {
                 name: "Near Recycling Partners",
-                url: "/user/ngo/allDonor",
+                url: "/user/ngo/provider",
                 icon: Star,
             },
-            {
-                name: "Donar",
-                url: "/user/ngo/allDonor",
-                icon: Star,
-            },
+            // {
+            //     name: "Donar",
+            //     url: "/user/ngo/allDonor",
+            //     icon: Star,
+            // },
         ],
       };
 

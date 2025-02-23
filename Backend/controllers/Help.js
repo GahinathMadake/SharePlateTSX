@@ -47,5 +47,15 @@ const raiseUserQuery = async (req, res) => {
     }
   };
 
-  module.exports = {raiseUserQuery};
+const fetchUserQuery = async (req, res) => {
+  console.log("User");
+    try {
+        const queries = await Contact.find().populate('user', 'name email'); // Populate user details if needed
+        res.status(200).json(queries);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+  module.exports = {raiseUserQuery, fetchUserQuery};
   

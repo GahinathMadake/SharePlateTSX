@@ -5,6 +5,7 @@ import {
     LayoutDashboard,
     House,
     Captions,
+    CircleHelp,
     CircleUserRound,
     Bell,
     MessageCircleCode,
@@ -65,6 +66,11 @@ const AdminDashboard: React.FC = () => {
               url: "/user/admin/contentManagement",
               icon: Captions, 
           },
+          {
+            name: "User Queries",
+            url: "/user/admin/userqueries",
+            icon: CircleHelp , 
+        },
          
         ],
       };
