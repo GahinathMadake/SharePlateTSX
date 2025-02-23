@@ -24,27 +24,27 @@ const AdminDashboard: React.FC = () => {
                 url: "/user/Admin/ngomanagement", 
                 icon: House,
             },
-            {
-                title: "Courses",
-                url: "#",
-                icon: Captions,
-                isActive: false,
-                items:[
-                    {
-                        title:"Ongoing",
-                        url:'/student/courses/ongoing'
-                    },
-                    {
-                        title:"Completed",
-                        url:'/student/courses/completed'
-                    },
-                    {
-                        title:"All",
-                        url:'/student/courses/All'
-                    },
-                ],
+            // {
+            //     title: "Courses",
+            //     url: "#",
+            //     icon: Captions,
+            //     isActive: false,
+            //     items:[
+            //         {
+            //             title:"Ongoing",
+            //             url:'/student/courses/ongoing'
+            //         },
+            //         {
+            //             title:"Completed",
+            //             url:'/student/courses/completed'
+            //         },
+            //         {
+            //             title:"All",
+            //             url:'/student/courses/All'
+            //         },
+            //     ],
                 
-            },
+            // },
             {
                 name: "Donation Management",
                 url: "/user/Admin/donationmanagement",
@@ -63,7 +63,7 @@ const AdminDashboard: React.FC = () => {
             {
               name: "Content Management",
               url: "/user/admin/contentManagement",
-              icon: CircleUserRound, 
+              icon: Captions, 
           },
          
         ],
