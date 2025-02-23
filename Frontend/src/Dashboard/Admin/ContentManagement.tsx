@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -7,80 +6,66 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Edit, Trash } from "lucide-react";
+import { Plus, Trash } from "lucide-react";
+import { useSnackbar } from "notistack";
 
 export default function FAQManagement() {
- 
+
+  const { enqueueSnackbar } = useSnackbar(); // use notistack for notifications
+
   const [selectedFaq, setSelectedFaq] = useState(null);
   const [isFaqModalOpen, setIsFaqModalOpen] = useState(false);
   const [newFaq, setNewFaq] = useState({ question: "", answer: "" });
   const [faqs, setFaqs] = useState<Faq[]>([]);
 
   interface Faq {
-    _id:number;
+    _id: number;
     question: string;
     answer: string;
   }
-
-  
 
   const handleDeleteFaq = async (id: number) => {
     if (!id) {
       console.error("Invalid FAQ ID:", id);
       return;
     }
-    // console.log("ID of faqs is ",id);
-
-     try{   
-          await axios.delete(`http://localhost:5000/api/faq/${id}`,
-            {withCredentials: true}
-          );
-          setFaqs((prevFaqs) => prevFaqs.filter((faq) => faq._id !== id));
-          console.log("FAQ deleted successfully");
-     }
-     catch(error){
-           console.error("Failed to delete FAQ", error);
-     }
+    try {   
+      await axios.delete(`http://localhost:5000/api/faq/${id}`, { withCredentials: true });
+      setFaqs((prevFaqs) => prevFaqs.filter((faq) => faq._id !== id));
+      enqueueSnackbar("FAQ deleted successfully", { variant: "success" });
+    } catch (error) {
+      console.error("Failed to delete FAQ", error);
+      enqueueSnackbar("Failed to delete FAQ", { variant: "error" });
+    }
   };
 
   const fetchFAQS = async () => {
-
     try {
-      const response = await axios.get("http://localhost:5000/api/faq",
-        {withCredentials: true}
-      );
+      const response = await axios.get("http://localhost:5000/api/faq", { withCredentials: true });
       setFaqs(response.data);
     } catch (error) {
       console.error("Failed to fetch FAQs", error);
+      enqueueSnackbar("Failed to fetch FAQs", { variant: "error" });
     }
-
-
   }
 
   useEffect(() => {
     fetchFAQS();
   }, []);
 
-
   const handleAddFaq = async (faq: Faq) => {
     try {
       const faqData = { question: faq.question, answer: faq.answer };
-      // console.log("data of faq",faqData);
-      const response = await axios.post("http://localhost:5000/api/faq", faqData,
-        {withCredentials: true}
-      );
-      // console.log("FAQ Added:", response.data);
+      const response = await axios.post("http://localhost:5000/api/faq", faqData, { withCredentials: true });
       setFaqs([...faqs, response.data]); // Update the FAQs list with the new FAQ
+      enqueueSnackbar("FAQ added successfully", { variant: "success" });
       setIsFaqModalOpen(false); // Close the modal
       setNewFaq({ question: "", answer: "" }); // Reset the form
     } catch (error) {
       console.error("Error adding FAQ:", error);
+      enqueueSnackbar("Error adding FAQ", { variant: "error" });
     }
   };
-  
-
-
-  
 
   return (
     <div className="flex min-h-screen w-full bg-gradient-to-br from-blue-50 to-purple-50 justify-center p-4 sm:p-6 lg:p-8">
@@ -141,7 +126,7 @@ export default function FAQManagement() {
           <DialogContent className="bg-white rounded-lg shadow-xl">
             <DialogHeader>
               <DialogTitle className="text-xl font-bold text-gray-800">
-               Add FAQ
+                Add FAQ
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
@@ -160,8 +145,7 @@ export default function FAQManagement() {
             </div>
             <DialogFooter>
               <Button
-                // variant="success"
-                onClick={()=>handleAddFaq(newFaq)}
+                onClick={() => handleAddFaq(newFaq)}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 Save

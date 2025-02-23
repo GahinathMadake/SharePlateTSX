@@ -726,6 +726,15 @@ const getNgoDashboardData = async (req, res) => {
   }
 };
 
+const getalldonations = async (req, res) => {
+  try {
+    const donations = await Donation.find();
+    res.status(200).json(donations);
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 // Export all functions properly
 module.exports = { 
   getDonationsUsingStatus,
@@ -745,7 +754,8 @@ module.exports = {
   getFeedbackDetails,
   generateDeliveryOTP,
   verifyDeliveryOTP,
-  getNgoDashboardData
+  getNgoDashboardData,
+  getalldonations
 };
 
 

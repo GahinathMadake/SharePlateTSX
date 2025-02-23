@@ -19,7 +19,8 @@ const {
   getFeedbackDetails,
   generateDeliveryOTP,
   verifyDeliveryOTP,
-  getNgoDashboardData   // <-- imported new method
+  getNgoDashboardData,   // <-- imported new method,
+  getalldonations
 } = require('../controllers/Donation');
 
 // Base routes
@@ -31,6 +32,7 @@ router.get("/topdonors", authMiddleware, getTopDonors);
 router.get("/my-donations", authMiddleware, getMyDonations);
 router.get("/accepted", authMiddleware, getAcceptedDonations);
 router.get("/my-accepted-delivered", authMiddleware, getMyAcceptedAndDeliveredDonations);
+router.get("/alldonations", authMiddleware, getalldonations);
 
 // New route for NGO dashboard data
 router.get("/ngo-dashboard", authMiddleware, getNgoDashboardData);
