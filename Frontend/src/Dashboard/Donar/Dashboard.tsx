@@ -88,7 +88,7 @@ const Dashboard = () => {
             { withCredentials: true }
           ),
           axios.get(
-            `${import.meta.env.VITE_Backend_URL}/api/donations/accepted`,
+            `${import.meta.env.VITE_Backend_URL}/api/donations/accepteddonationsbydonor`,
             { withCredentials: true }
           ),
           axios.get(
@@ -120,7 +120,7 @@ const Dashboard = () => {
   // Prepare chart data
   const barChartData = [
     { name: "Pending", value: pendingDonations.length },
-    { name: "Accepted", value: acceptedDonations.length },
+    { name: "Res", value: acceptedDonations.length },
     { name: "Delivered", value: deliveredDonations.length },
   ];
 

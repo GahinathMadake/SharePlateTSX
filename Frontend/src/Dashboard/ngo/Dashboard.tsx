@@ -4,6 +4,10 @@ import {
   Leaf,
   Zap,
   Users,
+  UserPlus,
+  FolderPlus,
+  FileText,
+  BarChart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -66,22 +70,23 @@ function Dashboard() {
     {
       title: "Total Accepted/Delivered Donations",
       value: ngoStats.totalDonations,
-      color: "bg-blue-400",
+      color: "bg-gray-400",
     },
     {
       title: "Total Food Saved (Kg)",
       value: ngoStats.totalFoodSaved * 0.55,
-      color: "bg-green-400",
+      color: "bg-green-300",
     },
     {
       title: "Available Donations",
       value: ngoStats.pendingDonations,
-      color: "bg-yellow-500",
+     
+      color: "bg-gray-400",
     },
     {
       title: "Reserved Donations",
       value: ngoStats.currentliveDonations,
-      color: "bg-red-500",
+      color: "bg-red-400",
     },
   ];
 
@@ -155,7 +160,7 @@ function Dashboard() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {dashboardStats.map((stat, index) => (
           <Card
             key={index}
@@ -177,79 +182,119 @@ function Dashboard() {
         ))}
       </div>
 
-      {/* Listings Overview (Progress Bars) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="transform transition-all hover:scale-[1.02] animate-fade-in-up delay-500">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold text-gray-900">
-              Listings Overview
-            </CardTitle>
-            <CardDescription>Distribution of listing stats</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              {progressData.map((item, index) => (
-                <div key={index}>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700">
-                      {item.title}
-                    </span>
-                    <Badge variant="outline" className="text-sm">
-                      {item.percentage}%
-                    </Badge>
-                  </div>
-                  <Progress value={item.percentage} className="h-2" />
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-        {/* Quick Actions removed */}
+      {/* Quick Actions Section */}
+      {/* Quick Actions and Listings Overview Section */}
+<div className="flex  flex-col lg:flex-row gap-6">
+  {/* Quick Actions Section */}
+  {/* Quick Actions and Listings Overview Section */}
+<div className="flex flex-col lg:flex-row gap-6">
+  {/* Quick Actions Section */}
+  <Card className="flex-1 h-full min-h-[400px] transform transition-all hover:scale-[1.02] animate-fade-in-up delay-700">
+    <CardHeader>
+      <CardTitle className="text-2xl font-bold text-gray-900 h-25">Quick Actions</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        {/* Add Listing Button */}
+        
+          <Button className="flex flex-col items-center justify-center gap-3 p-6 w-full h-40 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition-all transform hover:scale-105 animate-fade-in-up delay-100">
+            <UserPlus className="w-12 h-12" />
+            <span className="text-lg font-semibold text-center">Add Listing</span>
+          </Button>
+     
+
+        {/* Create Project Button */}
+ 
+          <Button className="flex flex-col items-center justify-center gap-3 p-6 w-full h-40 bg-green-50 text-green-700 rounded-xl hover:bg-green-100 transition-all transform hover:scale-105 animate-fade-in-up delay-200">
+            <FolderPlus className="w-12 h-12" />
+            <span className="text-lg font-semibold text-center">Create Project</span>
+          </Button>
+       
+
+          <Button className="flex flex-col items-center justify-center gap-3 p-6 w-full h-40 bg-purple-50 text-purple-700 rounded-xl hover:bg-purple-100 transition-all transform hover:scale-105 animate-fade-in-up delay-300">
+            <FileText className="w-12 h-12" />
+            <span className="text-lg font-semibold text-center">Zero Waste</span>
+          </Button>
+      
+
+        {/* Track Donation Button */}
+  
+          <Button className="flex flex-col items-center justify-center gap-3 p-6 w-full h-40 bg-orange-50 text-orange-700 rounded-xl hover:bg-orange-100 transition-all transform hover:scale-105 animate-fade-in-up delay-400">
+            <BarChart className="w-12 h-12" />
+            <span className="text-lg font-semibold text-center">Track Donation</span>
+          </Button>
+ 
       </div>
+    </CardContent>
+  </Card>
+
+  {/* Listings Overview (Progress Bars) */}
+
+</div>
+
+
+  {/* Listings Overview (Progress Bars) */}
+  <Card className="flex-1 transform transition-all hover:scale-[1.02] h-22animate-fade-in-up delay-500">
+    <CardHeader>
+      <CardTitle className="text-2xl font-bold text-gray-900">
+        Listings Overview
+      </CardTitle>
+      <CardDescription>Distribution of listing stats</CardDescription>
+    </CardHeader>
+    <CardContent>
+      <div className="space-y-6">
+        {progressData.map((item, index) => (
+          <div key={index}>
+            <div className="flex justify-between mb-2">
+              <span className="text-sm font-medium text-gray-700">
+                {item.title}
+              </span>
+              <Badge variant="outline" className="text-sm">
+                {item.percentage}%
+              </Badge>
+            </div>
+            <Progress value={item.percentage} className="h-2" />
+          </div>
+        ))}
+      </div>
+    </CardContent>
+  </Card>
+</div>
 
       {/* Experience Section */}
       <section id="experience" className="py-6 bg-gradient-to-b from-gray-50 to-gray-100 mt-10">
         <h2 className="text-3xl font-bold text-center mb-6 text-green-800 flex items-center justify-center gap-2">
-          Sustainable Uses of Leftover Food:
-          <br /> Turning Waste into Resources
+          Sustainable Uses of Leftover Food: <br /> Turning Waste into Resources
         </h2>
+
         <div className="relative max-w-6xl mx-auto px-4 py-12">
+          {/* Timeline */}
           <div className="absolute left-1/2 w-1 bg-gradient-to-b from-gray-300 to-gray-800 h-full transform -translate-x-1/2 rounded-full"></div>
+
           <div className="space-y-2 relative">
             {experiences.map((exp, index) => (
-              <div
-                key={index}
-                className={`relative w-full flex ${
-                  index % 2 === 0 ? "justify-start" : "justify-end"
-                }`}
-              >
+              <div key={index} className={`relative w-full flex ${index % 2 === 0 ? "justify-start" : "justify-end"}`}>
+                {/* Arrow Indicator */}
                 <div
                   className={`absolute w-6 h-6 ${exp.color} rounded-full left-1/2 transform -translate-x-1/2 -translate-y-2 flex items-center justify-center shadow-lg`}
                 >
                   {exp.icon}
                 </div>
-                <Card className="max-w-md p-1 shadow-lg transition-all transform hover:scale-[1.02] hover:shadow-lg">
+
+                <Card className="max-w-md p-4 shadow-lg transition-all transform hover:scale-[1.02] hover:shadow-xl">
                   <CardContent>
-                    <h3 className="text-xl font-bold text-gray-800">
-                      {exp.title}
-                    </h3>
-                    {exp.subtitle && (
-                      <div className="text-md text-gray-600 mt-1">
-                        {exp.subtitle}
-                      </div>
-                    )}
-                    <p className="mt-2 text-sm text-gray-700">
-                      {exp.description}
-                    </p>
-                    <p className="mt-1 text-xs text-gray-600">
-                      {exp.application}
-                    </p>
+                    <h3 className="text-xl font-bold text-gray-800">{exp.title}</h3>
+                    {exp.subtitle && <div className="text-md text-gray-600 mt-1">{exp.subtitle}</div>}
+                    <p className="mt-2 text-sm text-gray-700">{exp.description}</p>
+                    <p className="mt-1 text-xs text-gray-600">{exp.application}</p>
                   </CardContent>
                 </Card>
               </div>
             ))}
           </div>
         </div>
+
+        {/* View More Button */}
         <div className="text-center mt-4">
           <Link to="/user/NGO/provider">
             <Button className="px-6 py-6 text-white bg-gradient-to-r bg-gray-800 transition-all transform hover:scale-105 shadow-md">
@@ -257,41 +302,43 @@ function Dashboard() {
             </Button>
           </Link>
         </div>
-        <div className="mt-8">
-  <h2 className="text-2xl font-bold text-gray-800 mb-4">Related NGOs</h2>
-  <div className="flex flex-col sm:flex-row bg-white rounded-lg shadow-md overflow-hidden">
-    {/* First NGO Section */}
-    <div className="flex-1 p-6 border-r border-red-700">
-      <div className="transform transition-all hover:scale-105">
-        <h3 className="text-xl font-bold text-gray-800">Food for All</h3>
-        <p className="text-gray-600 mt-2">A global initiative to reduce food waste and feed the hungry.</p>
-      </div>
-    </div>
-
-    {/* Vertical Line */}
-    <div className="w-px bg-red-700"></div>
-
-    {/* Second NGO Section */}
-    <div className="flex-1 p-6 border-r border-red-700">
-      <div className="transform transition-all hover:scale-105">
-        <h3 className="text-xl font-bold text-gray-800">Zero Hunger</h3>
-        <p className="text-gray-600 mt-2">Working towards a world without hunger by 2030.</p>
-      </div>
-    </div>
-
-    {/* Vertical Line */}
-    <div className="w-px bg-red-700"></div>
-
-    {/* Third NGO Section */}
-    <div className="flex-1 p-6">
-      <div className="transform transition-all hover:scale-105">
-        <h3 className="text-xl font-bold text-gray-800">Save the Food</h3>
-        <p className="text-gray-600 mt-2">Rescuing surplus food and delivering it to those in need.</p>
-      </div>
-    </div>
-  </div>
-</div>
       </section>
+
+      {/* Related NGOs Section */}
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Related NGOs</h2>
+        <div className="flex flex-col sm:flex-row bg-white rounded-lg shadow-md overflow-hidden">
+          {/* First NGO Section */}
+          <div className="flex-1 p-6 border-r border-red-700">
+            <div className="transform transition-all hover:scale-105">
+              <h3 className="text-xl font-bold text-gray-800">Food for All</h3>
+              <p className="text-gray-600 mt-2">A global initiative to reduce food waste and feed the hungry.</p>
+            </div>
+          </div>
+
+          {/* Vertical Line */}
+          <div className="w-px bg-red-700"></div>
+
+          {/* Second NGO Section */}
+          <div className="flex-1 p-6 border-r border-red-700">
+            <div className="transform transition-all hover:scale-105">
+              <h3 className="text-xl font-bold text-gray-800">Zero Hunger</h3>
+              <p className="text-gray-600 mt-2">Working towards a world without hunger by 2030.</p>
+            </div>
+          </div>
+
+          {/* Vertical Line */}
+          <div className="w-px bg-red-700"></div>
+
+          {/* Third NGO Section */}
+          <div className="flex-1 p-6">
+            <div className="transform transition-all hover:scale-105">
+              <h3 className="text-xl font-bold text-gray-800">Save the Food</h3>
+              <p className="text-gray-600 mt-2">Rescuing surplus food and delivering it to those in need.</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
