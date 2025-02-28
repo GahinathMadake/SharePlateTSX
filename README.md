@@ -1,4 +1,4 @@
-# SharePlate
+# SharePlate 🌍🍽
 
 <div align="center">
 
